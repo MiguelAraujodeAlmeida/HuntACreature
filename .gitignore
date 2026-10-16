@@ -1,0 +1,12 @@
+# Arquivos temporários de editores e sistema
+.DS_Store
+Thumbs.db
+*.tmp
+*.bak
+*.swp
+*.swo
+
+# Saídas locais de teste e logs
+logs/
+tmp/
+*.log
