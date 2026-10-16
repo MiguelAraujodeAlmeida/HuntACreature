@@ -18,6 +18,7 @@ O lugar aberto no Roblox Studio contém a segunda revisão dos itens **1, 2, 3 e
 | `shared/VisualStyle.luau` | Fonte, cores e IDs dos ícones usados pelo HUD. |
 | `shared/CaptureConfig.luau` | Ajustes por tipo de laço: tempo de carga, alcance e velocidade; também parâmetros do minigame. |
 | `client/HUD.luau` | Construção da interface e apresentação dos estados/recompensas. |
+| `client/GlossyButton.luau` | Componente de botão: acabamento, ícone, legenda, foco, pressão, seleção e reflexos; sem regras de jogo. |
 | `client/CaptureController.luau` | Mouse, toque e controle; mira e comandos de captura. |
 | `server/CaptureService.luau` | Validação da carga, projétil, acerto e simulação do minigame no servidor. |
 | `HuntACreature.server.luau` | Criaturas, bases, economia, treino e integração com captura. |

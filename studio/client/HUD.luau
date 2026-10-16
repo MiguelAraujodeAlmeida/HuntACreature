@@ -3,6 +3,7 @@ local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 local Style = require(game:GetService("ReplicatedStorage").HACShared.VisualStyle)
+local GlossyButton = require(script.Parent.GlossyButton)
 local C = Style.Colors
 
 local HUD = {}
@@ -100,46 +101,28 @@ function HUD.new(player)
 	self.XPText = xpText
 	self.ForceText = strengthText
 
-	local bag = Instance.new("ImageButton")
-	bag.Name = "BolsaBotao"
-	bag.Size = UDim2.fromOffset(122, 66)
-	bag.Position = UDim2.new(0, 18, 0.43, 0)
-	bag.BackgroundTransparency = 1
-	bag.Image = ""
-	bag.Parent = gui
+	self.BagSkin = GlossyButton.new(gui, {
+		name = "BolsaBotao", text = "Bolsa", palette = "Cyan",
+		size = UDim2.fromOffset(112, 116), position = UDim2.new(0, 18, 0.4, 0),
+		icon = Style.SatchelIcon,
+	})
+	local bag = self.BagSkin.Root
 	self.BagButton = bag
-	local bagIcon = Instance.new("ImageLabel")
-	bagIcon.Name = "Icone"
-	bagIcon.Size = UDim2.fromOffset(64, 64)
-	bagIcon.Position = UDim2.fromOffset(0, 0)
-	bagIcon.BackgroundTransparency = 1
-	bagIcon.Image = Style.SatchelIcon
-	bagIcon.ScaleType = Enum.ScaleType.Fit
-	bagIcon.Parent = bag
-	local bagCaption = label(bag, "Legenda", "BOLSA", UDim2.fromOffset(64, 28), UDim2.fromOffset(58, 30), 16, C.White)
-	bagCaption.Font = Style.DisplayFont
-	bagCaption.TextStrokeColor3 = C.Ink
-	bagCaption.TextStrokeTransparency = 0
-	local bagBadge = frame(bag, "Contagem", UDim2.fromOffset(31, 26), UDim2.fromOffset(52, 0), C.Coral, 0, 13)
-	stroke(bagBadge, C.Ink, 2)
-	self.BagBadge = label(bagBadge, "Texto", "0", UDim2.fromScale(1, 1), UDim2.fromScale(0, 0), 15, C.White, Enum.TextXAlignment.Center)
-	self.BagBadge.Font = Style.DisplayFont
+	local bagBadge = frame(bag, "Contagem", UDim2.fromOffset(30, 27), UDim2.new(1, -20, 0, -8), C.Coral, 0, 13)
+	bagBadge.ZIndex = 3
+	stroke(bagBadge, C.White, 2)
+	self.BagBadge = label(bagBadge, "Texto", "0", UDim2.fromScale(1, 1), UDim2.fromScale(0, 0), 16, C.White, Enum.TextXAlignment.Center)
+	self.BagBadge.Font = Style.Button.Font
+	self.BagBadge.TextStrokeColor3 = C.Ink
+	self.BagBadge.TextStrokeTransparency = 0
 
-	local throw = Instance.new("ImageButton")
-	throw.Name = "Arremessar"
-	throw.Size = UDim2.fromOffset(82, 78)
-	throw.Position = UDim2.new(1, -100, 0, 102)
-	throw.BackgroundColor3 = C.Ink
-	throw.BackgroundTransparency = 0.18
-	throw.BorderSizePixel = 0
-	throw.Image = ""
+	self.ThrowSkin = GlossyButton.new(gui, {
+		name = "Arremessar", text = "Lançar", palette = "Gold",
+		size = UDim2.fromOffset(94, 98), position = UDim2.new(1, -112, 0, 102),
+		icon = Style.ResourceIconSheet, iconIndex = 3, textSize = 21,
+	})
+	local throw = self.ThrowSkin.Root
 	throw.Visible = false
-	throw.Parent = gui
-	corner(throw, 18)
-	stroke(throw, C.Rope, 2)
-	sprite(throw, "Laco", 3, UDim2.fromOffset(51, 51), UDim2.fromOffset(15, 1))
-	local throwCaption = label(throw, "Legenda", "LANÇAR", UDim2.fromOffset(76, 22), UDim2.fromOffset(3, 54), 12, C.White, Enum.TextXAlignment.Center)
-	throwCaption.Font = Style.DisplayFont
 	self.ThrowButton = throw
 
 	local reticle = frame(gui, "Mira", UDim2.fromOffset(28, 28), UDim2.new(0.5, -14, 0.5, -14), C.Ink, 1)
@@ -187,19 +170,11 @@ function HUD.new(player)
 	self.SheetTitle.Font = Style.DisplayFont
 	self.SheetBody = label(sheet, "Corpo", "", UDim2.fromOffset(310, 105), UDim2.fromOffset(23, 65), 20, C.White)
 	self.SheetBody.TextYAlignment = Enum.TextYAlignment.Top
-	local close = Instance.new("TextButton")
-	close.Name = "Fechar"
-	close.Size = UDim2.fromOffset(38, 38)
-	close.Position = UDim2.new(1, -49, 0, 11)
-	close.Text = "×"
-	close.TextSize = 28
-	close.Font = Style.DisplayFont
-	close.TextColor3 = C.White
-	close.BackgroundColor3 = C.Coral
-	close.BorderSizePixel = 0
-	close.ZIndex = 22
-	close.Parent = sheet
-	corner(close, 11)
+	self.CloseSkin = GlossyButton.new(sheet, {
+		name = "Fechar", text = "×", palette = "Coral", textSize = 30, zIndex = 22,
+		size = UDim2.fromOffset(44, 44), position = UDim2.new(1, -56, 0, 10),
+	})
+	local close = self.CloseSkin.Root
 	self.CloseButton = close
 	close.Activated:Connect(function() self:CloseSheet() end)
 	bag.Activated:Connect(function() self:OpenSheet("bag") end)
@@ -227,19 +202,11 @@ function HUD.new(player)
 	local target = frame(track, "Alvo", UDim2.fromOffset(13, 35), UDim2.fromOffset(170, 0), C.Gold, 0, 5)
 	stroke(target, C.Ink, 2)
 	self.Target = target
-	local hold = Instance.new("TextButton")
-	hold.Name = "SegurarLaco"
-	hold.Size = UDim2.fromOffset(120, 50)
-	hold.Position = UDim2.new(1, -138, 0, 61)
-	hold.Text = "PUXAR"
-	hold.TextColor3 = C.Ink
-	hold.TextSize = 18
-	hold.Font = Style.DisplayFont
-	hold.BackgroundColor3 = C.Rope
-	hold.BorderSizePixel = 0
-	hold.ZIndex = 32
-	hold.Parent = capture
-	corner(hold, 12)
+	self.HoldSkin = GlossyButton.new(capture, {
+		name = "SegurarLaco", text = "Puxar", palette = "Gold", textSize = 22, zIndex = 32,
+		size = UDim2.fromOffset(120, 50), position = UDim2.new(1, -138, 0, 61),
+	})
+	local hold = self.HoldSkin.Root
 	self.HoldButton = hold
 
 	local toast = frame(gui, "Aviso", UDim2.fromOffset(380, 46), UDim2.new(0.5, 0, 0, 19), C.Ink, 0.08, 12)
@@ -287,8 +254,10 @@ function HUD.new(player)
 				item.Legenda.TextSize = 12
 				item.Legenda.Text = ({"OURO", "XP", "FORÇA"})[i]
 			end
-			bag.Position = UDim2.fromOffset(13, 91)
-			throw.Position = UDim2.new(1, -97, 0, 93)
+			bag.Position = UDim2.fromOffset(13, 97)
+			bag.Size = UDim2.fromOffset(84, 88)
+			throw.Position = UDim2.new(1, -100, 0, 97)
+			throw.Size = UDim2.fromOffset(84, 88)
 			charge.Size = UDim2.fromOffset(340, 55)
 			charge.Position = UDim2.new(0.5, -170, 1, -95)
 			capture.Size = UDim2.fromOffset(440, 119)
@@ -321,7 +290,10 @@ function HUD.new(player)
 				item.Legenda.TextSize = 12
 				item.Legenda.Text = ({"OURO", "EXPERIÊNCIA", "FORÇA DO LAÇO"})[i]
 			end
-			bag.Position = UDim2.new(0, 18, 0.43, 0)
+			bag.Position = UDim2.new(0, 18, 0.4, 0)
+			bag.Size = UDim2.fromOffset(112, 116)
+			throw.Position = UDim2.new(1, -112, 0, 102)
+			throw.Size = UDim2.fromOffset(94, 98)
 			charge.Size = UDim2.fromOffset(440, 55)
 			charge.Position = UDim2.new(0.5, -220, 1, -125)
 			capture.Size = UDim2.fromOffset(540, 126)
@@ -331,6 +303,7 @@ function HUD.new(player)
 			zone.Size = UDim2.fromOffset(113, 35)
 			target.Size = UDim2.fromOffset(13, 35)
 			hold.Position = UDim2.new(1, -138, 0, 61)
+			hold.Size = UDim2.fromOffset(120, 50)
 			progressBack.Position = UDim2.fromOffset(24, 42)
 			progressBack.Size = UDim2.new(1, -48, 0, 7)
 			self.CreatureName.Position = UDim2.fromOffset(24, 7)
@@ -349,6 +322,7 @@ end
 
 function HUD:OpenSheet(kind)
 	self.sheetKind = kind
+	self.BagSkin:SetSelected(true)
 	self.Shade.Visible = true
 	self.Sheet.Visible = true
 	self:UpdateStats()
@@ -356,6 +330,7 @@ end
 
 function HUD:CloseSheet()
 	self.sheetKind = nil
+	self.BagSkin:SetSelected(false)
 	self.Shade.Visible = false
 	self.Sheet.Visible = false
 end
@@ -380,7 +355,7 @@ function HUD:SetEquipped(value)
 	self.equipped = value
 	self.ThrowButton.Visible = value and UserInputService.TouchEnabled and not self.capturing
 	self.Reticle.Visible = value and UserInputService.TouchEnabled and not self.capturing
-	if not value then self.ChargePanel.Visible = false end
+	if not value then self:ResetThrow() end
 	self:UpdateStats()
 end
 
@@ -388,16 +363,18 @@ function HUD:SetCharging(power)
 	self.ChargePanel.Visible = self.equipped and not self.capturing
 	self.ChargeFill.Size = UDim2.fromScale(math.max(0.02, power), 1)
 	self.ChargeText.Text = string.format("%d%%", math.floor(power * 100))
-	self.ThrowButton.BackgroundColor3 = C.Ink:Lerp(C.Coral, power * 0.55)
+	self.ThrowSkin:SetHeld(true)
+	self.ThrowSkin:SetSelected(power >= 1)
 end
 
 function HUD:ThrowLaunched()
-	self.ChargePanel.Visible = false
+	self:ResetThrow()
 end
 
 function HUD:ResetThrow()
 	self.ChargePanel.Visible = false
-	self.ThrowButton.BackgroundColor3 = C.Ink
+	self.ThrowSkin:SetHeld(false)
+	self.ThrowSkin:SetSelected(false)
 end
 
 function HUD:StartCapture(name, golden)
@@ -418,12 +395,14 @@ function HUD:CaptureState(state)
 end
 
 function HUD:SetHolding(value)
-	self.HoldButton.Text = value and "PUXANDO" or "PUXAR"
-	self.HoldButton.BackgroundColor3 = value and C.Gold or C.Rope
+	self.HoldSkin:SetText(value and "Puxando" or "Puxar")
+	self.HoldSkin:SetHeld(value)
 end
 
 function HUD:EndCapture(success, message)
 	self.capturing = false
+	self:SetHolding(false)
+	self.HoldSkin:SetSelected(false)
 	self.CapturePanel.Visible = false
 	self.ThrowButton.Visible = self.equipped and UserInputService.TouchEnabled
 	self.Reticle.Visible = self.equipped and UserInputService.TouchEnabled
@@ -479,7 +458,7 @@ function HUD:_render(dt)
 	self.ProgressFill.Size = UDim2.fromScale(self.display.progress, 1)
 	self.ProgressText.Text = string.format("%d%%", math.floor(self.display.progress * 100))
 	self.TimerText.Text = string.format("%ds", math.max(0, math.ceil(self.desired.timeLeft or 0)))
-	self.HoldButton.BackgroundColor3 = self.desired.overlap and C.Gold or C.Rope
+	self.HoldSkin:SetSelected(self.desired.overlap)
 end
 
 return HUD
