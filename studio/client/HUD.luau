@@ -1,89 +1,25 @@
--- Apresentação do jogo. Nenhuma regra de captura ou economia vive aqui.
+-- HUD v4. Orquestra apresentação; captura, valores e inventário continuam no servidor.
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
-local UserInputService = game:GetService("UserInputService")
-local Style = require(game:GetService("ReplicatedStorage").HACShared.VisualStyle)
-local GlossyButton = require(script.Parent.GlossyButton)
-local C = Style.Colors
-
+local UIS = game:GetService("UserInputService")
+local W = require(script.Parent.HUDWidgets)
+local Button = require(script.Parent.GlossyButton)
+local Resources = require(script.Parent.ResourceHUD)
+local Capture = require(script.Parent.CaptureHUD)
+local QuickSlot = require(script.Parent.QuickSlot)
+local S = W.Style
 local HUD = {}
 HUD.__index = HUD
-
-local function corner(object, radius)
-	local value = Instance.new("UICorner")
-	value.CornerRadius = UDim.new(0, radius)
-	value.Parent = object
-end
-
-local function stroke(object, color, thickness, transparency)
-	local value = Instance.new("UIStroke")
-	value.Color = color
-	value.Thickness = thickness
-	value.Transparency = transparency or 0
-	value.Parent = object
-	return value
-end
-
-local function frame(parent, name, size, position, color, transparency, radius)
-	local object = Instance.new("Frame")
-	object.Name = name
-	object.Size = size
-	object.Position = position
-	object.BackgroundColor3 = color or C.Ink
-	object.BackgroundTransparency = transparency or 0
-	object.BorderSizePixel = 0
-	object.Parent = parent
-	if radius then corner(object, radius) end
-	return object
-end
-
-local function label(parent, name, value, size, position, fontSize, color, alignment)
-	local object = Instance.new("TextLabel")
-	object.Name = name
-	object.Size = size
-	object.Position = position
-	object.BackgroundTransparency = 1
-	object.Font = Style.Font
-	object.Text = value
-	object.TextColor3 = color or C.White
-	object.TextSize = fontSize
-	object.TextXAlignment = alignment or Enum.TextXAlignment.Left
-	object.TextYAlignment = Enum.TextYAlignment.Center
-	object.TextWrapped = true
-	object.Parent = parent
-	return object
-end
-
-local function sprite(parent, name, index, size, position)
-	local object = Instance.new("ImageLabel")
-	object.Name = name
-	object.Size = size
-	object.Position = position
-	object.BackgroundTransparency = 1
-	object.Image = Style.ResourceIconSheet
-	object.ImageRectSize = Style.IconCellSize
-	object.ImageRectOffset = Vector2.new((index - 1) * Style.IconCellSize.X, 0)
-	object.ScaleType = Enum.ScaleType.Fit
-	object.Parent = parent
-	return object
-end
-
-local function stat(parent, name, index, caption)
-	local item = frame(parent, name, UDim2.fromOffset(160, 43), UDim2.fromOffset(0, 0), C.Ink, 1)
-	sprite(item, "Icone", index, UDim2.fromOffset(42, 42), UDim2.fromOffset(0, 0))
-	local number = label(item, "Valor", "0", UDim2.fromOffset(110, 29), UDim2.fromOffset(49, 0), 27, C.White)
-	number.Font = Style.DisplayFont
-	number.TextStrokeColor3 = C.Ink
-	number.TextStrokeTransparency = 0.15
-	local cap = label(item, "Legenda", caption, UDim2.fromOffset(105, 14), UDim2.fromOffset(51, 28), 12, C.White)
-	cap.TextStrokeColor3 = C.Ink
-	cap.TextStrokeTransparency = 0.2
-	return item, number, cap
-end
-
+local details = {
+	Ouro = { "OURO", S.Icons.Coin, S.UI.Gold, "Suas criaturas instaladas geram ouro na base." },
+	XP = { "EXPERIÊNCIA", S.Icons.XP, S.UI.Purple, "Suas criaturas instaladas geram experiência na base." },
+	Forca = { "FORÇA", S.Icons.Strength, S.UI.Cyan, "O treino aumenta sua força com o laço." },
+}
 function HUD.new(player)
-	local self = setmetatable({}, HUD)
-	self.player = player
+	local self = setmetatable(
+		{ player = player, connections = {}, equipped = false, capturing = false, toastVersion = 0, rewardVersion = 0 },
+		HUD
+	)
 	local gui = Instance.new("ScreenGui")
 	gui.Name = "HuntACreatureGui"
 	gui.ResetOnSpawn = false
@@ -91,374 +27,338 @@ function HUD.new(player)
 	gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 	gui.Parent = player:WaitForChild("PlayerGui")
 	self.Gui = gui
-
-	local resources = frame(gui, "Recursos", UDim2.fromOffset(170, 138), UDim2.new(0, 15, 1, -162), C.Ink, 1)
-	local gold, goldText = stat(resources, "Ouro", 1, "OURO")
-	local xp, xpText = stat(resources, "XP", 2, "EXPERIÊNCIA")
-	local strength, strengthText = stat(resources, "Forca", 3, "FORÇA DO LAÇO")
-	self.ResourceItems = {gold, xp, strength}
-	self.GoldText = goldText
-	self.XPText = xpText
-	self.ForceText = strengthText
-
-	self.BagSkin = GlossyButton.new(gui, {
-		name = "BolsaBotao", text = "Bolsa", palette = "Cyan",
-		size = UDim2.fromOffset(112, 116), position = UDim2.new(0, 18, 0.4, 0),
-		icon = Style.SatchelIcon,
-	})
-	local bag = self.BagSkin.Root
-	self.BagButton = bag
-	local bagBadge = frame(bag, "Contagem", UDim2.fromOffset(30, 27), UDim2.new(1, -20, 0, -8), C.Coral, 0, 13)
-	bagBadge.ZIndex = 3
-	stroke(bagBadge, C.White, 2)
-	self.BagBadge = label(bagBadge, "Texto", "0", UDim2.fromScale(1, 1), UDim2.fromScale(0, 0), 16, C.White, Enum.TextXAlignment.Center)
-	self.BagBadge.Font = Style.Button.Font
-	self.BagBadge.TextStrokeColor3 = C.Ink
-	self.BagBadge.TextStrokeTransparency = 0
-
-	self.ThrowSkin = GlossyButton.new(gui, {
-		name = "Arremessar", text = "Lançar", palette = "Gold",
-		size = UDim2.fromOffset(94, 98), position = UDim2.new(1, -112, 0, 102),
-		icon = Style.ResourceIconSheet, iconIndex = 3, textSize = 21,
-	})
-	local throw = self.ThrowSkin.Root
-	throw.Visible = false
-	self.ThrowButton = throw
-
-	local reticle = frame(gui, "Mira", UDim2.fromOffset(28, 28), UDim2.new(0.5, -14, 0.5, -14), C.Ink, 1)
-	reticle.Visible = false
-	frame(reticle, "Centro", UDim2.fromOffset(6, 6), UDim2.fromOffset(11, 11), C.Gold, 0, 3)
-	frame(reticle, "Topo", UDim2.fromOffset(2, 6), UDim2.fromOffset(13, 0), C.White)
-	frame(reticle, "Baixo", UDim2.fromOffset(2, 6), UDim2.fromOffset(13, 22), C.White)
-	frame(reticle, "Esquerda", UDim2.fromOffset(6, 2), UDim2.fromOffset(0, 13), C.White)
-	frame(reticle, "Direita", UDim2.fromOffset(6, 2), UDim2.fromOffset(22, 13), C.White)
-	self.Reticle = reticle
-
-	local charge = frame(gui, "ForcaArremesso", UDim2.fromOffset(440, 55), UDim2.new(0.5, -220, 1, -125), C.Ink, 0.12, 13)
-	charge.Visible = false
-	stroke(charge, C.Rope, 2)
-	self.ChargePanel = charge
-	local chargeTitle = label(charge, "Titulo", "FORÇA DO LAÇO", UDim2.fromOffset(290, 21), UDim2.fromOffset(17, 3), 15, C.White)
-	chargeTitle.Font = Style.DisplayFont
-	self.ChargeText = label(charge, "Valor", "0%", UDim2.fromOffset(82, 21), UDim2.new(1, -99, 0, 3), 16, C.Gold, Enum.TextXAlignment.Right)
-	self.ChargeText.Font = Style.DisplayFont
-	local chargeBack = frame(charge, "Trilha", UDim2.new(1, -34, 0, 14), UDim2.fromOffset(17, 31), C.White, 0.7, 7)
-	local chargeFill = frame(chargeBack, "Barra", UDim2.fromScale(0.02, 1), UDim2.fromScale(0, 0), C.Gold, 0, 7)
-	self.ChargeFill = chargeFill
-	local gradient = Instance.new("UIGradient")
-	gradient.Color = ColorSequence.new(C.Sun, C.Coral)
-	gradient.Parent = chargeFill
-
-	local shade = frame(gui, "FundoPainel", UDim2.fromScale(1, 1), UDim2.fromScale(0, 0), C.Ink, 0.45)
-	shade.Visible = false
-	shade.ZIndex = 20
-	self.Shade = shade
-	local sheet = frame(gui, "PainelInfo", UDim2.fromOffset(360, 180), UDim2.fromScale(0.5, 0.5), C.Ink, 0.04, 18)
-	sheet.AnchorPoint = Vector2.new(0.5, 0.5)
-	sheet.Visible = false
-	sheet.ZIndex = 21
-	stroke(sheet, C.Rope, 2)
-	self.Sheet = sheet
-	local sheetIcon = Instance.new("ImageLabel")
-	sheetIcon.Name = "BolsaIcone"
-	sheetIcon.Size = UDim2.fromOffset(42, 42)
-	sheetIcon.Position = UDim2.fromOffset(18, 11)
-	sheetIcon.BackgroundTransparency = 1
-	sheetIcon.Image = Style.SatchelIcon
-	sheetIcon.Parent = sheet
-	self.SheetTitle = label(sheet, "Titulo", "BOLSA", UDim2.fromOffset(230, 40), UDim2.fromOffset(67, 13), 25, C.White)
-	self.SheetTitle.Font = Style.DisplayFont
-	self.SheetBody = label(sheet, "Corpo", "", UDim2.fromOffset(310, 105), UDim2.fromOffset(23, 65), 20, C.White)
-	self.SheetBody.TextYAlignment = Enum.TextYAlignment.Top
-	self.CloseSkin = GlossyButton.new(sheet, {
-		name = "Fechar", text = "×", palette = "Coral", textSize = 30, zIndex = 22,
-		size = UDim2.fromOffset(44, 44), position = UDim2.new(1, -56, 0, 10),
-	})
-	local close = self.CloseSkin.Root
-	self.CloseButton = close
-	close.Activated:Connect(function() self:CloseSheet() end)
-	bag.Activated:Connect(function() self:OpenSheet("bag") end)
-
-	local capture = frame(gui, "Captura", UDim2.fromOffset(540, 126), UDim2.new(0.5, 0, 1, -257), C.Ink, 0.1, 18)
-	capture.AnchorPoint = Vector2.new(0.5, 0)
-	capture.Visible = false
-	capture.ZIndex = 30
-	stroke(capture, C.Rope, 2)
-	self.CapturePanel = capture
-	self.CreatureName = label(capture, "Criatura", "LUMITO", UDim2.fromOffset(245, 29), UDim2.fromOffset(24, 7), 22, C.White)
-	self.CreatureName.Font = Style.DisplayFont
-	self.ProgressText = label(capture, "Progresso", "16%", UDim2.fromOffset(75, 29), UDim2.new(1, -132, 0, 7), 23, C.Gold, Enum.TextXAlignment.Right)
-	self.ProgressText.Font = Style.DisplayFont
-	self.TimerText = label(capture, "Tempo", "28s", UDim2.fromOffset(54, 29), UDim2.new(1, -68, 0, 7), 15, C.White, Enum.TextXAlignment.Right)
-	local progressBack = frame(capture, "ProgressoFundo", UDim2.new(1, -48, 0, 7), UDim2.fromOffset(24, 42), C.White, 0.65, 4)
-	self.ProgressFill = frame(progressBack, "Barra", UDim2.fromScale(0.16, 1), UDim2.fromScale(0, 0), C.Gold, 0, 4)
-	local track = frame(capture, "Trilha", UDim2.fromOffset(354, 35), UDim2.fromOffset(24, 66), C.White, 0.78, 11)
-	track.ClipsDescendants = true
-	stroke(track, C.Rope, 1, 0.3)
-	self.Track = track
-	local zone = frame(track, "Zona", UDim2.fromOffset(113, 35), UDim2.fromOffset(120, 0), C.Sky, 0.3, 10)
-	stroke(zone, C.Sky, 2)
-	self.Zone = zone
-	local target = frame(track, "Alvo", UDim2.fromOffset(13, 35), UDim2.fromOffset(170, 0), C.Gold, 0, 5)
-	stroke(target, C.Ink, 2)
-	self.Target = target
-	self.HoldSkin = GlossyButton.new(capture, {
-		name = "SegurarLaco", text = "Puxar", palette = "Gold", textSize = 22, zIndex = 32,
-		size = UDim2.fromOffset(120, 50), position = UDim2.new(1, -138, 0, 61),
-	})
-	local hold = self.HoldSkin.Root
-	self.HoldButton = hold
-
-	local toast = frame(gui, "Aviso", UDim2.fromOffset(380, 46), UDim2.new(0.5, 0, 0, 19), C.Ink, 0.08, 12)
-	toast.AnchorPoint = Vector2.new(0.5, 0)
-	toast.Visible = false
-	toast.ZIndex = 40
-	stroke(toast, C.Rope, 2)
-	self.Toast = toast
-	self.ToastText = label(toast, "Texto", "", UDim2.new(1, -20, 1, 0), UDim2.fromOffset(10, 0), 17, C.White, Enum.TextXAlignment.Center)
-	self.ToastText.ZIndex = 41
-
-	local reward = label(gui, "Recompensa", "", UDim2.fromOffset(650, 78), UDim2.fromScale(0.5, 0.23), 39, C.Gold, Enum.TextXAlignment.Center)
-	reward.AnchorPoint = Vector2.new(0.5, 0.5)
-	reward.Font = Style.DisplayFont
-	reward.TextStrokeColor3 = C.Ink
-	reward.TextStrokeTransparency = 0
-	reward.Visible = false
-	reward.ZIndex = 50
-	self.RewardText = reward
+	self.Resources = Resources.new(gui, function(kind)
+		self:OpenSheet(kind)
+	end)
+	self.BagSkin = Button.new(
+		gui,
+		{
+			name = "BolsaBotao",
+			text = "Bolsa",
+			icon = S.Icons.Bag,
+			size = UDim2.fromOffset(146, 146),
+			position = UDim2.new(0, 14, 0.34, 0),
+			textSize = 29,
+		}
+	)
+	self.BagButton = self.BagSkin.Root
+	self.BagBadge = W.panel(self.BagButton, "Contagem", UDim2.fromOffset(48, 35), UDim2.new(1, -37, 0, -5), S.UI.Gold)
+	self.BagBadge.ZIndex = 4
+	self.BagCount = W.text(self.BagBadge, "Valor", "0/3", UDim2.fromScale(1, 1), UDim2.fromScale(0, 0), 18)
+	self.ThrowSkin = Button.new(
+		gui,
+		{
+			name = "Arremessar",
+			text = "Lançar",
+			icon = S.Icons.Lasso,
+			size = UDim2.fromOffset(120, 120),
+			position = UDim2.new(1, -140, 0.46, 0),
+			textSize = 25,
+		}
+	)
+	self.ThrowButton = self.ThrowSkin.Root
+	self.ThrowButton.Visible = false
+	self.Slot = QuickSlot.new(player, gui, function()
+		return self.capturing or self.sheetKind ~= nil or player:GetAttribute("Treinando")
+	end)
+	self.Reticle = W.frame(gui, "Mira", UDim2.fromOffset(24, 24), UDim2.new(0.5, -12, 0.5, -12))
+	self.Reticle.Visible = false
+	local ring = W.frame(self.Reticle, "Anel", UDim2.fromOffset(20, 20), UDim2.fromOffset(2, 2), nil, 10)
+	W.stroke(ring, S.UI.White, 2)
+	W.frame(self.Reticle, "Ponto", UDim2.fromOffset(4, 4), UDim2.fromOffset(10, 10), S.UI.Gold, 2)
+	self.Capture = Capture.new(gui)
+	self.HoldButton = self.Capture.Hold.Root
+	self.CapturePanel = self.Capture.Root
+	self.ChargePanel = self.Capture.Charge
+	self.Shade = W.frame(gui, "FundoPainel", UDim2.fromScale(1, 1), UDim2.fromScale(0, 0), S.UI.Ink)
+	self.Shade.BackgroundTransparency = 0.35
+	self.Shade.Visible = false
+	self.Shade.ZIndex = 20
+	self.Shade.Active = true
+	self.Sheet = W.panel(gui, "PainelInfo", UDim2.fromOffset(570, 320), UDim2.fromScale(0.5, 0.5), S.UI.Cyan)
+	self.Sheet.AnchorPoint = Vector2.new(0.5, 0.5)
+	self.Sheet.ZIndex = 21
+	self.Sheet.Visible = false
+	self.SheetScale = Instance.new("UIScale")
+	self.SheetScale.Parent = self.Sheet
+	self.SheetIcon = W.icon(self.Sheet, "Icone", S.Icons.Bag, UDim2.fromOffset(104, 104), UDim2.fromOffset(20, -30))
+	self.SheetTitle = W.text(self.Sheet, "Titulo", "BOLSA", UDim2.fromOffset(350, 56), UDim2.fromOffset(120, 9), 36)
+	self.CloseSkin = Button.new(
+		self.Sheet,
+		{
+			name = "Fechar",
+			text = "×",
+			color = S.UI.Red,
+			size = UDim2.fromOffset(49, 49),
+			position = UDim2.new(1, -59, 0, 9),
+			textSize = 35,
+			zIndex = 23,
+		}
+	)
+	self.CloseButton = self.CloseSkin.Root
+	self.BagContent = W.frame(self.Sheet, "Conteudo", UDim2.new(1, -42, 1, -93), UDim2.fromOffset(21, 74))
+	self.BagSlots = {}
+	for i = 1, 3 do
+		local slot = W.panel(
+			self.BagContent,
+			"Espaco" .. i,
+			UDim2.fromOffset(155, 120),
+			UDim2.fromOffset((i - 1) * 173 + 12, 0),
+			S.UI.Cyan
+		)
+		local icon = W.icon(slot, "Icone", S.Icons.Bag, UDim2.fromOffset(72, 72), UDim2.fromOffset(42, 9))
+		local caption = W.text(slot, "Estado", "Livre", UDim2.fromOffset(145, 26), UDim2.fromOffset(5, 83), 20)
+		self.BagSlots[i] = { icon = icon, caption = caption }
+	end
+	self.BagSummary = W.text(self.BagContent, "Resumo", "", UDim2.new(1, -20, 0, 36), UDim2.fromOffset(10, 133), 23)
+	W.icon(self.BagContent, "RendaIcone", S.Icons.Coin, UDim2.fromOffset(43, 43), UDim2.fromOffset(102, 175))
+	self.Income = W.text(
+		self.BagContent,
+		"Renda",
+		"",
+		UDim2.fromOffset(300, 38),
+		UDim2.fromOffset(147, 176),
+		24,
+		S.UI.Gold,
+		Enum.TextXAlignment.Left
+	)
+	self.DetailBody = W.text(self.Sheet, "Detalhes", "", UDim2.fromOffset(470, 170), UDim2.fromOffset(50, 102), 27)
+	self.DetailBody.Visible = false
+	self.Toast = W.panel(gui, "Aviso", UDim2.fromOffset(450, 64), UDim2.fromScale(0.5, 0.17), S.UI.Cyan)
+	self.Toast.AnchorPoint = Vector2.new(0.5, 0)
+	self.Toast.Visible = false
+	self.Toast.ZIndex = 40
+	self.ToastText = W.text(self.Toast, "Texto", "", UDim2.new(1, -35, 1, -14), UDim2.fromOffset(17, 7), 22)
+	self.ToastScale = Instance.new("UIScale")
+	self.ToastScale.Parent = self.Toast
+	self.RewardRoot = W.panel(gui, "Vitoria", UDim2.fromOffset(550, 110), UDim2.fromScale(0.5, 0.27), S.UI.Gold)
+	self.RewardRoot.AnchorPoint = Vector2.new(0.5, 0.5)
+	self.RewardRoot.Visible = false
+	self.RewardRoot.ZIndex = 45
 	self.RewardScale = Instance.new("UIScale")
-	self.RewardScale.Parent = reward
-
-	self.toastVersion = 0
-	self.rewardVersion = 0
-	self.equipped = false
-	self.capturing = false
-	self.desired = {target = 0.5, zone = 0.5, progress = 0.16, overlap = false, timeLeft = 28, streak = 0}
-	self.display = {target = 0.5, zone = 0.5, progress = 0.16}
-
+	self.RewardScale.Parent = self.RewardRoot
+	W.icon(self.RewardRoot, "Estrela", S.Icons.XP, UDim2.fromOffset(108, 108), UDim2.fromOffset(-23, -7))
+	W.text(self.RewardRoot, "Titulo", "CAPTUROU!", UDim2.fromOffset(410, 40), UDim2.fromOffset(88, 8), 32, S.UI.Gold)
+	self.RewardText = W.text(self.RewardRoot, "Recompensa", "", UDim2.fromOffset(425, 48), UDim2.fromOffset(84, 48), 23)
+	table.insert(
+		self.connections,
+		self.BagButton.Activated:Connect(function()
+			if self.sheetKind == "bag" then
+				self:CloseSheet()
+			else
+				self:OpenSheet("bag")
+			end
+		end)
+	)
+	table.insert(
+		self.connections,
+		self.CloseButton.Activated:Connect(function()
+			self:CloseSheet()
+		end)
+	)
+	table.insert(
+		self.connections,
+		UIS.InputBegan:Connect(function(input, processed)
+			if not processed and input.KeyCode == Enum.KeyCode.ButtonB then
+				self:CloseSheet()
+			end
+		end)
+	)
+	table.insert(
+		self.connections,
+		player.CharacterAdded:Connect(function()
+			self:EndCapture(false)
+			self:CloseSheet()
+		end)
+	)
 	local function resize()
-		local view = workspace.CurrentCamera.ViewportSize
-		local compact = view.Y < 500 or view.X < 700
-		if compact then
-			resources.Size = UDim2.fromOffset(350, 42)
-			resources.Position = UDim2.fromOffset(8, 46)
-			for i, item in ipairs(self.ResourceItems) do
-				item.Position = UDim2.fromOffset((i - 1) * 112, 0)
-				item.Size = UDim2.fromOffset(110, 42)
-				item.Icone.Size = UDim2.fromOffset(32, 32)
-				item.Icone.Position = UDim2.fromOffset(0, 4)
-				item.Valor.Position = UDim2.fromOffset(36, 1)
-				item.Valor.Size = UDim2.fromOffset(70, 24)
-				item.Valor.TextSize = 24
-				item.Legenda.Position = UDim2.fromOffset(37, 25)
-				item.Legenda.TextSize = 12
-				item.Legenda.Text = ({"OURO", "XP", "FORÇA"})[i]
-			end
-			bag.Position = UDim2.fromOffset(13, 97)
-			bag.Size = UDim2.fromOffset(84, 88)
-			throw.Position = UDim2.new(1, -100, 0, 97)
-			throw.Size = UDim2.fromOffset(84, 88)
-			charge.Size = UDim2.fromOffset(340, 55)
-			charge.Position = UDim2.new(0.5, -170, 1, -95)
-			capture.Size = UDim2.fromOffset(440, 119)
-			capture.Position = UDim2.new(0.5, 0, 1, -187)
-			track.Size = UDim2.fromOffset(260, 32)
-			track.Position = UDim2.fromOffset(19, 65)
-			zone.Size = UDim2.fromOffset(83, 32)
-			target.Size = UDim2.fromOffset(12, 32)
-			hold.Size = UDim2.fromOffset(120, 49)
-			hold.Position = UDim2.new(1, -140, 0, 59)
-			progressBack.Position = UDim2.fromOffset(19, 41)
-			progressBack.Size = UDim2.new(1, -38, 0, 7)
-			self.CreatureName.Position = UDim2.fromOffset(19, 6)
-			self.CreatureName.TextSize = 19
-			reward.Size = UDim2.fromOffset(math.min(520, view.X - 20), 70)
-			reward.TextSize = 30
-			toast.Size = UDim2.fromOffset(math.min(350, view.X - 20), 46)
-		else
-			resources.Size = UDim2.fromOffset(170, 138)
-			resources.Position = UDim2.new(0, 15, 1, -162)
-			for i, item in ipairs(self.ResourceItems) do
-				item.Position = UDim2.fromOffset(0, (i - 1) * 45)
-				item.Size = UDim2.fromOffset(160, 43)
-				item.Icone.Size = UDim2.fromOffset(42, 42)
-				item.Icone.Position = UDim2.fromOffset(0, 0)
-				item.Valor.Position = UDim2.fromOffset(49, 0)
-				item.Valor.Size = UDim2.fromOffset(110, 29)
-				item.Valor.TextSize = 27
-				item.Legenda.Position = UDim2.fromOffset(51, 28)
-				item.Legenda.TextSize = 12
-				item.Legenda.Text = ({"OURO", "EXPERIÊNCIA", "FORÇA DO LAÇO"})[i]
-			end
-			bag.Position = UDim2.new(0, 18, 0.4, 0)
-			bag.Size = UDim2.fromOffset(112, 116)
-			throw.Position = UDim2.new(1, -112, 0, 102)
-			throw.Size = UDim2.fromOffset(94, 98)
-			charge.Size = UDim2.fromOffset(440, 55)
-			charge.Position = UDim2.new(0.5, -220, 1, -125)
-			capture.Size = UDim2.fromOffset(540, 126)
-			capture.Position = UDim2.new(0.5, 0, 1, -257)
-			track.Size = UDim2.fromOffset(354, 35)
-			track.Position = UDim2.fromOffset(24, 66)
-			zone.Size = UDim2.fromOffset(113, 35)
-			target.Size = UDim2.fromOffset(13, 35)
-			hold.Position = UDim2.new(1, -138, 0, 61)
-			hold.Size = UDim2.fromOffset(120, 50)
-			progressBack.Position = UDim2.fromOffset(24, 42)
-			progressBack.Size = UDim2.new(1, -48, 0, 7)
-			self.CreatureName.Position = UDim2.fromOffset(24, 7)
-			self.CreatureName.TextSize = 22
-			reward.Size = UDim2.fromOffset(650, 78)
-			reward.TextSize = 39
-			toast.Size = UDim2.fromOffset(380, 46)
-		end
-		charge.Trilha.Size = UDim2.new(1, -34, 0, 14)
+		self:Resize(workspace.CurrentCamera.ViewportSize)
 	end
 	resize()
-	workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(resize)
-	self.renderConnection = RunService.RenderStepped:Connect(function(dt) self:_render(dt) end)
+	table.insert(self.connections, workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(resize))
+	table.insert(
+		self.connections,
+		RunService.RenderStepped:Connect(function(dt)
+			self.Capture:Render(dt)
+		end)
+	)
+	gui.Destroying:Connect(function()
+		self.dead = true
+		for _, c in ipairs(self.connections) do
+			c:Disconnect()
+		end
+	end)
 	return self
 end
-
+function HUD:Resize(view)
+	self.view = view
+	local compact = view.Y < 500 or view.X < 700
+	self.Resources:Resize(view)
+	self.Capture:Resize(view)
+	local size = compact and 102 or 146
+	self.BagButton.Size = UDim2.fromOffset(size, size)
+	self.BagButton.Position = UDim2.new(0, 14, 0, compact and 130 or math.max(140, view.Y * 0.31))
+	self.ThrowButton.Size = UDim2.fromOffset(compact and 96 or 120, compact and 96 or 120)
+	self.ThrowButton.Position = UDim2.new(1, compact and -112 or -140, 0.46, 0)
+	self.SheetScale.Scale = math.min(1, (view.X - 30) / 570, (view.Y - 40) / 320)
+	self.ToastScale.Scale = math.min(1, (view.X - 24) / 450)
+	self.RewardBaseScale = math.min(1, (view.X - 30) / 550)
+	self.RewardScale.Scale = self.RewardBaseScale
+end
 function HUD:OpenSheet(kind)
+	if self.capturing then
+		return
+	end
 	self.sheetKind = kind
-	self.BagSkin:SetSelected(true)
 	self.Shade.Visible = true
 	self.Sheet.Visible = true
+	self.BagContent.Visible = kind == "bag"
+	self.DetailBody.Visible = kind ~= "bag"
+	self.BagSkin:SetSelected(kind == "bag")
+	if kind == "bag" then
+		self.SheetIcon.Image = S.Icons.Bag
+		self.SheetTitle.Text = "BOLSA"
+		self.Sheet.ImageColor3 = S.UI.Cyan
+	else
+		local data = details[kind]
+		if not data then
+			self:CloseSheet()
+			return
+		end
+		self.SheetTitle.Text = data[1]
+		self.SheetIcon.Image = data[2]
+		self.Sheet.ImageColor3 = data[3]
+		self.DetailBody.Text = data[4]
+	end
 	self:UpdateStats()
 end
-
 function HUD:CloseSheet()
 	self.sheetKind = nil
-	self.BagSkin:SetSelected(false)
 	self.Shade.Visible = false
 	self.Sheet.Visible = false
+	self.BagSkin:SetSelected(false)
 end
-
 function HUD:UpdateStats()
 	local stats = self.player:FindFirstChild("leaderstats")
 	local gold = stats and stats:FindFirstChild("Ouro")
 	local xp = stats and stats:FindFirstChild("XP")
-	self.GoldText.Text = tostring(gold and gold.Value or 0)
-	self.XPText.Text = tostring(xp and xp.Value or 0)
-	self.ForceText.Text = tostring(self.player:GetAttribute("Forca") or 0)
+	self.Resources:Update(gold and gold.Value or 0, xp and xp.Value or 0, self.player:GetAttribute("Forca") or 0)
 	local carried = self.player:GetAttribute("Carregando") or 0
 	local installed = self.player:GetAttribute("Instaladas") or 0
-	self.BagBadge.Text = tostring(carried)
-	self.BagBadge.Parent.Visible = carried > 0
-	if self.sheetKind == "bag" then
-		self.SheetBody.Text = string.format("Na bolsa     %d / 3\nNa base       %d / 3\nRenda          %d ouro / 5 s", carried, installed, self.player:GetAttribute("Renda") or 0)
+	self.BagCount.Text = string.format("%d/3", carried)
+	for i, slot in ipairs(self.BagSlots) do
+		slot.icon.ImageTransparency = i <= carried and 0 or 0.8
+		slot.caption.Text = i <= carried and "Ocupado" or "Livre"
 	end
+	self.BagSummary.Text = string.format("Na bolsa: %d/3   •   Na base: %d/3", carried, installed)
+	self.Income.Text = string.format("%d ouro / 5 s", self.player:GetAttribute("Renda") or 0)
 end
-
 function HUD:SetEquipped(value)
 	self.equipped = value
-	self.ThrowButton.Visible = value and UserInputService.TouchEnabled and not self.capturing
-	self.Reticle.Visible = value and UserInputService.TouchEnabled and not self.capturing
-	if not value then self:ResetThrow() end
-	self:UpdateStats()
+	self.Slot:SetEquipped(value)
+	self.ThrowButton.Visible = value and UIS.TouchEnabled and not self.capturing
+	self.Reticle.Visible = value and UIS.TouchEnabled and not self.capturing
+	if not value then
+		self:ResetThrow()
+	end
 end
-
 function HUD:SetCharging(power)
 	self.ChargePanel.Visible = self.equipped and not self.capturing
-	self.ChargeFill.Size = UDim2.fromScale(math.max(0.02, power), 1)
-	self.ChargeText.Text = string.format("%d%%", math.floor(power * 100))
+	self.Capture:SetCharging(power)
 	self.ThrowSkin:SetHeld(true)
 	self.ThrowSkin:SetSelected(power >= 1)
 end
-
-function HUD:ThrowLaunched()
-	self:ResetThrow()
-end
-
 function HUD:ResetThrow()
 	self.ChargePanel.Visible = false
 	self.ThrowSkin:SetHeld(false)
 	self.ThrowSkin:SetSelected(false)
 end
-
+function HUD:ThrowLaunched()
+	self:ResetThrow()
+end
 function HUD:StartCapture(name, golden)
 	self.capturing = true
 	self:CloseSheet()
+	self:ResetThrow()
+	self.Capture:Reset()
 	self.CapturePanel.Visible = true
+	self.Capture.Name.Text = name
+	self.Capture.Name.TextColor3 = golden and S.UI.Gold or S.UI.White
 	self.ThrowButton.Visible = false
 	self.Reticle.Visible = false
-	self.ChargePanel.Visible = false
-	self.CreatureName.Text = string.upper(name)
-	self.CreatureName.TextColor3 = golden and C.Gold or C.White
-	self.desired = {target = 0.5, zone = 0.5, progress = 0.16, overlap = false, timeLeft = 28, streak = 0}
-	self.display = {target = 0.5, zone = 0.5, progress = 0.16}
+	self:SetHolding(false)
 end
-
 function HUD:CaptureState(state)
-	if self.capturing and typeof(state) == "table" then self.desired = state end
+	if self.capturing and typeof(state) == "table" then
+		self.Capture.desired = state
+	end
 end
-
 function HUD:SetHolding(value)
-	self.HoldSkin:SetText(value and "Puxando" or "Puxar")
-	self.HoldSkin:SetHeld(value)
+	self.Capture:SetHolding(value)
 end
-
 function HUD:EndCapture(success, message)
 	self.capturing = false
 	self:SetHolding(false)
-	self.HoldSkin:SetSelected(false)
+	self.Capture.Hold:SetSelected(false)
 	self.CapturePanel.Visible = false
-	self.ThrowButton.Visible = self.equipped and UserInputService.TouchEnabled
-	self.Reticle.Visible = self.equipped and UserInputService.TouchEnabled
+	self:SetEquipped(self.equipped)
 	self:ResetThrow()
-	if not success and message then self:Notice(message) end
+	if not success and message then
+		self:Notice(message)
+	end
 end
-
 function HUD:Notice(message)
 	self.toastVersion += 1
 	local version = self.toastVersion
 	self.ToastText.Text = message
 	self.Toast.Visible = true
 	task.delay(2.5, function()
-		if version == self.toastVersion then self.Toast.Visible = false end
+		if not self.dead and version == self.toastVersion then
+			self.Toast.Visible = false
+		end
 	end)
 end
-
 function HUD:Reward(golden, message)
 	self.rewardVersion += 1
 	local version = self.rewardVersion
 	self.RewardText.Text = message
-	self.RewardText.TextColor3 = golden and C.Gold or C.White
-	self.RewardText.Visible = true
-	self.RewardScale.Scale = 0.25
-	TweenService:Create(self.RewardScale, TweenInfo.new(0.38, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Scale = 1}):Play()
-	for i = 1, 8 do
-		local spark = sprite(self.Gui, "Brilho", 2, UDim2.fromOffset(golden and 40 or 28, golden and 40 or 28), UDim2.fromScale(0.5, 0.25))
+	self.RewardRoot.Visible = true
+	self.RewardScale.Scale = 0.35 * self.RewardBaseScale
+	TweenService:Create(
+		self.RewardScale,
+		TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
+		{ Scale = self.RewardBaseScale }
+	):Play()
+	for i = 1, 10 do
+		local spark = W.icon(
+			self.Gui,
+			"EstrelaVitoria",
+			S.Icons.XP,
+			UDim2.fromOffset(golden and 48 or 34, golden and 48 or 34),
+			UDim2.fromScale(0.5, 0.27)
+		)
 		spark.AnchorPoint = Vector2.new(0.5, 0.5)
-		spark.ZIndex = 49
-		local angle = i * math.pi / 4
-		local distance = golden and 220 or 150
-		TweenService:Create(spark, TweenInfo.new(0.7, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-			Position = UDim2.new(0.5, math.cos(angle) * distance, 0.25, math.sin(angle) * distance * 0.5),
-			ImageTransparency = 1,
-		}):Play()
-		task.delay(0.8, function() spark:Destroy() end)
+		spark.ZIndex = 44
+		local angle = i * math.pi / 5
+		local distance = golden and 260 or 205
+		TweenService:Create(
+			spark,
+			TweenInfo.new(0.85, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+			{
+				Position = UDim2.new(0.5, math.cos(angle) * distance, 0.27, math.sin(angle) * distance * 0.48),
+				Rotation = i % 2 == 0 and 80 or -80,
+				ImageTransparency = 1,
+			}
+		):Play()
+		task.delay(0.9, function()
+			spark:Destroy()
+		end)
 	end
-	task.delay(2.4, function()
-		if version == self.rewardVersion then self.RewardText.Visible = false end
+	self.BagSkin:Shine()
+	task.delay(2.5, function()
+		if not self.dead and version == self.rewardVersion then
+			self.RewardRoot.Visible = false
+		end
 	end)
 end
-
-function HUD:_render(dt)
-	if not self.capturing then return end
-	local alpha = 1 - math.exp(-dt * 20)
-	self.display.target += (self.desired.target - self.display.target) * alpha
-	self.display.zone += (self.desired.zone - self.display.zone) * alpha
-	self.display.progress += (self.desired.progress - self.display.progress) * (1 - math.exp(-dt * 12))
-	local width = self.Track.AbsoluteSize.X
-	self.Target.Position = UDim2.fromOffset(self.display.target * width - self.Target.AbsoluteSize.X / 2, 0)
-	self.Zone.Position = UDim2.fromOffset(self.display.zone * width - self.Zone.AbsoluteSize.X / 2, 0)
-	self.Zone.BackgroundColor3 = self.desired.overlap and C.Grass or C.Sky
-	self.ProgressFill.Size = UDim2.fromScale(self.display.progress, 1)
-	self.ProgressText.Text = string.format("%d%%", math.floor(self.display.progress * 100))
-	self.TimerText.Text = string.format("%ds", math.max(0, math.ceil(self.desired.timeLeft or 0)))
-	self.HoldSkin:SetSelected(self.desired.overlap)
-end
-
 return HUD

@@ -1,8 +1,8 @@
 -- Linguagem visual do protótipo. Centralizar mudanças de fonte e paleta aqui.
 local Style = {}
 
-Style.Font = Enum.Font.GothamBold
-Style.DisplayFont = Enum.Font.GothamBlack
+Style.Font = Enum.Font.FredokaOne
+Style.DisplayFont = Enum.Font.FredokaOne
 Style.Colors = {
 	Ink = Color3.fromRGB(19, 30, 43),
 	White = Color3.fromRGB(255, 252, 240),
@@ -18,43 +18,27 @@ Style.Colors = {
 	Rope = Color3.fromRGB(247, 214, 142),
 }
 
-Style.ResourceIconSheet = "rbxassetid://107528171876427"
-Style.SatchelIcon = "rbxassetid://129286908163718"
--- Roblox reduz esta textura de 2172x724 para 1024x341 na importação.
-Style.IconCellSize = Vector2.new(341, 341)
-Style.Outline = 2
-Style.Corner = 12
-
--- Botões: acabamento e movimento independentes das regras de jogo.
-Style.Button = {
-	Font = Enum.Font.FredokaOne,
-	Outline = Color3.fromRGB(5, 16, 47),
-	HoverScale = 1.055,
+-- Assets v4: imagens independentes, sem recortes da arte anterior.
+Style.Icons = {
+	Coin = "rbxassetid://137147969134175",
+	XP = "rbxassetid://90531108912513",
+	Strength = "rbxassetid://111581776806956",
+	Bag = "rbxassetid://84667354571821",
+	Lasso = "rbxassetid://117254148917574",
+}
+Style.Skins = { Tile = "rbxassetid://93505871377958", Panel = "rbxassetid://130734564577623" }
+-- A importação do Roblox reduz o painel de 2172x724 para 1024x341.
+Style.PanelSlice = Rect.new(150, 140, 874, 200)
+Style.PanelSliceScale = 0.18
+Style.UI = {
+	Gold = Color3.fromRGB(255, 203, 20),
+	Cyan = Color3.fromRGB(12, 211, 255),
+	Purple = Color3.fromRGB(211, 108, 255),
+	Green = Color3.fromRGB(59, 246, 29),
+	Red = Color3.fromRGB(255, 72, 81),
+	Ink = Color3.fromRGB(3, 12, 40),
+	White = Color3.fromRGB(255, 255, 255),
+	HoverScale = 1.06,
 	PressScale = 0.94,
-	HoverSeconds = 0.16,
-	ReleaseSeconds = 0.26,
-	Palettes = {
-		Cyan = {
-			Rim = Color3.fromRGB(10, 238, 255),
-			Top = Color3.fromRGB(29, 218, 255),
-			Bottom = Color3.fromRGB(0, 105, 240),
-			Edge = Color3.fromRGB(22, 77, 203),
-			Plate = Color3.fromRGB(8, 35, 100),
-		},
-		Gold = {
-			Rim = Color3.fromRGB(255, 244, 102),
-			Top = Color3.fromRGB(255, 231, 39),
-			Bottom = Color3.fromRGB(255, 146, 0),
-			Edge = Color3.fromRGB(177, 80, 8),
-			Plate = Color3.fromRGB(91, 43, 6),
-		},
-		Coral = {
-			Rim = Color3.fromRGB(255, 185, 164),
-			Top = Color3.fromRGB(255, 115, 104),
-			Bottom = Color3.fromRGB(218, 43, 76),
-			Edge = Color3.fromRGB(128, 29, 53),
-			Plate = Color3.fromRGB(91, 22, 47),
-		},
-	},
 }
 return Style
