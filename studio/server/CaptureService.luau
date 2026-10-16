@@ -25,6 +25,12 @@ local function equippedLasso(player)
 	return tool and Config.Lassos[tool.Name], tool and tool.Name
 end
 
+local function wildCreatureFromHit(instance, wildFolder)
+	local current = instance
+	while current and current.Parent ~= wildFolder do current = current.Parent end
+	return current and current:IsA("Model") and current or nil
+end
+
 local function ropeLoop(parent)
 	local model = Instance.new("Model")
 	model.Name = "LacoArremessado"
@@ -144,17 +150,19 @@ function CaptureService:_finish(player, success, message)
 end
 
 function CaptureService:_beginCapture(player, creature, lasso)
-	if self.sessions[player] or not creature.Parent or creature.Parent ~= self.wildFolder then return end
+	if self.sessions[player] or not creature.Parent or creature.Parent ~= self.wildFolder then
+		return false, "A criatura não está mais disponível."
+	end
 	if creature:GetAttribute("BusyUserId") then
-		self.notice(player, "Esse Lumito já está sendo capturado.")
-		return
+		return false, "Esse Lumito já está sendo capturado."
 	end
 	if not self.canCarry(player) then
-		self.notice(player, "Bolsa cheia: instale suas criaturas na base.")
-		return
+		return false, "Bolsa cheia: instale suas criaturas na base."
 	end
 	local root = playerRoot(player)
-	if not root or not equippedLasso(player) or (root.Position - creature.PrimaryPart.Position).Magnitude > lasso.MaximumRange + 10 then return end
+	if not root or not equippedLasso(player) or (root.Position - creature.PrimaryPart.Position).Magnitude > lasso.MaximumRange + 10 then
+		return false, "A criatura saiu do alcance."
+	end
 	creature:SetAttribute("BusyUserId", player.UserId)
 	local golden = creature:GetAttribute("Golden") == true
 	self.sessions[player] = {
@@ -174,6 +182,7 @@ function CaptureService:_beginCapture(player, creature, lasso)
 		sendTime = 0,
 	}
 	self.remote:FireClient(player, "CaptureStart", creature.Name, golden)
+	return true
 end
 
 function CaptureService:_miss(player, reason)
@@ -201,39 +210,60 @@ function CaptureService:_startCharge(player)
 	self.remote:FireClient(player, "ChargeReady")
 end
 
-function CaptureService:_throw(player, aimPoint)
+function CaptureService:_throw(player, aimRay)
 	local charge = self.charges[player]
 	self.charges[player] = nil
 	if not charge or self.projectiles[player] or self.sessions[player] then return end
 	local root = playerRoot(player)
 	local lasso, lassoName = equippedLasso(player)
 	if not root or not lasso or lassoName ~= charge.lassoName or player:GetAttribute("Treinando") then return end
-	if not finiteVector(aimPoint) then return end
+	if typeof(aimRay) ~= "table" or not finiteVector(aimRay.origin) or not finiteVector(aimRay.direction)
+		or (aimRay.origin - root.Position).Magnitude > Config.MaximumCameraDistance
+		or aimRay.direction.Magnitude < 0.9 or aimRay.direction.Magnitude > 1.1 then
+		self.remote:FireClient(player, "ThrowMiss", "Mira inválida.")
+		return
+	end
+	local cameraParams = RaycastParams.new()
+	cameraParams.FilterType = Enum.RaycastFilterType.Exclude
+	cameraParams.FilterDescendantsInstances = {player.Character, self.effectsFolder}
+	local cameraHit = workspace:Raycast(aimRay.origin, aimRay.direction.Unit * Config.AimLimit, cameraParams)
+	local aimPoint = cameraHit and cameraHit.Position or aimRay.origin + aimRay.direction.Unit * Config.AimLimit
 	local origin = root.Position + Vector3.new(0, 1.3, 0)
 	local aimDelta = aimPoint - origin
 	local aimDistance = aimDelta.Magnitude
-	if aimDistance < 2 or aimDistance > Config.AimLimit then
-		self.notice(player, "Mira inválida. Aponte para a ilha de caça.")
+	if aimDistance < 1 then
+		self.remote:FireClient(player, "ThrowMiss", "Mira muito próxima.")
 		return
 	end
 	local direction = aimDelta.Unit
 	local chargeTime = math.clamp(os.clock() - charge.started, Config.MinimumChargeSeconds, lasso.ChargeSeconds)
 	local power = math.clamp(chargeTime / lasso.ChargeSeconds, 0, 1)
 	local range = lasso.MinimumRange + (lasso.MaximumRange - lasso.MinimumRange) * power
-	local startPosition = origin + direction * 2
-	local distance = math.min(aimDistance - 2, range)
-	local endPosition = startPosition + direction * distance
+	local distance = math.min(aimDistance, range)
+	local endPosition = origin + direction * distance
+	local candidate = cameraHit and wildCreatureFromHit(cameraHit.Instance, self.wildFolder)
+	local creature
+	local targetPart
+	local localHitPoint
+	if candidate and aimDistance <= range + 0.01 then
+		creature = candidate
+		targetPart = cameraHit.Instance
+		localHitPoint = targetPart.CFrame:PointToObjectSpace(cameraHit.Position)
+	end
 	local visual = ropeLoop(self.effectsFolder)
-	visual:PivotTo(CFrame.lookAt(startPosition, endPosition))
+	visual:PivotTo(CFrame.lookAt(origin, endPosition))
 	self.projectiles[player] = {
 		visual = visual,
-		startPosition = startPosition,
+		startPosition = origin,
 		endPosition = endPosition,
 		direction = direction,
 		duration = math.clamp(distance / lasso.ProjectileSpeed, 0.12, 1.1),
 		elapsed = 0,
-		previous = startPosition,
 		lasso = lasso,
+		creature = creature,
+		targetPart = targetPart,
+		localHitPoint = localHitPoint,
+		missReason = candidate and aimDistance > range and "Alvo fora do alcance." or nil,
 	}
 	self.cooldowns[player] = os.clock() + lasso.CooldownSeconds
 	self.remote:FireClient(player, "ThrowLaunched", power)
@@ -260,33 +290,19 @@ function CaptureService:_stepProjectile(player, projectile, dt)
 	projectile.elapsed = math.min(projectile.duration, projectile.elapsed + dt)
 	local t = projectile.elapsed / projectile.duration
 	local position = projectile.startPosition:Lerp(projectile.endPosition, t)
-	local segment = position - projectile.previous
-	if segment.Magnitude > 0.01 then
-		local creatureParams = RaycastParams.new()
-		creatureParams.FilterType = Enum.RaycastFilterType.Include
-		creatureParams.FilterDescendantsInstances = {self.wildFolder}
-		local worldParams = RaycastParams.new()
-		worldParams.FilterType = Enum.RaycastFilterType.Exclude
-		worldParams.FilterDescendantsInstances = {player.Character, self.wildFolder, self.effectsFolder}
-		local creatureHit = workspace:Spherecast(projectile.previous, projectile.lasso.ProjectileRadius, segment, creatureParams)
-		local worldHit = workspace:Raycast(projectile.previous, segment, worldParams)
-		if creatureHit and (not worldHit or creatureHit.Distance <= worldHit.Distance + 0.1) then
-			local creature = creatureHit.Instance:FindFirstAncestorOfClass("Model")
-			if creature and creature.Parent == self.wildFolder then
-				projectile.visual:Destroy()
-				self.projectiles[player] = nil
-				self:_beginCapture(player, creature, projectile.lasso)
-				return
-			end
-		end
-		if worldHit then
-			self:_miss(player)
-			return
-		end
-	end
 	projectile.visual:PivotTo(CFrame.lookAt(position, position + projectile.direction) * CFrame.Angles(0, 0, t * 8))
-	projectile.previous = position
-	if t >= 1 then self:_miss(player) end
+	if t < 1 then return end
+	local creature = projectile.creature
+	local targetPart = projectile.targetPart
+	if creature and creature.Parent == self.wildFolder and targetPart and targetPart:IsDescendantOf(creature)
+		and (targetPart.CFrame:PointToWorldSpace(projectile.localHitPoint) - projectile.endPosition).Magnitude <= Config.MovingTargetTolerance then
+		projectile.visual:Destroy()
+		self.projectiles[player] = nil
+		local captured, reason = self:_beginCapture(player, creature, projectile.lasso)
+		if not captured then self.remote:FireClient(player, "ThrowMiss", reason) end
+	else
+		self:_miss(player, projectile.missReason)
+	end
 end
 
 function CaptureService:_stepSession(player, session, dt)

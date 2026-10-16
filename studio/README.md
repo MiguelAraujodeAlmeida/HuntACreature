@@ -7,7 +7,7 @@ O lugar aberto no Roblox Studio contém a segunda revisão dos itens **1, 2, 3 e
 1. Salve o lugar no Roblox Studio e clique **Play**.
 2. Equipe **Laço de treino** na barra padrão. Atravesse a ponte e encontre um Lumito.
 3. **PC:** aponte com o cursor para onde deseja lançar, segure o botão esquerdo do mouse para carregar a força e solte. **Celular:** mire com a câmera e segure o botão **Lançar**. **Controle:** mire pelo centro da tela e use R2.
-4. A força altera somente o alcance; o laço percorre uma linha reta até o ponto mirado, sem gravidade. O minigame abre somente quando o laço acerta uma criatura.
+4. A força altera somente o alcance. Com carga máxima e alvo dentro do alcance, o centro do laço percorre uma linha reta até o ponto sob o cursor (ou a mira central no celular/controle), sem gravidade. Se faltar alcance, ele para antes. O minigame abre somente quando o ponto mirado pertence a uma criatura.
 5. Durante a captura, segure **Espaço** no PC, **Puxar** no celular ou **A** no controle para mover a zona para a direita; solte para movê-la para a esquerda. Mantenha o marcador dentro da zona até completar a captura.
 6. Volte ao hub e use **Instalar criaturas** no totem da sua base. Ouro e XP entram periodicamente. O treino atual ainda usa a esteira e será redesenhado no item 8.
 

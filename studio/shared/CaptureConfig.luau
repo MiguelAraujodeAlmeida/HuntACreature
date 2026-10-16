@@ -8,12 +8,13 @@ Config.Lassos = {
 		MinimumRange = 18,
 		MaximumRange = 73,
 		ProjectileSpeed = 90,
-		ProjectileRadius = 1.6,
 		CooldownSeconds = 0.65,
 	},
 }
 Config.MinimumChargeSeconds = 0.12
 Config.AimLimit = 140
+Config.MaximumCameraDistance = 40
+Config.MovingTargetTolerance = 2
 
 Config.CaptureTimeLimit = 28
 Config.StateInterval = 0.05

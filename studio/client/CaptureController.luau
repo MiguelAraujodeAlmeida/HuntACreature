@@ -1,7 +1,6 @@
 -- Entrada do jogador. O servidor é a única autoridade sobre carga e acerto.
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
-local GuiService = game:GetService("GuiService")
 local Config = require(game:GetService("ReplicatedStorage").HACShared.CaptureConfig)
 
 local Controller = {}
@@ -92,21 +91,18 @@ function Controller.new(player, remote, hud)
 	return self
 end
 
-function Controller:_aim(center)
+function Controller:_aimRay(center)
 	local camera = workspace.CurrentCamera
 	if not camera then return nil end
 	local screenPoint
-	if center or UserInputService.TouchEnabled then
+	if center then
 		screenPoint = camera.ViewportSize / 2
 	else
-		screenPoint = UserInputService:GetMouseLocation() - GuiService:GetGuiInset()
+		-- GetMouseLocation e ViewportPointToRay usam as mesmas coordenadas.
+		screenPoint = UserInputService:GetMouseLocation()
 	end
 	local ray = camera:ViewportPointToRay(screenPoint.X, screenPoint.Y)
-	local params = RaycastParams.new()
-	params.FilterType = Enum.RaycastFilterType.Exclude
-	params.FilterDescendantsInstances = {self.player.Character, workspace.HuntACreature.EfeitosDeCaca}
-	local hit = workspace:Raycast(ray.Origin, ray.Direction * 115, params)
-	return hit and hit.Position or ray.Origin + ray.Direction * 115
+	return {origin = ray.Origin, direction = ray.Direction}
 end
 
 function Controller:_startCharge(mode, input)
@@ -121,7 +117,7 @@ end
 
 function Controller:_releaseCharge()
 	if not self.charging then return end
-	local aim = self:_aim(self.chargeMode ~= "mouse")
+	local aim = self:_aimRay(self.chargeMode ~= "mouse")
 	self.charging = false
 	self.chargeInput = nil
 	self.chargeMode = nil
