@@ -16,13 +16,14 @@ local hud = HUD.new(player)
 local controller = CaptureController.new(player, remote, hud)
 local collection = require(modules.CollectionUI).new(player, remote, hud, controller)
 hud.Collection = collection
-require(modules.NativeInventory).new(player, collection)
-local boards = require(modules.UpgradeBoards).new(player, collection)
+local boards
 
 remote.OnClientEvent:Connect(function(action, a, b, c)
 	if action == "Profile" then
 		collection:SetData(a)
-		boards:Update(a.profile)
+		if boards then
+			boards:Update(a.profile)
+		end
 	elseif action == "OpenCollection" then
 		collection:Open(a, b)
 	elseif action == "ActionFeedback" then
@@ -31,6 +32,17 @@ remote.OnClientEvent:Connect(function(action, a, b, c)
 	controller:HandleEvent(action, a, b, c)
 end)
 remote:FireServer("RequestProfile")
+
+-- Receber perfis/abertura de menus não depende da replicação de objetos opcionais.
+task.defer(function()
+	require(modules.NativeInventory).new(player, collection)
+end)
+task.defer(function()
+	boards = require(modules.UpgradeBoards).new(player, collection)
+	if collection.data then
+		boards:Update(collection.data.profile)
+	end
+end)
 
 local stats = player:WaitForChild("leaderstats")
 stats:WaitForChild("Ouro").Changed:Connect(function()

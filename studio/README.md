@@ -2,6 +2,8 @@
 
 Atualizado em 18/10/2026. Lugar **[Testing] Hunt a Creature**, placeId **102310424634629**. Última entrega: [menus, placas e inventário](MENUS_INVENTARIO_2026-10-18.md), aplicada em Edit e aguardando teste humano.
 
+Correção posterior de interações aplicada: placas com descoberta tardia e duas faces; prompts do mercado/loja sem oclusão pelo balcão. [Checklist completo para reteste](CHECKLIST_ULTIMAS_ATUALIZACOES.md).
+
 ## Estado
 
 - 37 fontes atuais recuperados do Studio após continuidade em outro dispositivo; baseline Git `7b2649a`.

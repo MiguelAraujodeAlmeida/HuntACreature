@@ -71,6 +71,7 @@ function World.new(world)
 	local prompt = Instance.new("ProximityPrompt")
 	prompt.Name, prompt.ActionText, prompt.ObjectText = "AbrirLoja", "Comprar", "Loja de caça"
 	prompt.MaxActivationDistance, prompt.HoldDuration, prompt.Parent = 12, 0, shop
+	prompt.RequiresLineOfSight, prompt.ClickablePrompt = false, true
 	local sign = Instance.new("BillboardGui")
 	sign.Size, sign.StudsOffset, sign.AlwaysOnTop, sign.Parent =
 		UDim2.fromOffset(200, 40), Vector3.new(0, 3, 0), true, shop

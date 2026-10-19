@@ -187,17 +187,22 @@ for _, base in ipairs(presentation.bases:GetChildren()) do
 		toggleTraining(player, base)
 	end)
 end
-presentation.prompt.Triggered:Connect(function(player)
-	if near(player, presentation.shop, C.Shop.Distance) and not busy(player) then
-		publish(player)
-		remote:FireClient(player, "OpenCollection", "Loja")
+local function openCounter(player, anchor, distance, page)
+	if not near(player, anchor, distance) then
+		return
 	end
+	if busy(player) then
+		notice(player, "Conclua a caça ou saia do treino primeiro.")
+		return
+	end
+	publish(player)
+	remote:FireClient(player, "OpenCollection", page)
+end
+presentation.prompt.Triggered:Connect(function(player)
+	openCounter(player, presentation.shop, C.Shop.Distance, "Loja")
 end)
 presentation.seller.Vender.Triggered:Connect(function(player)
-	if near(player, presentation.seller, C.Sell.Distance) and not busy(player) then
-		publish(player)
-		remote:FireClient(player, "OpenCollection", "Venda")
-	end
+	openCounter(player, presentation.seller, C.Sell.Distance, "Venda")
 end)
 for index = 1, #spawnPoints do
 	spawnWild(index)

@@ -4,6 +4,7 @@ local function part(parent, name, size, cf, color)
 	local p = parent:FindFirstChild(name) or Instance.new("Part")
 	p.Name, p.Size, p.CFrame, p.Color = name, size, cf, color
 	p.Anchored, p.CanCollide, p.CanTouch = true, false, false
+	p.CanQuery = true
 	p.Material, p.Parent = Enum.Material.SmoothPlastic, parent
 	return p
 end
@@ -52,6 +53,7 @@ function Stations.Ensure(world)
 	local prompt = seller:FindFirstChild("Vender") or Instance.new("ProximityPrompt")
 	prompt.Name, prompt.ActionText, prompt.ObjectText = "Vender", "Vender", "Mercado de criaturas"
 	prompt.MaxActivationDistance, prompt.HoldDuration, prompt.Parent = 12, 0, seller
+	prompt.Enabled, prompt.RequiresLineOfSight, prompt.ClickablePrompt = true, false, true
 	if not seller:FindFirstChild("Letreiro") then
 		local gui = Instance.new("BillboardGui")
 		gui.Name, gui.Size, gui.StudsOffset, gui.AlwaysOnTop, gui.Parent =

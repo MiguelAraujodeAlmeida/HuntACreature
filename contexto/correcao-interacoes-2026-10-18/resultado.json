@@ -1,0 +1,38 @@
+{
+  "date": "2026-10-18",
+  "placeId": 102310424634629,
+  "startedPlay": false,
+  "inspectedExistingUserPlay": true,
+  "checks": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"passed\":true,\"checks\":[\"base ausente não bloqueia inicialização\",\"base sem pasta aguarda sem erro\",\"peça sem atributo aguarda sem erro\",\"atributo tardio cria frente e verso\",\"perfil anterior preenche nível e preço\",\"botão de compra disponível\",\"passos repetidos não duplicam interfaces\",\"compra envia Upgrade e ID corretos\",\"clique duplo bloqueado\",\"captura bloqueia compra\",\"placa permanece desenhada fora do alcance de compra\",\"distância bloqueia envio\",\"treino tem botão nas duas faces\",\"botão de treino envia comando correto\",\"peça removida limpa interfaces\",\"peça recriada recebe interface\",\"mudança de dono remove acesso antigo\",\"limpeza final sem interfaces restantes\"]}"
+      }
+    ],
+    "isError": false
+  },
+  "sourceChecks": [
+    {
+      "path": "StarterPlayer.StarterPlayerScripts.HACClient.UpgradeBoards",
+      "equal": true
+    },
+    {
+      "path": "StarterPlayer.StarterPlayerScripts.HuntACreatureClient",
+      "equal": true
+    },
+    {
+      "path": "ServerScriptService.HACServer.WorldStations",
+      "equal": true
+    },
+    {
+      "path": "ServerScriptService.HACServer.WorldPresentation",
+      "equal": true
+    },
+    {
+      "path": "ServerScriptService.HuntACreature",
+      "equal": true
+    }
+  ],
+  "fullPlaceSaveConfirmed": false
+}
