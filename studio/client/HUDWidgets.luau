@@ -76,3 +76,4 @@ function W.bar(parent, name, size, pos, color)
 	return back, fill
 end
 return W
+

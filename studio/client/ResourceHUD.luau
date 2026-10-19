@@ -1,8 +1,8 @@
 -- Contadores v4; apenas apresentação dos valores replicados pelo servidor.
 local TweenService = game:GetService("TweenService")
 local W = require(script.Parent.HUDWidgets)
-local Button = require(script.Parent.GlossyButton)
 local S = W.Style
+local Audio = require(script.Parent.AudioFeedback)
 local Resources = {}
 Resources.__index = Resources
 local specs = {
@@ -23,19 +23,19 @@ local function formatNumber(value)
 end
 function Resources.new(parent, onDetails)
 	local self = setmetatable({ items = {} }, Resources)
-	self.Root = W.frame(parent, "Recursos", UDim2.fromOffset(854, 70), UDim2.new(1, -870, 0, 10))
+	self.Root = W.frame(parent, "Recursos", UDim2.fromOffset(244, 184), UDim2.new(0, 16, 1, -200))
 	self.Scale = Instance.new("UIScale")
 	self.Scale.Parent = self.Root
 	for index, spec in ipairs(specs) do
 		local card =
-			W.panel(self.Root, spec[1], UDim2.fromOffset(274, 66), UDim2.fromOffset((index - 1) * 290, 0), spec[4])
-		W.icon(card, "Icone", spec[3], UDim2.fromOffset(84, 84), UDim2.fromOffset(-9, -9))
-		W.text(
+			W.panel(self.Root, spec[1], UDim2.fromOffset(244, 56), UDim2.fromOffset(0, (index - 1) * 64), spec[4])
+		local icon = W.icon(card, "Icone", spec[3], UDim2.fromOffset(50, 50), UDim2.fromOffset(4, 3))
+		local label = W.text(
 			card,
 			"Nome",
 			spec[2],
-			UDim2.fromOffset(145, 15),
-			UDim2.fromOffset(70, 7),
+			UDim2.fromOffset(130, 14),
+			UDim2.fromOffset(61, 6),
 			12,
 			spec[4],
 			Enum.TextXAlignment.Left
@@ -44,50 +44,96 @@ function Resources.new(parent, onDetails)
 			card,
 			"Valor",
 			"0",
-			UDim2.fromOffset(147, 40),
-			UDim2.fromOffset(69, 20),
-			33,
+			UDim2.fromOffset(130, 30),
+			UDim2.fromOffset(59, 19),
+			27,
 			nil,
 			Enum.TextXAlignment.Left
 		)
 		text.TextScaled = true
 		local limit = Instance.new("UITextSizeConstraint")
-		limit.MaxTextSize = 33
+		limit.MaxTextSize = 27
 		limit.MinTextSize = 16
 		limit.Parent = text
 		local scale = Instance.new("UIScale")
 		scale.Parent = text
-		local plus = Button.new(
-			card,
-			{
-				name = "Detalhes",
-				text = "+",
-				textSize = 38,
-				color = S.UI.Green,
-				size = UDim2.fromOffset(44, 46),
-				position = UDim2.fromOffset(220, 10),
-			}
-		)
-		plus.Root.Activated:Connect(function()
+		-- O cartão inteiro é clicável, inclusive em telas pequenas.
+		local plus = Instance.new("TextButton")
+		plus.Name = "Detalhes"
+		plus.Size = UDim2.fromScale(1, 1)
+		plus.Text = ""
+		plus.BackgroundTransparency = 1
+		plus.ZIndex = 5
+		plus.Parent = card
+		plus.Activated:Connect(function()
+			Audio.Play("Click")
 			onDetails(spec[1])
 		end)
-		self.items[index] = { text = text, scale = scale }
+		local indicator = W.frame(card, "Mais", UDim2.fromOffset(26, 30), UDim2.new(1, -31, 0.5, -15), S.UI.Green, 8)
+		W.gradient(indicator, S.UI.Green:Lerp(S.UI.White, 0.25), S.UI.Green:Lerp(S.UI.Ink, 0.3))
+		W.stroke(indicator, S.UI.Ink, 2)
+		local shine = W.frame(indicator, "Luz", UDim2.new(1, -6, 0.3, 0), UDim2.fromOffset(3, 3), S.UI.White, 4)
+		shine.BackgroundTransparency = 0.65
+		W.text(indicator, "Simbolo", "+", UDim2.fromScale(1, 1), UDim2.fromScale(0, 0), 24)
+		local gain = W.text(card, "Ganho", "", UDim2.fromOffset(100, 26), UDim2.fromOffset(80, -6), 19, spec[4])
+		gain.Visible = false
+		gain.AnchorPoint = Vector2.new(0.5, 0)
+		self.items[index] = { text = text, scale = scale, card = card, gain = gain, icon = icon, label = label, indicator = indicator }
 	end
 	return self
 end
-function Resources:Resize(view)
-	local scale = math.clamp((view.X - 32) / 854, 0.40, 1)
-	if view.X >= 1100 then
-		scale = 1
+function Resources:Resize(layout)
+	local mode, margin = layout.resourceMode, layout.margin
+	local row = mode == "row"
+	local gap, height = 8, layout.resourceHeight
+	local width = row and math.min(224, (layout.width - margin * 2 - gap * 2) / 3)
+		or (mode == "narrow" and math.min(190, layout.width - layout.bag - margin * 3) or 224)
+	self.Scale.Scale = 1
+	self.Root.Size = UDim2.fromOffset(row and (width * 3 + gap * 2) or width, row and height or height * 3 + gap * 2)
+	self.Root.AnchorPoint = mode == "stack" and Vector2.new(0, 1) or Vector2.zero
+	self.Root.Position = mode == "stack" and UDim2.new(0, margin, 1, -margin) or UDim2.fromOffset(margin, margin)
+	for i, item in ipairs(self.items) do
+		item.card.Size = UDim2.fromOffset(width, height)
+		item.card.Position = UDim2.fromOffset(row and (i - 1) * (width + gap) or 0, row and 0 or (i - 1) * (height + gap))
+		local iconSize = height - 8
+		item.icon.Size = UDim2.fromOffset(iconSize, iconSize)
+		item.icon.Position = UDim2.fromOffset(4, 4)
+		local left = iconSize + 10
+		item.label.Position = UDim2.fromOffset(left, 5)
+		item.label.Size = UDim2.fromOffset(width - left - 36, 13)
+		item.label.TextSize = 11
+		item.text.Position = UDim2.fromOffset(left, 18)
+		item.text.Size = UDim2.fromOffset(width - left - 36, height - 22)
+		item.text:FindFirstChildOfClass("UITextSizeConstraint").MaxTextSize = layout.short and 21 or 25
+		item.gain.Size = UDim2.fromOffset(width - 30, 24)
 	end
-	self.Scale.Scale = scale
-	self.Root.Position = UDim2.new(1, -16 - 854 * scale, 0, view.X < 1100 and 48 or 10)
 end
 function Resources:Update(gold, xp, force)
 	for i, value in ipairs({ gold, xp, force }) do
 		local item = self.items[i]
 		item.text.Text = formatNumber(value)
 		if item.value and value > item.value then
+			if i == 1 then Audio.Play("Income") end
+			if item.gainTween then
+				item.gainTween:Cancel()
+			end
+			item.gain.Text = "+" .. formatNumber(value - item.value)
+			item.gain.Position = UDim2.new(0.5, 0, 0, -6)
+			item.gain.TextTransparency = 0
+			item.gain.Visible = true
+			item.gainTween = TweenService:Create(
+				item.gain,
+				TweenInfo.new(0.8, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+				{ Position = UDim2.new(0.5, 0, 0, -27), TextTransparency = 1 }
+			)
+			item.gainTween:Play()
+			local outline = item.gain:FindFirstChildOfClass("UIStroke")
+			if item.outlineTween then
+				item.outlineTween:Cancel()
+			end
+			outline.Transparency = 0
+			item.outlineTween = TweenService:Create(outline, TweenInfo.new(0.8), { Transparency = 1 })
+			item.outlineTween:Play()
 			if item.tween then
 				item.tween:Cancel()
 			end
@@ -103,3 +149,4 @@ function Resources:Update(gold, xp, force)
 	end
 end
 return Resources
+

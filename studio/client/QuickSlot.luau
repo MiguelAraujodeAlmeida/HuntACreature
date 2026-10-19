@@ -8,17 +8,14 @@ local Slot = {}
 Slot.__index = Slot
 function Slot.new(player, parent, isBusy)
 	local self = setmetatable({ connections = {} }, Slot)
-	self.Skin = Button.new(
-		parent,
-		{
-			name = "LacoEquipado",
-			text = "Laço",
-			icon = W.Style.Icons.Lasso,
-			textSize = 20,
-			size = UDim2.fromOffset(88, 88),
-			position = UDim2.new(0.5, 0, 1, -12),
-		}
-	)
+	self.Skin = Button.new(parent, {
+		name = "LacoEquipado",
+		text = "Laço",
+		icon = W.Style.Icons.Lasso,
+		textSize = 20,
+		size = UDim2.fromOffset(88, 88),
+		position = UDim2.new(0.5, 0, 1, -12),
+	})
 	self.Root = self.Skin.Root
 	self.Root.AnchorPoint = Vector2.new(0.5, 1)
 	W.text(self.Root, "Atalho", "1", UDim2.fromOffset(23, 23), UDim2.fromOffset(1, 0), 16).Visible =
@@ -76,3 +73,4 @@ function Slot:SetEquipped(value)
 	self.Skin:SetText(value and "Em uso" or "Laço")
 end
 return Slot
+

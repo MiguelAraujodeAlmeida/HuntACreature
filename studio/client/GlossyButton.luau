@@ -3,6 +3,8 @@ local TweenService = game:GetService("TweenService")
 local UIS = game:GetService("UserInputService")
 local W = require(script.Parent.HUDWidgets)
 local S = W.Style
+local Effects = require(script.Parent.UIEffects)
+local Audio = require(script.Parent.AudioFeedback)
 local Button = {}
 Button.__index = Button
 function Button.new(parent, o)
@@ -40,6 +42,18 @@ function Button.new(parent, o)
 		self.caption =
 			W.text(face, "Legenda", o.text, UDim2.new(1, -8, 1, -4), UDim2.fromOffset(4, 0), o.textSize or 24)
 	end
+	local reflectionMask = W.frame(visual, "ReflexoMascara", UDim2.new(1, -18, 1, -18), UDim2.fromOffset(9, 9))
+	reflectionMask.ClipsDescendants = true
+	self.sweep = W.frame(reflectionMask, "Reflexo", UDim2.fromScale(0.18, 2), UDim2.fromScale(-0.3, -0.5), S.UI.White)
+	self.sweep.Rotation = 22
+	self.sweep.BackgroundTransparency = 0.8
+	local gradient = Instance.new("UIGradient")
+	gradient.Transparency = NumberSequence.new({
+		NumberSequenceKeypoint.new(0, 1),
+		NumberSequenceKeypoint.new(0.5, 0.5),
+		NumberSequenceKeypoint.new(1, 1),
+	})
+	gradient.Parent = self.sweep
 	self.caption.TextScaled = true
 	local limit = Instance.new("UITextSizeConstraint")
 	limit.MaxTextSize = o.textSize or 25
@@ -91,6 +105,8 @@ function Button.new(parent, o)
 		self:_refresh()
 	end)
 	connect(root.Activated, function()
+		if o.sound ~= false then Audio.Play("Click") end
+		Effects.Burst(visual, S.UI.Gold, 5)
 		self:Shine()
 	end)
 	connect(root:GetPropertyChangedSignal("Visible"), function()
@@ -140,6 +156,8 @@ function Button:Shine()
 	if self.dead then
 		return
 	end
+	self.sweep.Position = UDim2.fromScale(-0.3, -0.5)
+	self:_tween("sweep", self.sweep, { Position = UDim2.fromScale(1.3, -0.5) }, 0.5)
 	self.spark.TextTransparency = 0
 	self:_tween("spark", self.spark, { TextTransparency = 1 }, 0.55)
 end
@@ -162,3 +180,4 @@ function Button:SetSelected(v)
 	end
 end
 return Button
+
