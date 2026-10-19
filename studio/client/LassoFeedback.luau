@@ -2,6 +2,7 @@
 local Aim = require(game.ReplicatedStorage.HACShared.LassoAim)
 local Visuals = require(game.ReplicatedStorage.HACShared.LassoVisuals)
 local Config = require(game.ReplicatedStorage.HACShared.CaptureConfig)
+local Gameplay = require(game.ReplicatedStorage.HACShared.GameplayConfig)
 local Feedback = {}
 Feedback.__index = Feedback
 function Feedback.new(player)
@@ -96,12 +97,20 @@ function Feedback:Update(ray, lasso, power, charging)
 	self.Highlight.Enabled = target ~= nil
 	self.Highlight.OutlineColor = target and target:GetAttribute("Golden") and Color3.fromRGB(255, 211, 35)
 		or Color3.fromRGB(59, 245, 227)
+	local locked = target
+		and (self.player:GetAttribute("Forca") or 0) < Gameplay.MinimumStrength(target:GetAttribute("Species"))
+	if locked then
+		self.Highlight.OutlineColor = Color3.fromRGB(255, 85, 100)
+	end
 	self.Highlight.OutlineTransparency = 0.08 + (math.sin(os.clock() * 5) + 1) * 0.04
 	if target and target ~= self.lastTarget then
 		Visuals.Burst(self.Folder, resolved.endpoint, Color3.fromRGB(91, 255, 206), 4)
 	end
 	self.lastTarget = target
 	self.Marker.Color = target and Color3.fromRGB(71, 255, 164) or Color3.fromRGB(255, 216, 73)
+	if locked then
+		self.Marker.Color = Color3.fromRGB(255, 85, 100)
+	end
 	self.Marker.Position = resolved.endpoint
 	self.Marker.Transparency = charging and 0.15 or 1
 	if charging then
@@ -132,4 +141,3 @@ function Feedback:Destroy()
 	self.Folder:Destroy()
 end
 return Feedback
-

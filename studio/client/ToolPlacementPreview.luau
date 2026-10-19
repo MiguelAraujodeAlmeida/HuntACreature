@@ -17,7 +17,7 @@ function Preview:Resolve(ray)
 	local island = world and world:FindFirstChild("IlhaCaca")
 	local ground = island and island:FindFirstChild("Gramado")
 	if not ray or not root or not ground then
-		return nil, "Mire no chão perto de você."
+		return nil, "Aim at the ground nearby."
 	end
 	local effects = world:FindFirstChild("EfeitosDeCaca")
 	local wild = island:FindFirstChild("CriaturasSelvagens")
@@ -32,7 +32,7 @@ function Preview:Resolve(ray)
 	params.FilterType, params.FilterDescendantsInstances = Enum.RaycastFilterType.Exclude, excluded
 	local hit = workspace:Raycast(ray.origin, ray.direction * 150, params)
 	if not hit then
-		return nil, "Mire no chão perto de você."
+		return nil, "Aim at the ground nearby."
 	end
 	local occupied = {}
 	if effects then

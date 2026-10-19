@@ -22,6 +22,7 @@ function HUD.new(player)
 	local gui = Instance.new("ScreenGui")
 	gui.Name = "HuntACreatureGui"
 	gui.ResetOnSpawn = false
+	gui.AutoLocalize = false
 	gui.IgnoreGuiInset = false
 	gui.ScreenInsets = Enum.ScreenInsets.CoreUISafeInsets
 	gui.ClipToDeviceSafeArea = true
@@ -35,7 +36,7 @@ function HUD.new(player)
 	self.Resources = Resources.new(gui)
 	self.BagSkin = Button.new(gui, {
 		name = "BolsaBotao",
-		text = "Criaturas",
+		text = "Creatures",
 		icon = S.Icons.Bag,
 		size = UDim2.fromOffset(146, 146),
 		position = UDim2.new(0, 14, 0.34, 0),
@@ -48,6 +49,7 @@ function HUD.new(player)
 	self.BagCount = W.text(self.BagBadge, "Valor", "0/3", UDim2.fromScale(1, 1), UDim2.fromScale(0, 0), 18)
 	self.IndexSkin = Button.new(gui, {
 		name = "IndexBotao",
+		glyph = "book",
 		text = "Index",
 		color = S.UI.Purple,
 		size = UDim2.fromOffset(86, 44),
@@ -59,9 +61,26 @@ function HUD.new(player)
 			self.Collection:Open("Index")
 		end
 	end)
+	self.SettingsSkin = Button.new(
+		gui,
+		{
+			name = "Settings",
+			text = "Settings",
+			glyph = "gear",
+			color = S.UI.Cyan,
+			size = UDim2.fromOffset(104, 40),
+			position = UDim2.new(1, -116, 0, 10),
+			textSize = 14,
+		}
+	)
+	self.SettingsSkin.Root.Activated:Connect(function()
+		if self.Collection then
+			self.Collection:Open("Settings")
+		end
+	end)
 	self.ThrowSkin = Button.new(gui, {
 		name = "Arremessar",
-		text = "Lançar",
+		text = "Throw",
 		icon = S.Icons.Lasso,
 		size = UDim2.fromOffset(120, 120),
 		position = UDim2.new(1, -140, 0.46, 0),
@@ -96,7 +115,7 @@ function HUD.new(player)
 	self.RewardScale = Instance.new("UIScale")
 	self.RewardScale.Parent = self.RewardRoot
 	W.icon(self.RewardRoot, "Estrela", S.Icons.XP, UDim2.fromOffset(108, 108), UDim2.fromOffset(-23, -7))
-	W.text(self.RewardRoot, "Titulo", "CAPTUROU!", UDim2.fromOffset(410, 40), UDim2.fromOffset(88, 8), 32, S.UI.Gold)
+	W.text(self.RewardRoot, "Titulo", "CAPTURED!", UDim2.fromOffset(410, 40), UDim2.fromOffset(88, 8), 32, S.UI.Gold)
 	self.RewardText = W.text(self.RewardRoot, "Recompensa", "", UDim2.fromOffset(425, 48), UDim2.fromOffset(84, 48), 23)
 	table.insert(
 		self.connections,
@@ -164,7 +183,7 @@ function HUD:Resize(view)
 		or margin + layout.resourceHeight + 14
 	self.BagButton.Position = layout.narrow and UDim2.new(1, -margin - layout.bag, 0, margin + 5)
 		or UDim2.fromOffset(margin, bagY)
-	local navWidth = math.max(76, layout.bag)
+	local navWidth = math.max(100, layout.bag)
 	self.IndexSkin.Root.Size = UDim2.fromOffset(navWidth, 44)
 	if layout.narrow then
 		local y = margin + 5 + layout.bag + 6
@@ -174,6 +193,12 @@ function HUD:Resize(view)
 	else
 		self.IndexSkin.Root.Position = UDim2.fromOffset(margin + layout.bag + 8, bagY)
 	end
+	self.SettingsSkin.Root.Position = layout.narrow and UDim2.new(1, -margin - navWidth, 0, margin + layout.bag + 61)
+		or (
+			layout.desktop and UDim2.new(1, -margin - 116, 0, margin)
+			or UDim2.fromOffset(margin + layout.bag + 8, bagY + 50)
+		)
+	self.SettingsSkin.Root.Size = UDim2.fromOffset(layout.narrow and navWidth or 116, 40)
 	self.BagBadge.Size = UDim2.fromOffset(32, 24)
 	self.BagBadge.Position = UDim2.new(1, -29, 0, 0)
 	self.BagCount.TextSize = 14
@@ -215,7 +240,7 @@ function HUD:CloseSheet()
 end
 function HUD:UpdateStats()
 	local stats = self.player:FindFirstChild("leaderstats")
-	local gold = stats and stats:FindFirstChild("Ouro")
+	local gold = stats and stats:FindFirstChild("Gold")
 	local xp = stats and stats:FindFirstChild("XP")
 	self.Resources:Update(gold and gold.Value or 0, xp and xp.Value or 0, self.player:GetAttribute("Forca") or 0)
 	local carried = self.player:GetAttribute("Carregando") or 0

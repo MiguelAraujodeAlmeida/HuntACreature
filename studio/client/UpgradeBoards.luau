@@ -82,7 +82,7 @@ function Boards:_mount(base, anchor, signature)
 		if training then
 			view.train = Button.new(root, {
 				name = "Treinar",
-				text = "TREINAR",
+				text = "TRAIN",
 				color = W.Style.UI.Green,
 				size = UDim2.new(1, -20, 0, 44),
 				position = UDim2.new(0, 10, 1, -49),
@@ -98,7 +98,7 @@ function Boards:_mount(base, anchor, signature)
 			local value = W.text(
 				row,
 				"Beneficio",
-				"Carregando…",
+				"Loading…",
 				UDim2.new(1, 0, 0, 24),
 				UDim2.fromOffset(0, 28),
 				18,
@@ -143,15 +143,15 @@ function Boards:_refresh(panel)
 		for _, row in ipairs(view.rows) do
 			local preview = self.profile and C.UpgradePreview(self.profile, row.id)
 			if preview then
-				row.title.Text = C.Upgrades[row.id].Name .. " • Nv. " .. (preview.level + 1)
-				local unit = row.id == "Treino" and " força"
+				row.title.Text = C.Upgrades[row.id].Name .. " • Lv. " .. (preview.level + 1)
+				local unit = row.id == "Treino" and " strength"
 					or row.id == "Multiplicador" and "×"
 					or row.id == "Velocidade" and " studs/s"
-					or " espaços"
+					or " slots"
 				row.value.Text = number(preview.current)
 					.. (preview.next and " → " .. number(preview.next) or "")
 					.. unit
-				row.skin:SetText(preview.cost and "$ " .. preview.cost or "MÁXIMO")
+				row.skin:SetText(preview.cost and "$ " .. preview.cost or "MAX")
 			end
 			local enabled = canUse and preview ~= nil and preview.cost ~= nil
 			row.skin.Root.Active, row.skin.Root.Selectable = enabled, enabled

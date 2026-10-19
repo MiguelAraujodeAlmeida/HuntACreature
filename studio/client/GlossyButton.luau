@@ -41,6 +41,10 @@ function Button.new(parent, o)
 		shine.BackgroundTransparency = 0.67
 		self.caption =
 			W.text(face, "Legenda", o.text, UDim2.new(1, -8, 1, -4), UDim2.fromOffset(4, 0), o.textSize or 24)
+		if o.glyph then
+			self.glyph = require(script.Parent.NavGlyph).new(face, o.glyph)
+			self.caption.Size, self.caption.Position = UDim2.new(1, -40, 1, -4), UDim2.fromOffset(36, 0)
+		end
 	end
 	local reflectionMask = W.frame(visual, "ReflexoMascara", UDim2.new(1, -18, 1, -18), UDim2.fromOffset(9, 9))
 	reflectionMask.ClipsDescendants = true
@@ -105,7 +109,9 @@ function Button.new(parent, o)
 		self:_refresh()
 	end)
 	connect(root.Activated, function()
-		if o.sound ~= false then Audio.Play("Click") end
+		if o.sound ~= false then
+			Audio.Play("Click")
+		end
 		Effects.Burst(visual, S.UI.Gold, 5)
 		self:Shine()
 	end)
@@ -151,6 +157,9 @@ function Button:_refresh()
 	if self.icon then
 		self:_tween("icon", self.icon, { Rotation = focus and -5 or 0 })
 	end
+	if self.glyph then
+		self:_tween("glyph", self.glyph, { Rotation = focus and 12 or 0 })
+	end
 end
 function Button:Shine()
 	if self.dead then
@@ -180,4 +189,3 @@ function Button:SetSelected(v)
 	end
 end
 return Button
-

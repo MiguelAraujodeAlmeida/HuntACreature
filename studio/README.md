@@ -1,16 +1,13 @@
 # Hunt A Creature — fontes do protótipo
 
-Atualizado em 18/10/2026. Lugar **[Testing] Hunt a Creature**, placeId **102310424634629**. Última entrega: [menus, placas e inventário](MENUS_INVENTARIO_2026-10-18.md), aplicada em Edit e aguardando teste humano.
-
-Correção posterior de interações aplicada: placas com descoberta tardia e duas faces; prompts do mercado/loja sem oclusão pelo balcão. [Checklist completo para reteste](CHECKLIST_ULTIMAS_ATUALIZACOES.md).
+Atualizado em 19/10/2026. Lugar **[Testing] Hunt a Creature**, placeId **102310424634629**. Última entrega: [base, configurações, coleção e inglês](BASE_COLECAO_2026-10-19.md). [Checklist do playtest](CHECKLIST_BASE_COLECAO_2026-10-19.md).
 
 ## Estado
 
-- 37 fontes atuais recuperados do Studio após continuidade em outro dispositivo; baseline Git `7b2649a`.
-- 42 fontes finais locais/Studio conferidos e compilados. Sincronização é **manual**, sem Script Sync/Rojo verificado.
-- Jogo inclui captura, IA inicial do Lumito, perfil persistente, ferramentas, treino no manequim, cinco categorias de melhorias, Index e loja com cota individual.
-- Revisão atual: upgrades por placas físicas, Criaturas com Equipar/Desequipar, mercado de venda, inventário nativo e renda por segundo (5×).
-- Nenhum Play iniciado pelo assistente nesta revisão; experiência e persistência real aguardam validação específica do desenvolvedor.
+- 48 fontes de runtime conferidos/compilados. Sincronização manual; sem Script Sync/Rojo verificado.
+- Base viva, Settings, favoritos protegidos, inglês nativo, Tools/Lassos e Index visual por variantes implementados.
+- Captura, treino, inventário, renda por segundo e placas da revisão anterior preservados.
+- 33 verificações isoladas passaram; nenhum Play iniciado. Aprovação da experiência e persistência real pendentes.
 
 ## Organização
 
@@ -37,6 +34,12 @@ Backup anterior em `../contexto/retomada-2026-10-18/`: export dos 37 fontes, có
 
 BuildWorld.luau e archive/ contêm histórico. Não executar o construtor antigo sobre o cenário atual. Mapa, Tools e propriedades não estão integralmente representados no Git.
 
+## Domínios novos
+
+BaseRoamingService move visuais equipados sem tocar em renda. CatalogPresentation exporta retratos a partir dos modelos; CreaturePortrait os apresenta. SettingsPage e LocalPreferences isolam preferências. GameplayConfig guarda MinimumStrength (Lumito 0), Settings e BaseRoaming. ProfileData persiste favorito/settings/variantDiscoveries por migração aditiva sem reset de schema/IDs.
+
+Backup atual: contexto/evolucao-2026-10-19/antes.zip e ServerStorage.HACBeforeEvolution20261019. Objetos alterados em Edit: nomes visíveis, Training Lasso, pedestais ocultos/inertes, catálogo de retratos. Salvamento completo do lugar continua não confirmado.
+
 ## Limites
 
-Lumito é a amostra (tamanhos e Dourado), não catálogo final. Ponte permanece provisória; teletransporte/mapa amplo, arte/modelos finais e configurações de áudio estão adiados. Economia acelerada mantém preços anteriores. Persistência existe, mas teste real de reconexão/cotas não foi confirmado nesta rodada. Ordem da barra nativa não possui persistência personalizada.
+Lumito é a amostra (tamanhos e Dourado), não catálogo final. Ponte permanece provisória; teletransporte/mapa amplo, arte/modelos finais estão adiados. Economia acelerada mantém preços anteriores. Persistência existe, mas teste real de reconexão/cotas não foi confirmado nesta rodada. Ordem da barra nativa não possui persistência personalizada.

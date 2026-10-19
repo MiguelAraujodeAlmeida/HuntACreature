@@ -17,7 +17,7 @@ function Capture.new(parent)
 	W.text(
 		self.Charge,
 		"Titulo",
-		"ARREMESSO",
+		"THROW",
 		UDim2.fromOffset(290, 24),
 		UDim2.fromOffset(76, 8),
 		19,
@@ -60,7 +60,7 @@ function Capture.new(parent)
 	W.stroke(self.Target, S.UI.White, 2)
 	self.Hold = Button.new(self.Root, {
 		name = "SegurarLaco",
-		text = "PUXAR",
+		text = "PULL",
 		textSize = 22,
 		color = S.UI.Gold,
 		size = UDim2.fromOffset(135, 54),
@@ -144,7 +144,7 @@ function Capture:SetCharging(power, range, maxRange)
 end
 function Capture:SetHolding(value)
 	self.Hold:SetHeld(value)
-	self.Hold:SetText(value and "PUXANDO" or "PUXAR")
+	self.Hold:SetText(value and "PULLING" or "PULL")
 end
 function Capture:Render(dt)
 	if not self.Root.Visible then
@@ -169,9 +169,10 @@ function Capture:Render(dt)
 	if milestone > self.milestone then
 		self.milestone = milestone
 		Effects.Burst(self.Progress, S.UI.Gold, 5)
-		if milestone < 4 then Audio.Play("Progress", 1 + milestone * 0.12) end
+		if milestone < 4 then
+			Audio.Play("Progress", 1 + milestone * 0.12)
+		end
 	end
 	self.Hold:SetSelected(s.overlap)
 end
 return Capture
-

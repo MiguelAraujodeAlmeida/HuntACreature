@@ -51,7 +51,7 @@ function Stations.Ensure(world)
 		Color3.fromRGB(95, 58, 34)
 	)
 	local prompt = seller:FindFirstChild("Vender") or Instance.new("ProximityPrompt")
-	prompt.Name, prompt.ActionText, prompt.ObjectText = "Vender", "Vender", "Mercado de criaturas"
+	prompt.Name, prompt.ActionText, prompt.ObjectText = "Vender", "Sell", "Creature Market"
 	prompt.MaxActivationDistance, prompt.HoldDuration, prompt.Parent = 12, 0, seller
 	prompt.Enabled, prompt.RequiresLineOfSight, prompt.ClickablePrompt = true, false, true
 	if not seller:FindFirstChild("Letreiro") then
@@ -59,7 +59,7 @@ function Stations.Ensure(world)
 		gui.Name, gui.Size, gui.StudsOffset, gui.AlwaysOnTop, gui.Parent =
 			"Letreiro", UDim2.fromOffset(230, 45), Vector3.new(0, 3, 0), true, seller
 		local label = Instance.new("TextLabel")
-		label.Size, label.BackgroundTransparency, label.Text = UDim2.fromScale(1, 1), 1, "VENDA DE CRIATURAS"
+		label.Size, label.BackgroundTransparency, label.Text = UDim2.fromScale(1, 1), 1, "CREATURE MARKET"
 		label.Font, label.TextSize, label.TextColor3, label.TextStrokeTransparency, label.Parent =
 			Enum.Font.FredokaOne, 23, Color3.new(1, 1, 1), 0, gui
 	end

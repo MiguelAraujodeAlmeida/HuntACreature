@@ -1,9 +1,9 @@
 -- Ajustes exclusivos do item 5 e do minigame (item 2).
 local Config = {}
 
-Config.ToolName = "Laço de treino"
+Config.ToolName = "Training Lasso"
 Config.Lassos = {
-	["Laço de treino"] = {
+	["Training Lasso"] = {
 		ChargeSeconds = 1.4,
 		MinimumRange = 18,
 		MaximumRange = 73,
@@ -30,4 +30,3 @@ Config.StrengthHalfBonus = 30
 Config.MissDecay = 0.07
 
 return Config
-

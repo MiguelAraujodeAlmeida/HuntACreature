@@ -1,0 +1,94 @@
+{
+  "date": "2026-10-19",
+  "studio": "11f50ef9-b049-476c-add8-041cef01ae46",
+  "placeId": 102310424634629,
+  "mode": "Edit",
+  "beforeSources": 42,
+  "finalSources": 48,
+  "ruleChecks": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"passed\":[\"Lumito captures at strength 0\",\"Normal variant recorded\",\"Favorite accepts boolean\",\"Favorite blocks server sale\",\"Favorite rejects nonboolean\",\"Favorite survives equip\",\"Unequip still works\",\"Can unfavorite\",\"Unfavorited sale succeeds\",\"Discovery survives sale\",\"Settings accepts boolean\",\"Settings rejects unknown key\",\"Settings rejects invalid value\",\"Old save migrated without losing gold\",\"Does not invent sold variant history\",\"Capture rejects insufficient strength\",\"Capture accepts exact strength boundary\",\"Portrait catalog has Normal and Gold\",\"Six equipped creatures spawn freely\",\"Profile sync does not reset movement\",\"Creatures move inside bounds without physical collisions\",\"Unequip removes roaming visual\",\"Menu builds: Criaturas\",\"Menu builds: Venda\",\"Menu builds: Index\",\"Menu builds: Loja\",\"Menu builds: Settings\",\"Lassos tab builds\",\"Index uses model portraits\",\"Preferences hide base model and mute sound\",\"Hidden preference applies to new creatures\",\"Muted sounds cannot restore volume themselves\",\"Preferences restore visibility and desired volume\"],\"count\":33}"
+      }
+    ],
+    "isError": false
+  },
+  "sourceChecks": [
+    {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"errors\":[],\"count\":6,\"mismatches\":[]}"
+        }
+      ],
+      "isError": false
+    },
+    {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"errors\":[],\"count\":6,\"mismatches\":[]}"
+        }
+      ],
+      "isError": false
+    },
+    {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"errors\":[],\"count\":6,\"mismatches\":[]}"
+        }
+      ],
+      "isError": false
+    },
+    {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"errors\":[],\"count\":6,\"mismatches\":[]}"
+        }
+      ],
+      "isError": false
+    },
+    {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"errors\":[],\"count\":6,\"mismatches\":[]}"
+        }
+      ],
+      "isError": false
+    },
+    {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"errors\":[],\"count\":6,\"mismatches\":[]}"
+        }
+      ],
+      "isError": false
+    },
+    {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"errors\":[],\"count\":6,\"mismatches\":[]}"
+        }
+      ],
+      "isError": false
+    },
+    {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"errors\":[],\"count\":6,\"mismatches\":[]}"
+        }
+      ],
+      "isError": false
+    }
+  ],
+  "playStarted": false,
+  "dataStoreTested": false,
+  "fullPlaceSaveConfirmed": false
+}

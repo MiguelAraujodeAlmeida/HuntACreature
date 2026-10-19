@@ -135,21 +135,25 @@ function CaptureService:_finish(player, success, message)
 		if success then
 			rewardBurst(self.effectsFolder, position, session.golden)
 		else
-			message = "Não foi possível guardar a criatura. Confira sua bolsa."
+			message = "Could not store the creature. Check your bag."
 		end
 	end
 	self.remote:FireClient(player, "CaptureEnd", success, message, session.golden)
 end
 
 function CaptureService:_beginCapture(player, creature, lasso)
+	local required = Gameplay.MinimumStrength(creature:GetAttribute("Species"))
+	if (player:GetAttribute("Forca") or 0) < required then
+		return false, string.format("Requires %s strength", tostring(required))
+	end
 	if self.sessions[player] or not creature.Parent or creature.Parent ~= self.wildFolder then
-		return false, "A criatura não está mais disponível."
+		return false, "This creature is no longer available."
 	end
 	if creature:GetAttribute("BusyUserId") then
-		return false, "Esse Lumito já está sendo capturado."
+		return false, "Someone is already capturing this creature."
 	end
 	if not self.canCarry(player) then
-		return false, "Bolsa cheia: instale suas criaturas na base."
+		return false, "Bag full. Equip creatures at your base."
 	end
 	local root = playerRoot(player)
 	if
@@ -157,7 +161,7 @@ function CaptureService:_beginCapture(player, creature, lasso)
 		or not equippedLasso(player)
 		or (root.Position - creature.PrimaryPart.Position).Magnitude > lasso.MaximumRange + 10
 	then
-		return false, "A criatura saiu do alcance."
+		return false, "The creature moved out of range."
 	end
 	creature:SetAttribute("BusyUserId", player.UserId)
 	local golden = creature:GetAttribute("Golden") == true
@@ -220,11 +224,11 @@ function CaptureService:_startCharge(player)
 		return
 	end
 	if player:GetAttribute("Treinando") then
-		deny("Encerre o treino antes de caçar.")
+		deny("Leave training before hunting.")
 		return
 	end
 	if player:GetAttribute("ProfileReady") ~= true then
-		deny("Aguarde seus dados carregarem.")
+		deny("Your progress is loading.")
 		return
 	end
 	local lasso, name = equippedLasso(player)
@@ -378,7 +382,7 @@ function CaptureService:_stepSession(player, session, dt)
 	end
 	local elapsed = os.clock() - session.started
 	if elapsed > Config.CaptureTimeLimit then
-		self:_finish(player, false, "O Lumito escapou. Aproveite o cansaço para tentar de novo!")
+		self:_finish(player, false, "The creature escaped.")
 		return
 	end
 	session.goalTimer -= dt
@@ -422,7 +426,7 @@ function CaptureService:_stepSession(player, session, dt)
 		})
 	end
 	if session.progress >= 1 then
-		self:_finish(player, true, "Lumito capturado!")
+		self:_finish(player, true, "Lumito captured!")
 	end
 end
 

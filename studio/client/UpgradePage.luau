@@ -6,15 +6,15 @@ local function number(value)
 end
 function Page.Render(ui)
 	local group = C.UpgradeGroups[ui.upgradeGroup]
-	if not group then ui:Text("Escolha uma melhoria na bolsa, na base ou no manequim.",60); return end
+	if not group then ui:Text("Choose an upgrade at your base.",60); return end
 	ui.pageTitle = group.Name
 	if ui.upgradeGroup=="Bolsa" or ui.upgradeGroup=="Base" then
-		ui:InlineAction("BackToCollection","‹ Voltar à " .. ui.upgradeGroup:lower(),function() ui:Open(ui.upgradeGroup) end)
+		ui:InlineAction("BackToCollection","‹ Back to " .. ui.upgradeGroup:lower(),function() ui:Open(ui.upgradeGroup) end)
 	end
 	local ids = C.UpgradesIn(ui.upgradeGroup)
 	if not table.find(ids,ui.upgradeId) then ui.upgradeId=ids[1] end
 	if #ids>1 then
-		ui:Text("Escolha o que deseja melhorar. Cada compra evolui apenas uma opção.",48)
+		ui:Text("Choose an upgrade.",48)
 		for _,id in ipairs(ids) do
 			local skin=ui:InlineAction("ChooseUpgrade:" .. id,C.Upgrades[id].Name,function()
 				ui.upgradeId=id; ui:Render()
@@ -23,27 +23,27 @@ function Page.Render(ui)
 		end
 	end
 	local id=ui.upgradeId
-	if not id then ui:Text("Nenhuma melhoria cadastrada aqui.",48); return end
+	if not id then ui:Text("No upgrades here.",48); return end
 	local def=C.Upgrades[id]
 	local p=ui.data.profile
 	local preview=C.UpgradePreview(p,id)
-	local description=def.Description .. "\n\nAtual: " .. number(preview.current) .. " " .. def.Unit
-	if preview.next then description ..= "\nPróximo: " .. number(preview.next) .. " " .. def.Unit
-	else description ..= "\nMelhoria concluída." end
+	local description=def.Description .. "\n\nCurrent: " .. number(preview.current) .. " " .. def.Unit
+	if preview.next then description ..= "\nNext: " .. number(preview.next) .. " " .. def.Unit
+	else description ..= "\nUpgrade complete." end
 	if def.Group=="Treino" then
-		description ..= "\n\nResultado: +" .. number(C.TrainingGain(p)) .. " força / " .. C.TrainingSeconds .. " s"
+		description ..= "\n\nResult: +" .. number(C.TrainingGain(p)) .. " strength / " .. C.TrainingSeconds .. " s"
 		if preview.next then description ..= " → +" .. number(C.TrainingGain(p,id)) end
 	end
-	local card=ui:Card(def.Name .. " • nível " .. preview.level,description,def.Group=="Treino" and 270 or 220)
+	local card=ui:Card(def.Name .. " • level " .. preview.level,description,def.Group=="Treino" and 270 or 220)
 	if preview.cost then
-		ui:PurchaseButton(card,"Upgrade:" .. id,"Melhorar • " .. preview.cost .. " ouro",function()
+		ui:PurchaseButton(card,"Upgrade:" .. id,"Upgrade • " .. preview.cost .. " gold",function()
 			local reason=ui:UpgradeUnavailable(id)
 			if reason then return reason end
-			if ui.data.profile.gold<preview.cost then return "Faltam " .. (preview.cost-ui.data.profile.gold) .. " ouro" end
+			if ui.data.profile.gold<preview.cost then return "Need " .. (preview.cost-ui.data.profile.gold) .. " gold" end
 		end,function() ui:Send("Upgrade",id) end)
 	end
 	if def.Group=="Treino" then
-		ui:Text("Manequim = ganho básico. Eficiência = multiplicador. O treino continua sendo feito com seu laço.",64)
+		ui:Text("Improve your training dummy and efficiency.",64)
 	end
 end
 return Page

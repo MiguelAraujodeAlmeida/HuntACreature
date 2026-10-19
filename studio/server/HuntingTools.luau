@@ -25,30 +25,30 @@ function Tools:Use(player, id, position)
 		or humanoid.Health <= 0
 		or player:GetAttribute("Treinando")
 	then
-		return false, "Não é possível usar agora."
+		return false, "Cannot use this now."
 	end
 	local held = character:FindFirstChildOfClass("Tool")
 	if not held or held:GetAttribute("HACItemId") ~= id then
-		return false, "Equipe a ferramenta."
+		return false, "Equip the tool first."
 	end
 	if (profile.items[id] or 0) <= 0 then
-		return false, "Você não tem essa ferramenta."
+		return false, "You do not own this tool."
 	end
 	local cooldowns = self.cooldowns[player] or {}
 	if (cooldowns[id] or 0) > os.clock() then
-		return false, "Ferramenta recarregando."
+		return false, "Tool is on cooldown."
 	end
 	local session = o.capture.sessions[player]
 	if id == "Pocao" then
 		if not session then
-			return false, "Use a poção durante uma captura."
+			return false, "Use the potion during a capture."
 		end
 		if (session.potionUntil or 0) > os.clock() then
-			return false, "A poção já está ativa."
+			return false, "Potion already active."
 		end
 	else
 		if session or o.capture.projectiles[player] or o.capture.charges[player] then
-			return false, "Conclua o lançamento primeiro."
+			return false, "Finish the throw first."
 		end
 		local params = RaycastParams.new()
 		params.FilterType = Enum.RaycastFilterType.Exclude
@@ -65,7 +65,7 @@ function Tools:Use(player, id, position)
 	end
 	local accepted, message = o.profiles:Change(player, function(p)
 		if (p.items[id] or 0) <= 0 then
-			return false, "Ferramenta indisponível."
+			return false, "Tool unavailable."
 		end
 		p.items[id] -= 1
 		return true

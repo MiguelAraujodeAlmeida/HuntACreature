@@ -6,9 +6,9 @@ local Audio = require(script.Parent.AudioFeedback)
 local Resources = {}
 Resources.__index = Resources
 local specs = {
-	{ "Ouro", "OURO", S.Icons.Coin, S.UI.Gold },
+	{ "Ouro", "GOLD", S.Icons.Coin, S.UI.Gold },
 	{ "XP", "XP", S.Icons.XP, S.UI.Purple },
-	{ "Forca", "FORÇA", S.Icons.Strength, S.UI.Cyan },
+	{ "Forca", "STRENGTH", S.Icons.Strength, S.UI.Cyan },
 }
 local function formatNumber(value)
 	local n = math.max(0, math.floor(value))
@@ -19,7 +19,7 @@ local function formatNumber(value)
 		return string.format("%.1fM", n / 1000000)
 	end
 	local text = tostring(n)
-	return text:reverse():gsub("(%d%d%d)", "%1."):reverse():gsub("^%.", "")
+	return text:reverse():gsub("(%d%d%d)", "%1,"):reverse():gsub("^,", "")
 end
 function Resources.new(parent, onDetails)
 	local self = setmetatable({ items = {} }, Resources)

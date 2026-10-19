@@ -288,7 +288,7 @@ function Behavior:_pose(moving)
 		self.wasSlowed = slow
 		local label = self.model.PrimaryPart:FindFirstChild("Identificacao")
 		local text = label and label:FindFirstChildOfClass("TextLabel")
-		if text then text.Text = self.model.Name .. (slow and " • LENTO" or self.state == "Panicking" and " !" or self.state == "Tired" and " …" or "") end
+		if text then text.Text = self.model.Name .. (slow and " • SLOWED" or self.state == "Panicking" and " !" or self.state == "Tired" and " …" or "") end
 	end
 	local bounce = moving and math.abs(math.sin(self.phase)) * (self.state == "Panicking" and 0.13 or 0.045) or 0
 	local roll = moving and math.sin(self.phase) * (self.state == "Panicking" and 0.07 or 0.025) or 0

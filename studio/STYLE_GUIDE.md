@@ -1,9 +1,11 @@
 # Hunt A Creature — direção visual atual
 
-Atualizado em 18/10/2026. Referência vigente: arte glossy enviada pelo desenvolvedor, ícones de brinquedo com volume, painéis escuros e contornos luminosos ciano/dourado. A direção é revisável e ainda depende de parecer humano.
+Atualizado em 19/10/2026. Referência vigente: arte glossy enviada pelo desenvolvedor, ícones de brinquedo com volume, painéis escuros e contornos luminosos ciano/dourado. A direção é revisável e ainda depende de parecer humano.
 
 ## Componentes
 
+- **Idioma:** inglês nos textos visíveis. IDs de dados legados permanecem estáveis; traduzir apresentação, nunca saves por substituição global.
+- **Coleção:** retratos 3D reutilizam modelos reais; desconhecidos usam silhueta. Variante/progresso no Index; estrela por indivíduo indica proteção de venda.
 - **Fonte:** Fredoka One para texto e títulos, centralizada em shared/VisualStyle.luau. Texto branco com contorno escuro e números legíveis.
 - **Arte:** skins e ícones v4 independentes, referenciados em VisualStyle. Preservar proporção; tamanhos/layout vêm de HUDLayout. Ouro dourado, XP roxo, força ciano; navegação glossy ciano.
 - **Interação:** GlossyButton concentra foco, pressão, retorno, brilho e seleção; área de input estável. UIEffects/AudioFeedback concentram feedback, sem economia no componente.
@@ -16,7 +18,7 @@ Atualizado em 18/10/2026. Referência vigente: arte glossy enviada pelo desenvol
 
 Mundo cartunizado modular, saturado e coerente. Amostras de studs/madeira/piso em WorldStyle não são arte final aprovada. Evitar textura fotográfica isolada. Criaturas com silhueta clara e expressão; raridade/mutação reforça a família visual.
 
-Feedback acompanha antecipação, impacto, progresso e resolução. Efeitos expressivos sem cobrir a mira ou impedir decisão. Renda por segundo não exige som a cada pagamento; AudioConfig também aplica cooldown. Sem mute em cada painel; configurações são escopo futuro.
+Feedback acompanha antecipação, impacto, progresso e resolução. Efeitos expressivos sem cobrir a mira ou impedir decisão. Renda por segundo não exige som a cada pagamento; AudioConfig também aplica cooldown. Mute centralizado em Settings, junto da visibilidade local de criaturas na base.
 
 ## Aprovação
 

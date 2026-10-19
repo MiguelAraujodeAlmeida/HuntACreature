@@ -45,7 +45,7 @@ task.defer(function()
 end)
 
 local stats = player:WaitForChild("leaderstats")
-stats:WaitForChild("Ouro").Changed:Connect(function()
+stats:WaitForChild("Gold").Changed:Connect(function()
 	hud:UpdateStats()
 end)
 stats:WaitForChild("XP").Changed:Connect(function()

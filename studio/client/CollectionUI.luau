@@ -10,6 +10,7 @@ local Audio = require(script.Parent.AudioFeedback)
 local View = require(script.Parent.CollectionView)
 local Preview = require(script.Parent.ToolPlacementPreview)
 local Pages = {
+	Settings = require(script.Parent.SettingsPage),
 	Index = require(script.Parent.IndexPage),
 	Criaturas = require(script.Parent.CreaturePage),
 	Venda = require(script.Parent.CreaturePage),
@@ -42,7 +43,7 @@ function UI.new(player, remote, hud, controller)
 	self.shade.BackgroundTransparency, self.shade.ZIndex, self.shade.Visible, self.shade.Active = 0.25, 21, false, true
 	self.root = W.panel(hud.Surface, "Colecao", UDim2.fromOffset(620, 500), UDim2.fromScale(0.5, 0.5), W.Style.UI.Cyan)
 	self.root.AnchorPoint, self.root.ZIndex, self.root.Visible = Vector2.new(0.5, 0.5), 22, false
-	self.header = text(self.root, "COLEÇÃO", 42)
+	self.header = text(self.root, "COLLECTION", 42)
 	self.header.Size = UDim2.new(1, -72, 0, 40)
 	self.close = button(self.root, "×", function()
 		hud:CloseSheet()
@@ -54,22 +55,22 @@ function UI.new(player, remote, hud, controller)
 	local list = Instance.new("UIListLayout")
 	list.Padding, list.SortOrder, list.Parent = UDim.new(0, 8), Enum.SortOrder.LayoutOrder, scroll
 	self.scroll = scroll
-	self.footer = text(self.root, "Carregando progresso…", 30)
+	self.footer = text(self.root, "Loading progress…", 30)
 	self.footer.Position = UDim2.new(0, 8, 1, -35)
 	self.utilities = {}
 	self.preview = Preview.new(player)
 	self.placementHint = text(hud.Surface, "", 42)
 	self.placementHint.AnchorPoint = Vector2.new(0.5, 1)
 	self.placementHint.ZIndex, self.placementHint.Visible = 24, false
-	self.potion = button(hud.CapturePanel, "Usar poção", function()
+	self.potion = button(hud.CapturePanel, "Use potion", function()
 		self:UsePotion()
 	end, UDim2.fromOffset(140, 34), UDim2.new(0, 0, 0, -40))
 	self.potion.Root.Visible = false
-	self.exit = button(hud.Surface, "Sair do treino", function()
+	self.exit = button(hud.Surface, "Leave training", function()
 		remote:FireServer("StopTraining")
 	end, UDim2.fromOffset(160, 42), UDim2.new(0.5, -80, 0.55, 0))
 	self.exit.Root.Visible = false
-	self.cancel = button(hud.CapturePanel, "Soltar laço", function()
+	self.cancel = button(hud.CapturePanel, "Release", function()
 		remote:FireServer("CancelCapture")
 	end, UDim2.fromOffset(112, 30), UDim2.new(1, -112, 0, -34))
 	self.connections = {}
@@ -125,14 +126,12 @@ function UI.new(player, remote, hud, controller)
 				local seconds = math.max(0, self.data.rotation.endsAt - math.floor(workspace:GetServerTimeNow()))
 				self.footer.Text = self.tab == "Loja"
 						and string.format(
-							"Reposição %02d:%02d • Ouro: %s",
+							"Restock %02d:%02d • Gold: %s",
 							math.floor(seconds / 60),
 							seconds % 60,
 							tostring(self.data.profile.gold)
 						)
-					or (self.data.temporary and "TESTE TEMPORÁRIO • " or "")
-						.. "Ouro: "
-						.. self.data.profile.gold
+					or (self.data.temporary and "TEMPORARY TEST • " or "") .. "Gold: " .. self.data.profile.gold
 				self:RefreshValues()
 				if self.tab == "Loja" and seconds == 0 and os.clock() - (self.stockRequestedAt or 0) > 1 then
 					self.stockRequestedAt = os.clock()
@@ -147,6 +146,7 @@ function UI.new(player, remote, hud, controller)
 		end
 		self.preview:Destroy()
 	end)
+	self.preferences = require(script.Parent.LocalPreferences).new(hud.Gui)
 	self:Resize()
 	return self
 end
@@ -171,12 +171,12 @@ function UI:Open(tab, group)
 	if not Pages[tab or "Criaturas"] then
 		return
 	end
-	if self.controller.capturing or self.controller.flying then
-		self.hud:Notice("Conclua a caça primeiro.")
+	if (self.controller.capturing or self.controller.flying) and tab ~= "Settings" then
+		self.hud:Notice("Finish the hunt first.")
 		return
 	end
-	if self.player:GetAttribute("Treinando") then
-		self.hud:Notice("Saia do treino para abrir o painel.")
+	if self.player:GetAttribute("Treinando") and tab ~= "Settings" then
+		self.hud:Notice("Leave training to open this menu.")
 		return
 	end
 	self.controller:_cancelCharge()
@@ -189,6 +189,22 @@ function UI:Open(tab, group)
 	end
 	self.upgradeGroup = group
 	self.root.Visible, self.shade.Visible = true, true
+	local hud = self.hud
+	hud.BagSkin:SetSelected(self.tab == "Criaturas")
+	hud.IndexSkin:SetSelected(self.tab == "Index")
+	hud.SettingsSkin:SetSelected(self.tab == "Settings")
+	if not self.openScale then
+		self.openScale = Instance.new("UIScale")
+		self.openScale.Parent = self.root
+	end
+	if self.openTween then
+		self.openTween:Cancel()
+	end
+	self.openScale.Scale = 0.94
+	self.openTween =
+		game:GetService("TweenService")
+			:Create(self.openScale, TweenInfo.new(0.22, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = 1 })
+	self.openTween:Play()
 	Audio.Play("Open")
 	self:Render()
 end
@@ -198,6 +214,9 @@ function UI:Close()
 		self.hud.sheetKind = nil
 	end
 	self.confirm = nil
+	self.hud.BagSkin:SetSelected(false)
+	self.hud.IndexSkin:SetSelected(false)
+	self.hud.SettingsSkin:SetSelected(false)
 end
 function UI:Send(action, id, extra)
 	if not self.data then
@@ -220,20 +239,20 @@ function UI:UsePotion()
 end
 function UI:Unavailable(id)
 	if not self.data or self.player:GetAttribute("ProfileReady") ~= true then
-		return "Carregando…"
+		return "Loading…"
 	end
 	if (self.data.profile.items[id] or 0) <= 0 then
-		return "Sem unidades."
+		return "Out of stock."
 	end
 	local left = math.ceil((self.player:GetAttribute("Cooldown" .. id) or 0) - workspace:GetServerTimeNow())
 	if left > 0 then
-		return "Recarregando • " .. left .. " s"
+		return "Cooldown • " .. left .. " s"
 	end
 	if id == "Pocao" and not self.controller.capturing then
-		return "Use a poção durante uma captura."
+		return "Use the potion during a capture."
 	end
 	if id ~= "Pocao" and (self.controller.capturing or self.controller.flying) then
-		return "Conclua o lançamento primeiro."
+		return "Finish the throw first."
 	end
 	return nil
 end
@@ -256,6 +275,7 @@ end
 function UI:UpdateTools()
 	local p = self.data and self.data.profile
 	self.exit.Root.Visible = self.player:GetAttribute("Treinando") == true
+	self.hud.SettingsSkin.Root.Visible = not self.controller.capturing and not self.hud.sheetKind
 	self.hud.IndexSkin.Root.Visible = not self.controller.capturing
 		and not self.exit.Root.Visible
 		and not self.hud.sheetKind
@@ -264,8 +284,8 @@ function UI:UpdateTools()
 		and self.activeItem == "Pocao"
 		and p ~= nil
 		and (p.items.Pocao or 0) > 0
-	self.potion:SetText(left > 0 and (left .. " s") or "Usar poção")
-	local throwText = self.selected and "Posicionar" or "Lançar"
+	self.potion:SetText(left > 0 and (left .. " s") or "Use potion")
+	local throwText = self.selected and "Place" or "Throw"
 	if self.hud.ThrowSkin.caption.Text ~= throwText then
 		self.hud.ThrowSkin:SetText(throwText)
 	end
@@ -290,6 +310,9 @@ end
 function UI:SetData(data)
 	local changed = not View.Equal(View.Content(self.data, self.tab), View.Content(data, self.tab))
 	self.data = data
+	if self.preferences then
+		self.preferences:Apply(data.profile.settings)
+	end
 	if self.confirm and not data.profile.creatures[self.confirm] then
 		self.confirm = nil
 	end
@@ -305,13 +328,24 @@ function UI:RefreshValues()
 	if not self.data then
 		return
 	end
-	self.header.Text = self.pageTitle or "COLEÇÃO"
+	self.header.Text = self.pageTitle or "COLLECTION"
 	for _, refresh in ipairs(self.valueRefreshers or {}) do
 		refresh()
 	end
 end
 function UI:Text(message, height)
 	return text(self.scroll, message, height)
+end
+function UI:Tabs(key, options, selected, callback)
+	local row = W.frame(self.scroll, key, UDim2.new(1, -8, 0, 44), UDim2.new())
+	for i, option in ipairs(options) do
+		local skin = self:ActionButton(row, key .. ":" .. option.id, option.name, function()
+			callback(option.id)
+		end, UDim2.new(1 / #options, -6, 1, 0), UDim2.new((i - 1) / #options, 3, 0, 0))
+		skin:SetSelected(option.id == selected)
+		skin.caption.TextTransparency = option.id == selected and 0 or 0.25
+	end
+	return row
 end
 function UI:InlineAction(key, caption, callback)
 	return self:ActionButton(self.scroll, key, caption, callback, UDim2.new(1, -8, 0, 44), UDim2.new())
@@ -372,14 +406,14 @@ function UI:Render()
 	local hadFocus = selected and selected:IsDescendantOf(self.scroll)
 	local focusKey = hadFocus and selected:GetAttribute("FocusKey")
 	self.valueRefreshers = {}
-	self.pageTitle = "Criaturas"
+	self.pageTitle = "Creatures"
 	for _, child in ipairs(self.scroll:GetChildren()) do
 		if child:IsA("GuiObject") then
 			child:Destroy()
 		end
 	end
 	if not self.data then
-		text(self.scroll, "Carregando progresso…", 50)
+		text(self.scroll, "Loading progress…", 50)
 		return
 	end
 	local top = 54

@@ -25,7 +25,7 @@ function Service:Load(player)
 			end)
 		end)
 		if ok and value and value.lease and value.lease.token == token then result = value; break end
-		reason = ok and "Perfil ainda aberto em outra sessão." or tostring(value)
+		reason = ok and "Your profile is open in another session." or tostring(value)
 		if attempt < 3 then task.wait(attempt * 2) end
 	end
 	if not result then warn("[HAC Perfil] " .. player.UserId .. ": " .. tostring(reason)); return nil end
@@ -75,11 +75,11 @@ function Service:Save(player, release)
 end
 function Service:Change(player, callback, passive)
 	local profile = self:Get(player)
-	if not profile then return false, "Progresso indisponível. Aguarde o salvamento." end
+	if not profile then return false, "Progress unavailable. Please wait for saving." end
 	-- Copy-on-write mantém transações indivisíveis e sem efeitos parciais em falhas.
 	local nextProfile = Data.Copy(profile)
 	local ok, accepted, message = pcall(callback, nextProfile)
-	if not ok then warn("[HAC Transação] " .. tostring(accepted)); return false, "Não foi possível concluir a ação." end
+	if not ok then warn("[HAC Transação] " .. tostring(accepted)); return false, "Could not complete the action." end
 	if not accepted then return false, message end
 	-- A revisão protege ações sobre a coleção; renda/treino não invalidam cliques.
 	-- O snapshot completo, inclusive ganhos passivos, continua sendo salvo.

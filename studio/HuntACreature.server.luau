@@ -86,7 +86,7 @@ publish = function(player)
 	player:SetAttribute("ProfileReady", true)
 	local stats = player:FindFirstChild("leaderstats")
 	if stats then
-		stats.Ouro.Value, stats.XP.Value = p.gold, p.xp
+		stats.Gold.Value, stats.XP.Value = p.gold, p.xp
 	end
 	local h = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
 	if h and not training[player] then
@@ -174,7 +174,7 @@ local function toggleTraining(player, base)
 		return
 	end
 	if busy(player) then
-		notice(player, "Conclua a caça antes de treinar.")
+		notice(player, "Finish your hunt before training.")
 		return
 	end
 	if presentation:StartTraining(player, base, effects) then
@@ -192,7 +192,7 @@ local function openCounter(player, anchor, distance, page)
 		return
 	end
 	if busy(player) then
-		notice(player, "Conclua a caça ou saia do treino primeiro.")
+		notice(player, "Finish hunting or leave training first.")
 		return
 	end
 	publish(player)
@@ -213,7 +213,7 @@ local function assignBase(player)
 		if not owners[i] then
 			owners[i] = player
 			player:SetAttribute("BaseIndex", i)
-			setLabel(baseOf(player), "BASE DE " .. string.upper(player.DisplayName))
+			setLabel(baseOf(player), "BASE • " .. string.upper(player.DisplayName))
 			return true
 		end
 	end
@@ -229,7 +229,7 @@ local function attachCharacter(player, character)
 	end
 	h.Died:Once(function()
 		stopTraining(player)
-		capture:_finish(player, false, "Captura interrompida.")
+		capture:_finish(player, false, "Capture interrupted.")
 		capture:PlayerRemoving(player)
 		huntingTools:RemovePlayer(player)
 	end)
@@ -245,7 +245,7 @@ local function playerAdded(player)
 	player:SetAttribute("Treinando", false)
 	local stats = Instance.new("Folder")
 	stats.Name, stats.Parent = "leaderstats", player
-	for _, name in ipairs({ "Ouro", "XP" }) do
+	for _, name in ipairs({ "Gold", "XP" }) do
 		local v = Instance.new("IntValue")
 		v.Name, v.Parent = name, stats
 	end
@@ -257,9 +257,7 @@ local function playerAdded(player)
 	end
 	local p = Profiles:Load(player)
 	if not p then
-		player:Kick(
-			"Não foi possível carregar seu progresso. Aguarde e tente novamente. No Studio, confira o acesso às APIs."
-		)
+		player:Kick("Could not load your progress. Please try again. In Studio, check API access.")
 		return
 	end
 	if not player.Parent or closing then
@@ -268,12 +266,12 @@ local function playerAdded(player)
 	end
 	if not assignBase(player) then
 		Profiles:Save(player, true)
-		player:Kick("As bases deste servidor estão ocupadas. Entre em outro servidor.")
+		player:Kick("All bases are occupied. Try another server.")
 		return
 	end
 	publish(player)
 	if Profiles.memory then
-		notice(player, "Teste temporário: progresso não será salvo.")
+		notice(player, "Temporary test: progress will not be saved.")
 	end
 end
 local function playerRemoving(player)
@@ -284,7 +282,7 @@ local function playerRemoving(player)
 	local base = baseOf(player)
 	if base then
 		base.CriaturasInstaladas:ClearAllChildren()
-		setLabel(base, "BASE LIVRE")
+		setLabel(base, "FREE BASE")
 		owners[player:GetAttribute("BaseIndex")] = nil
 	end
 	Profiles:Save(player, true)
@@ -320,7 +318,7 @@ remote.OnServerEvent:Connect(function(player, action, args)
 		return
 	end
 	if action == "CancelCapture" then
-		capture:_finish(player, false, "Você soltou o laço.")
+		capture:_finish(player, false, "Lasso released.")
 		return
 	end
 	if action == "RequestProfile" then
@@ -348,7 +346,7 @@ remote.OnServerEvent:Connect(function(player, action, args)
 		return
 	end
 	if args.revision ~= p.revision then
-		notice(player, "A coleção mudou. Confira e tente novamente.")
+		notice(player, "Collection updated. Try again.")
 		publish(player)
 		return
 	end
@@ -358,30 +356,34 @@ remote.OnServerEvent:Connect(function(player, action, args)
 	local ok, message
 	if args.action == "Use" then
 		ok, message = huntingTools:Use(player, args.id, args.position)
+	elseif args.action == "SetSetting" then
+		ok, message = Profiles:Change(player, function(nextProfile)
+			return Data.Action(nextProfile, args.action, args, C.Rotation(os.time()))
+		end)
 	elseif not busy(player) then
 		if not aliveRoot(player) then
 			return
 		end
 		if args.action == "Buy" and not near(player, presentation.shop, C.Shop.Distance) then
-			notice(player, "Aproxime-se da loja no hub.")
+			notice(player, "Move closer to the hunting shop.")
 			return
 		end
 		if args.action == "Upgrade" then
 			local board = Stations.FindBoard(baseOf(player), args.id)
 			if not board or not near(player, board, C.Boards.Distance) then
-				notice(player, "Aproxime-se da sua placa de melhoria.")
+				notice(player, "Move closer to your upgrade board.")
 				return
 			end
 		end
 		if args.action == "Sell" and not near(player, presentation.seller, C.Sell.Distance) then
-			notice(player, "Vá ao mercado para vender.")
+			notice(player, "Visit the Creature Market to sell.")
 			return
 		end
 		ok, message = Profiles:Change(player, function(nextProfile)
 			return Data.Action(nextProfile, args.action, args, C.Rotation(os.time()))
 		end)
 	else
-		message = "Conclua a caça ou saia do treino primeiro."
+		message = "Finish hunting or leave training first."
 	end
 	notice(player, message)
 	if ok then
@@ -441,8 +443,8 @@ RunService.Heartbeat:Connect(function(dt)
 		elseif Profiles.sessions[player] then
 			player:SetAttribute("ProfileReady", false)
 			stopTraining(player)
-			capture:_finish(player, false, "Captura interrompida para proteger seu progresso.")
-			player:Kick("O salvamento está indisponível. Seu progresso está protegido; tente entrar novamente.")
+			capture:_finish(player, false, "Capture stopped to protect your progress.")
+			player:Kick("Saving is unavailable. Your progress is protected; please rejoin.")
 		end
 	end
 end)

@@ -1,24 +1,20 @@
 local C = require(game.ReplicatedStorage.HACShared.GameplayConfig)
 local Page = {}
 function Page.Render(ui)
-	ui.pageTitle = "Loja de caça"
-	local categories, seen = { "Todas" }, { Todas = true }
-	for _, id in ipairs(C.ShopIds()) do
-		local category = C.Items[id].Category or "Outros"
-		if not seen[category] then
-			seen[category] = true
-			table.insert(categories, category)
+	ui.pageTitle = "Hunting Shop"
+	ui.shopCategory = ui.shopCategory == "Lassos" and "Lassos" or "Tools"
+	ui:Tabs(
+		"ShopCategory",
+		{ { id = "Tools", name = "Tools" }, { id = "Lassos", name = "Lassos" } },
+		ui.shopCategory,
+		function(id)
+			ui.shopCategory = id
+			ui:Render()
 		end
-	end
-	local categoryIndex = table.find(categories, ui.shopCategory) or 1
-	ui.shopCategory = categories[categoryIndex]
-	ui:InlineAction("ShopCategory", "Categoria: " .. ui.shopCategory .. "  ›", function()
-		ui.shopCategory = categories[categoryIndex % #categories + 1]
-		ui:Render()
-	end)
+	)
 	for _, id in ipairs(C.ShopIds()) do
 		local def = C.Items[id]
-		if ui.shopCategory ~= "Todas" and ui.shopCategory ~= (def.Category or "Outros") then
+		if ui.shopCategory ~= def.Category then
 			continue
 		end
 		local offer = ui.data.rotation.offers[id]
@@ -26,42 +22,60 @@ function Page.Render(ui)
 		local stock = offer and offer.stock or 0
 		local bought = C.Bought(ui.data.profile, ui.data.rotation, id)
 		local owned = def.Permanent and ui.data.profile.owned[id]
-		local state = owned and "Adquirido"
-			or stock == 0 and "Sem estoque"
-			or string.format("Estoque: %d/%d", math.max(0, stock - bought), stock)
+		local state = owned and "Owned"
+			or stock == 0 and "Sold out"
+			or string.format("Stock: %d/%d", math.max(0, stock - bought), stock)
 		local description = def.Description
 		if not def.Permanent then
 			local seconds = def.EffectSeconds or def.Duration
-			description ..= (seconds and "\nDuração: " .. seconds .. " s" or "")
+			description ..= (seconds and "\nDuration: " .. seconds .. " s" or "")
 			if def.Cooldown then
-				description ..= " • recarga: " .. def.Cooldown .. " s"
+				description ..= " • cooldown: " .. def.Cooldown .. " s"
 			end
 		end
 		description ..= "\n" .. state
-		local card = ui:Card(def.Name .. " • " .. (def.Category or "Outros"), description, 206)
+		if def.Permanent then
+			local config = require(game.ReplicatedStorage.HACShared.CaptureConfig)
+			local lasso = config.Lassos[def.Name]
+			if lasso then
+				description ..= string.format(
+					"\nRange: %d studs • Full charge: %.1f s",
+					lasso.MaximumRange,
+					lasso.ChargeSeconds
+				)
+			end
+		else
+			description ..= "\nOwned: " .. tostring(ui.data.profile.items[id] or 0)
+		end
+		local card = ui:Card(def.Name, description, 206)
+		if def.Permanent then
+			local W = require(script.Parent.HUDWidgets)
+			W.icon(card, "Lasso", W.Style.Icons.Lasso, UDim2.fromOffset(40, 40), UDim2.new(1, -48, 0, 0))
+			card.Texto.Size = UDim2.new(1, -58, 0, 38)
+		end
 		local rotation = ui.data.rotation.id
-		ui:PurchaseButton(card, "Buy:" .. id, "Comprar • " .. price .. " ouro", function()
+		ui:PurchaseButton(card, "Buy:" .. id, "Buy • " .. price .. " gold", function()
 			local current = ui.data.profile
 			if def.Permanent and current.owned[id] then
-				return "Adquirido"
+				return "Owned"
 			end
 			if workspace:GetServerTimeNow() >= ui.data.rotation.endsAt then
-				return "Atualizando estoque…"
+				return "Refreshing stock…"
 			end
 			if stock == 0 then
-				return "Sem estoque"
+				return "Sold out"
 			end
 			if C.Bought(current, ui.data.rotation, id) >= stock then
-				return "Sua cota acabou"
+				return "Purchase limit reached"
 			end
 			if not def.Permanent and (current.items[id] or 0) >= C.ItemCapacity(id) then
-				return "Limite de unidades atingido"
+				return "Capacity reached"
 			end
 			if not ui:NearShop() then
-				return "Aproxime-se da loja no hub"
+				return "Move closer to the shop"
 			end
 			if current.gold < price then
-				return "Faltam " .. (price - current.gold) .. " ouro"
+				return "Need " .. (price - current.gold) .. " gold"
 			end
 		end, function()
 			ui:Send("Buy", id, { rotation = rotation })

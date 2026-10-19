@@ -20,6 +20,8 @@ function Data.New()
 		strength = 0,
 		creatures = {},
 		discoveries = {},
+		variantDiscoveries = {},
+		settings = Data.Copy(C.Settings),
 		upgrades = {},
 		items = Data.Copy(C.StartingItems),
 		owned = Data.Copy(C.StartingEquipment),
@@ -28,6 +30,19 @@ function Data.New()
 end
 function Data.Validate(p)
 	assert(type(p) == "table" and p.schemaVersion == C.SchemaVersion, "Versão de perfil incompatível")
+	-- Additive migration: keep existing IDs, balances, creatures and discoveries.
+	p.settings = p.settings or Data.Copy(C.Settings)
+	p.variantDiscoveries = p.variantDiscoveries or {}
+	assert(type(p.settings) == "table" and type(p.variantDiscoveries) == "table", "Invalid preferences")
+	for id, discovered in pairs(p.variantDiscoveries) do
+		assert(type(id) == "string" and type(discovered) == "boolean", "Invalid discovery")
+	end
+	for key, default in pairs(C.Settings) do
+		if p.settings[key] == nil then
+			p.settings[key] = default
+		end
+		assert(type(p.settings[key]) == "boolean", "Invalid setting")
+	end
 	for _, key in ipairs({ "gold", "xp", "strength", "revision" }) do
 		assert(type(p[key]) == "number" and p[key] >= 0 and p[key] < math.huge, "Valor inválido: " .. key)
 	end
@@ -50,6 +65,8 @@ function Data.Validate(p)
 			assert(C.Mutations[mutation], "Mutação desconhecida")
 		end
 		assert(item.location == "bag" or item.location == "base", "Localização inválida")
+		assert(item.favorite == nil or type(item.favorite) == "boolean", "Invalid favorite")
+		p.variantDiscoveries[C.VariantKey(item)] = true
 		if item.location == "base" then
 			assert(
 				type(item.slot) == "number"
@@ -94,79 +111,98 @@ function Data.FreeSlot(p)
 	end
 end
 function Data.Capture(p, creature)
+	if p.strength < C.MinimumStrength(creature.species) then
+		return false, "Not enough strength."
+	end
 	if p.creatures[creature.id] or Data.Count(p, "bag") >= C.Stat(p, "Bolsa") then
-		return false, "Bolsa cheia."
+		return false, "Bag full."
 	end
 	local item = Data.Copy(creature)
 	item.location, item.slot = "bag", nil
 	p.creatures[item.id] = item
 	local first = not p.discoveries[item.species]
 	p.discoveries[item.species] = true
-	return true, first and "Nova descoberta!" or "Criatura capturada!"
+	p.variantDiscoveries = p.variantDiscoveries or {}
+	p.variantDiscoveries[C.VariantKey(item)] = true
+	return true, first and "New discovery!" or "Creature captured!"
 end
 function Data.Action(p, action, args, rotation)
 	local item = type(args.id) == "string" and p.creatures[args.id]
-	if action == "Equip" then
+	if action == "SetSetting" then
+		if C.Settings[args.id] == nil or type(args.value) ~= "boolean" then
+			return false, "Invalid setting."
+		end
+		p.settings = p.settings or Data.Copy(C.Settings)
+		p.settings[args.id] = args.value
+	elseif action == "SetFavorite" then
+		if not item or type(args.value) ~= "boolean" then
+			return false, "Invalid favorite."
+		end
+		item.favorite = args.value
+	elseif action == "Equip" then
 		local slot = Data.FreeSlot(p)
 		if not item or item.location ~= "bag" then
-			return false, "Escolha uma criatura da bolsa."
+			return false, "Choose a creature from your bag."
 		end
 		if not slot then
-			return false, "Base cheia. Desequipe uma criatura primeiro."
+			return false, "Base full. Unequip a creature first."
 		end
 		item.location, item.slot = "base", slot
 	elseif action == "Sell" then
 		if not item then
-			return false, "Essa criatura não está disponível."
+			return false, "This creature is unavailable."
+		end
+		if item.favorite then
+			return false, "Unfavorite this creature before selling."
 		end
 		p.gold += C.Value(item, "Sale")
 		p.creatures[item.id] = nil
 	elseif action == "Unequip" then
 		if not item or item.location ~= "base" then
-			return false, "Criatura não equipada."
+			return false, "Creature is not equipped."
 		end
 		if Data.Count(p, "bag") >= C.Stat(p, "Bolsa") then
-			return false, "Bolsa cheia. Libere um espaço antes de desequipar."
+			return false, "Bag full. Free a slot before unequipping."
 		end
 		item.location, item.slot = "bag", nil
 	elseif action == "Upgrade" then
 		local def = C.Upgrades[args.id]
 		if not def then
-			return false, "Melhoria inválida."
+			return false, "Invalid upgrade."
 		end
 		local level = p.upgrades[args.id] or 0
 		local cost = def.Costs[level + 1]
 		if not cost then
-			return false, "Nível máximo desta versão."
+			return false, "Maximum level."
 		end
 		if p.gold < cost then
-			return false, "Ouro insuficiente."
+			return false, "Not enough gold."
 		end
 		p.gold -= cost
 		p.upgrades[args.id] = level + 1
 	elseif action == "Buy" then
 		if args.rotation ~= rotation.id then
-			return false, "O estoque mudou. Confira a nova oferta."
+			return false, "Stock changed. Check the new offer."
 		end
 		local offer, def = rotation.offers[args.id], C.Items[args.id]
 		if not offer or not def then
-			return false, "Item fora desta rotação."
+			return false, "Item unavailable in this rotation."
 		end
 		if def.Permanent and p.owned[args.id] then
-			return false, "Você já possui este equipamento."
+			return false, "You already own this equipment."
 		end
 		local bought = C.Bought(p, rotation, args.id)
 		if offer.stock <= 0 then
-			return false, "Sem estoque nesta reposição."
+			return false, "Out of stock."
 		end
 		if bought >= offer.stock then
-			return false, "Sua cota desta rotação acabou."
+			return false, "Purchase limit reached for this restock."
 		end
 		if not def.Permanent and (p.items[args.id] or 0) >= C.ItemCapacity(args.id) then
-			return false, "Limite de ferramentas atingido."
+			return false, "Tool capacity reached."
 		end
 		if p.gold < offer.price then
-			return false, "Ouro insuficiente."
+			return false, "Not enough gold."
 		end
 		if p.shop.rotation ~= rotation.id then
 			p.shop = {
@@ -182,7 +218,7 @@ function Data.Action(p, action, args, rotation)
 			p.items[args.id] = (p.items[args.id] or 0) + 1
 		end
 	else
-		return false, "Ação inválida."
+		return false, "Invalid action."
 	end
 	local message = nil -- Sucesso é mostrado no cartão/placa e pelo feedback de ação.
 	return true, message

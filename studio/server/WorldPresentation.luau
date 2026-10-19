@@ -9,6 +9,8 @@ function World.new(world)
 		{ world = world, bases = world.Hub.Bases, dummies = {}, exercise = {}, upgradePrompts = {} },
 		World
 	)
+	self.roaming = require(script.Parent.BaseRoamingService).new(world)
+	require(script.Parent.CatalogPresentation).Build()
 	for _, base in ipairs(self.bases:GetChildren()) do
 		local first = base:FindFirstChild("Lugar1")
 		if first then
@@ -25,6 +27,11 @@ function World.new(world)
 					marker.CFrame = first.CFrame + base.Plataforma.CFrame:VectorToWorldSpace(offset)
 					marker.Parent = base
 				end
+			end
+		end
+		for _, marker in ipairs(base:GetChildren()) do
+			if marker:IsA("BasePart") and marker.Name:match("^Lugar%d+$") then
+				marker.Transparency, marker.CanCollide, marker.CanTouch, marker.CanQuery = 1, false, false, false
 			end
 		end
 		local station = base:FindFirstChild("Esteira")
@@ -57,7 +64,7 @@ function World.new(world)
 			)
 			dummy.PrimaryPart = body
 			self.dummies[base] = dummy
-			station.Treinar.ActionText, station.Treinar.ObjectText = "Treinar / sair", "Manequim de laço"
+			station.Treinar.ActionText, station.Treinar.ObjectText = "Train / leave", "Training dummy"
 		end
 	end
 	local shop = Factory.Part(
@@ -69,14 +76,14 @@ function World.new(world)
 	)
 	shop.CanCollide = true
 	local prompt = Instance.new("ProximityPrompt")
-	prompt.Name, prompt.ActionText, prompt.ObjectText = "AbrirLoja", "Comprar", "Loja de caça"
+	prompt.Name, prompt.ActionText, prompt.ObjectText = "AbrirLoja", "Shop", "Hunting Shop"
 	prompt.MaxActivationDistance, prompt.HoldDuration, prompt.Parent = 12, 0, shop
 	prompt.RequiresLineOfSight, prompt.ClickablePrompt = false, true
 	local sign = Instance.new("BillboardGui")
 	sign.Size, sign.StudsOffset, sign.AlwaysOnTop, sign.Parent =
 		UDim2.fromOffset(200, 40), Vector3.new(0, 3, 0), true, shop
 	local label = Instance.new("TextLabel")
-	label.Size, label.BackgroundTransparency, label.Text, label.TextSize = UDim2.fromScale(1, 1), 1, "LOJA DE CAÇA", 23
+	label.Size, label.BackgroundTransparency, label.Text, label.TextSize = UDim2.fromScale(1, 1), 1, "HUNTING SHOP", 23
 	label.Font, label.TextColor3, label.TextStrokeTransparency, label.Parent =
 		Enum.Font.FredokaOne, Color3.new(1, 1, 1), 0, sign
 	self.shop, self.prompt = shop, prompt
@@ -84,46 +91,18 @@ function World.new(world)
 	return self
 end
 function World:RenderBase(base, profile)
-	local folder = base.CriaturasInstaladas
-	local byId = {}
-	for _, model in ipairs(folder:GetChildren()) do
-		byId[model:GetAttribute("CreatureId") or ""] = model
-	end
-	for id, item in pairs(profile.creatures) do
-		if item.location == "base" then
-			local marker = base:FindFirstChild("Lugar" .. item.slot)
-			if marker then
-				local model = byId[id]
-				local position = marker.Position + Vector3.new(0, 1.68 * item.size * 0.72, 0)
-				if not model then
-					model = Factory.Build(folder, position, item, true)
-				else
-					model:PivotTo(CFrame.new(position))
-				end
-				byId[id] = nil
-			end
-		end
-	end
-	for _, model in pairs(byId) do
-		model:Destroy()
-	end
-	for _, marker in ipairs(base:GetChildren()) do
-		local slot = tonumber(marker.Name:match("^Lugar(%d+)$"))
-		if slot and marker:IsA("BasePart") then
-			marker.Transparency = slot <= C.Stat(profile, "Base") and 0.15 or 1
-		end
-	end
+	self.roaming:Sync(base, profile)
 	local dummy = self.dummies[base]
 	if dummy then
 		dummy.Alvo.Color = Color3.fromRGB(234, 183, 111):Lerp(
 			Color3.fromRGB(255, 219, 62),
 			(profile.upgrades.Treino or 0) / math.max(1, #C.Upgrades.Treino.Values - 1)
 		)
-		base.Esteira.Treinar.ObjectText = "Manequim "
+		base.Esteira.Treinar.ObjectText = "Dummy "
 			.. ((profile.upgrades.Treino or 0) + 1)
 			.. " • +"
 			.. C.TrainingGain(profile)
-			.. " força / "
+			.. " strength / "
 			.. C.TrainingSeconds
 			.. " s"
 	end

@@ -10,14 +10,15 @@ C.Species = {
 		Sale = 12,
 		Income = 1,
 		XP = 1,
-		Description = "Passeia com pequenas pausas. Ao perceber um caçador, foge até se cansar.",
+		MinimumStrength = 0,
+		Description = "A playful wanderer. Flees from hunters until it tires.",
 	},
 }
-C.Mutations = { Dourado = { Name = "Dourado", Chance = 0.18, Value = 3, Difficulty = 1.2 } }
+C.Mutations = { Dourado = { Name = "Gold", Chance = 0.18, Value = 3, Difficulty = 1.2 } }
 C.Sizes = {
-	{ Name = "Pequeno", Scale = 0.85, Weight = 25 },
+	{ Name = "Small", Scale = 0.85, Weight = 25 },
 	{ Name = "Normal", Scale = 1, Weight = 55 },
-	{ Name = "Grande", Scale = 1.2, Weight = 20 },
+	{ Name = "Large", Scale = 1.2, Weight = 20 },
 }
 C.IncomeSeconds = 1 -- Mesmo valor por pagamento: rendimento 5x, solicitado em 18/10.
 C.TrainingSeconds = 2
@@ -29,65 +30,84 @@ C.Placement = { Distance = 18, Border = 3, Spacing = 3, Height = 0.18 }
 C.UpgradeOrder = { "Base", "Bolsa", "Treino", "Multiplicador", "Velocidade" }
 C.UpgradeGroups = {
 	Base = {
-		Name = "Sua base",
+		Name = "Your base",
 		Anchor = "Plataforma",
 		Distance = 22,
-		Hint = "Aproxime-se da sua base.",
+		Hint = "Move closer to your base.",
 		PromptAnchor = "Totem",
-		ActionText = "Melhorar base",
+		ActionText = "Upgrade base",
 	},
-	Bolsa = { Name = "Bolsa de caça" },
+	Bolsa = { Name = "Creature Bag" },
 	Treino = {
-		Name = "Manequim de laço",
+		Name = "Training dummy",
 		Anchor = "Esteira",
 		Distance = 12,
-		Hint = "Aproxime-se do seu manequim.",
+		Hint = "Move closer to your dummy.",
 		PromptAnchor = "Esteira",
-		ActionText = "Melhorar treino",
+		ActionText = "Upgrade training",
 	},
-	Velocidade = { Name = "Velocidade do caçador" },
+	Velocidade = { Name = "Movement speed" },
 }
 C.BaseLayout = { Columns = 3, ColumnSpacing = 4, RowSpacing = 3.5 }
 C.Index = { PageSize = 18 }
+C.Settings = { Sound = true, BaseCreatures = true }
+C.BaseRoaming = { Speed = 2.1, Interval = 0.05, PauseMin = 0.8, PauseMax = 2.8, Margin = 0.35 }
+C.RarityNames = {
+	Comum = "Common",
+	Rara = "Rare",
+	["Épica"] = "Epic",
+	["Mítica"] = "Mythic",
+	["Lendária"] = "Legendary",
+	Secreta = "Secret",
+	Divina = "Divine",
+}
+function C.MinimumStrength(species)
+	return C.Species[species] and (C.Species[species].MinimumStrength or 0) or math.huge
+end
+function C.VariantKey(item)
+	local mutations = table.clone(item.mutations or {})
+	table.sort(mutations)
+	return item.species .. ":" .. (#mutations == 0 and "Normal" or table.concat(mutations, "+"))
+end
 C.Sell = { Distance = 14 }
 C.Boards = { Distance = 16 }
 C.Upgrades = {
 	Base = {
 		Name = "Base",
 		Group = "Base",
-		Description = "Instale mais criaturas e amplie sua produção de ouro.",
+		Description = "Equip more creatures to grow your income.",
 		Values = { 3, 4, 5, 6 },
 		Costs = { 40, 100, 220 },
-		Unit = "lugares",
+		Unit = "slots",
 	},
 	Bolsa = {
-		Name = "Bolsa",
+		Name = "Bag",
 		Group = "Bolsa",
-		Description = "Carregue mais criaturas antes de voltar à base.",
+		Description = "Carry more creatures on your hunts.",
 		Values = { 3, 4, 5, 6 },
 		Costs = { 25, 70, 160 },
-		Unit = "lugares",
+		Unit = "slots",
 	},
 	Treino = {
-		Name = "Manequim",
+		Name = "Training dummy",
 		Group = "Treino",
-		Description = "Melhora o ganho básico de força a cada ciclo de treino.",
+		Description = "Gain more strength each training cycle.",
 		Values = { 1, 2, 3, 4 },
 		Costs = { 30, 90, 180 },
-		Unit = "força base / ciclo",
+		Unit = "strength / cycle",
 	},
 	Multiplicador = {
-		Name = "Eficiência do treino",
+		Name = "Training efficiency",
 		Group = "Treino",
-		Description = "Multiplica a força recebida em cada ciclo do manequim.",
+		Description = "Multiply strength gained during training.",
 		Values = { 1, 1.25, 1.5, 2 },
 		Costs = { 50, 140, 300 },
-		Unit = "× ganho do treino",
+		Unit = "× training gain",
 	},
 	Velocidade = {
-		Name = "Velocidade",
+		Name = "Speed",
 		Group = "Velocidade",
-		Description = "Desloque-se mais rápido para acompanhar as criaturas.",
+		Description = "Move faster to keep up with creatures.",
 		Values = { 16, 18, 20, 22 },
 		Costs = { 35, 100, 240 },
 		Unit = "studs/s",
@@ -96,9 +116,9 @@ C.Upgrades = {
 C.ItemOrder = { "Isca", "Armadilha", "Pocao", "LacoTreino" }
 C.Items = {
 	Isca = {
-		Name = "Isca",
-		Description = "Atrai criaturas tranquilas que respondem à isca.",
-		Category = "Consumíveis",
+		Name = "Bait",
+		Description = "Attracts nearby calm creatures.",
+		Category = "Tools",
 		Shop = { Chance = 1, Min = 2, Max = 5 },
 		Price = 8,
 		Stock = 5,
@@ -107,9 +127,9 @@ C.Items = {
 		Radius = 18,
 	},
 	Armadilha = {
-		Name = "Armadilha",
-		Description = "Posicione no chão para desacelerar um alvo.",
-		Category = "Consumíveis",
+		Name = "Trap",
+		Description = "Place on the ground to slow a creature.",
+		Category = "Tools",
 		Shop = { Chance = 0.7, Min = 1, Max = 3 },
 		Price = 12,
 		Stock = 3,
@@ -120,9 +140,9 @@ C.Items = {
 		EffectSeconds = 6,
 	},
 	Pocao = {
-		Name = "Poção",
-		Description = "Acalma o alvo durante a disputa de captura.",
-		Category = "Consumíveis",
+		Name = "Calming Potion",
+		Description = "Calms the creature during capture.",
+		Category = "Tools",
 		Shop = { Chance = 0.6, Min = 1, Max = 4 },
 		Price = 10,
 		Stock = 4,
@@ -131,9 +151,9 @@ C.Items = {
 		Slow = 0.65,
 	},
 	LacoTreino = {
-		Name = "Laço de treino",
-		Description = "Seu laço inicial permanente.",
-		Category = "Equipamentos",
+		Name = "Training Lasso",
+		Description = "Your trusty starter lasso.",
+		Category = "Lassos",
 		Shop = { Chance = 1, Min = 1, Max = 1 },
 		Price = 0,
 		Stock = 1,
@@ -242,6 +262,10 @@ function C.Rotation(timestamp)
 		offers[id] = { price = def.Price, stock = available and quantity or 0 }
 	end
 	return { id = tostring(C.Shop.Version) .. ":" .. epoch, endsAt = (epoch + 1) * C.Shop.Seconds, offers = offers }
+end
+for id, species in pairs(C.Species) do
+	local minimum = species.MinimumStrength or 0
+	assert(type(minimum) == "number" and minimum >= 0 and minimum < math.huge, "Invalid minimum strength: " .. id)
 end
 -- Erros de edição do catálogo aparecem na carga, antes de qualquer compra.
 for id, def in pairs(C.Upgrades) do

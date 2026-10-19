@@ -28,11 +28,13 @@ function View.Content(data, tab)
 	if tab == "Criaturas" or tab == "Venda" then
 		return { creatures = p.creatures, capacity = p.upgrades }
 	elseif tab == "Index" then
-		return { discoveries = p.discoveries, creatures = p.creatures }
+		return { discoveries = p.discoveries, variants = p.variantDiscoveries, creatures = p.creatures }
+	elseif tab == "Settings" then
+		return p.settings
 	elseif tab == "Melhorias" then
 		return p.upgrades
 	elseif tab == "Loja" then
-		return { rotation = data.rotation, shop = p.shop, owned = p.owned }
+		return { rotation = data.rotation, shop = p.shop, owned = p.owned, items = p.items }
 	end
 	return nil
 end
