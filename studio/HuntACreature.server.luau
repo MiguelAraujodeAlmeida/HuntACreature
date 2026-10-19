@@ -5,304 +5,468 @@ local RunService = game:GetService("RunService")
 local C = require(ReplicatedStorage.HACShared.GameplayConfig)
 local Modules = script.Parent.HACServer
 local Data = require(Modules.ProfileData)
+local ToolInventory = require(Modules.ToolInventory)
+local Stations = require(Modules.WorldStations)
 local Profiles = require(Modules.ProfileService).new()
 local Factory = require(Modules.CreatureFactory)
 local world = workspace:WaitForChild("HuntACreature")
 local remote = ReplicatedStorage:WaitForChild("HuntACreatureRemote")
 local presentation = require(Modules.WorldPresentation).new(world)
 local function folder(name, parent)
- local result = Instance.new("Folder")
- result.Name, result.Parent = name, parent
- return result
+	local result = Instance.new("Folder")
+	result.Name, result.Parent = name, parent
+	return result
 end
 local wild = folder("CriaturasSelvagens", world.IlhaCaca)
 local effects = folder("EfeitosDeCaca", world)
-local creatures = require(Modules.CreatureBehaviorService).new({wildFolder=wild, effectsFolder=effects, ground=world.IlhaCaca.Gramado})
+local creatures = require(Modules.CreatureBehaviorService).new({
+	wildFolder = wild,
+	effectsFolder = effects,
+	ground = world.IlhaCaca.Gramado,
+})
 local spawnPoints = world.IlhaCaca.PontosCriaturas:GetChildren()
-table.sort(spawnPoints, function(a,b) return a.Name < b.Name end)
+table.sort(spawnPoints, function(a, b)
+	return a.Name < b.Name
+end)
 local random, wildData, owners, training, requests = Random.new(), {}, {}, {}, {}
 local capture, huntingTools
 local publish, spawnWild
 local closing = false
 local function notice(player, message)
- if player.Parent and message then remote:FireClient(player, "Notice", message) end
+	if player.Parent and message then
+		remote:FireClient(player, "Notice", message)
+	end
 end
 local function baseOf(player)
- local index = player:GetAttribute("BaseIndex")
- return index and presentation.bases:FindFirstChild("Base" .. index)
+	local index = player:GetAttribute("BaseIndex")
+	return index and presentation.bases:FindFirstChild("Base" .. index)
 end
 local function aliveRoot(player)
- local character = player.Character
- local h = character and character:FindFirstChildOfClass("Humanoid")
- return h and h.Health > 0 and character:FindFirstChild("HumanoidRootPart")
+	local character = player.Character
+	local h = character and character:FindFirstChildOfClass("Humanoid")
+	return h and h.Health > 0 and character:FindFirstChild("HumanoidRootPart")
 end
 local function near(player, part, distance)
- local root = aliveRoot(player)
- return root and part and (root.Position - part.Position).Magnitude <= distance
+	local root = aliveRoot(player)
+	return root and part and (root.Position - part.Position).Magnitude <= distance
 end
 local function setLabel(base, message)
- local label = base.Totem:FindFirstChild("Label")
- local text = label and label:FindFirstChild("Text")
- if text then text.Text = message end
+	local label = base.Totem:FindFirstChild("Label")
+	local text = label and label:FindFirstChild("Text")
+	if text then
+		text.Text = message
+	end
 end
 local function stopTraining(player)
- training[player] = nil
- local p = Profiles:Get(player)
- presentation:StopTraining(player, p and C.Stat(p,"Velocidade"))
- player:SetAttribute("Treinando", false)
+	training[player] = nil
+	local p = Profiles:Get(player)
+	presentation:StopTraining(player, p and C.Stat(p, "Velocidade"))
+	player:SetAttribute("Treinando", false)
 end
 local function busy(player)
- return training[player] or capture.sessions[player] or capture.projectiles[player] or capture.charges[player]
+	return training[player] or capture.sessions[player] or capture.projectiles[player] or capture.charges[player]
 end
 publish = function(player)
- local p = Profiles:Get(player)
- if not p or not player.Parent then return end
- local income = 0
- for _, item in pairs(p.creatures) do if item.location == "base" then income += C.Value(item, "Income") end end
- player:SetAttribute("Carregando", Data.Count(p,"bag"))
- player:SetAttribute("Instaladas", Data.Count(p,"base"))
- player:SetAttribute("BagCapacity", C.Stat(p,"Bolsa"))
- player:SetAttribute("BaseCapacity", C.Stat(p,"Base"))
- player:SetAttribute("Renda", income)
- player:SetAttribute("Forca", p.strength)
- player:SetAttribute("ProfileReady", true)
- local stats = player:FindFirstChild("leaderstats")
- if stats then stats.Ouro.Value, stats.XP.Value = p.gold, p.xp end
- local h = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
- if h and not training[player] then h.WalkSpeed = C.Stat(p,"Velocidade") end
- local base = baseOf(player)
- if base then presentation:RenderBase(base, p) end
- remote:FireClient(player, "Profile", {profile=Data.Copy(p), rotation=C.Rotation(os.time()), temporary=Profiles.memory})
+	local p = Profiles:Get(player)
+	if not p or not player.Parent then
+		return
+	end
+	local income = 0
+	for _, item in pairs(p.creatures) do
+		if item.location == "base" then
+			income += C.Value(item, "Income")
+		end
+	end
+	player:SetAttribute("Carregando", Data.Count(p, "bag"))
+	player:SetAttribute("Instaladas", Data.Count(p, "base"))
+	player:SetAttribute("BagCapacity", C.Stat(p, "Bolsa"))
+	player:SetAttribute("BaseCapacity", C.Stat(p, "Base"))
+	player:SetAttribute("Renda", income)
+	player:SetAttribute("Forca", p.strength)
+	player:SetAttribute("ProfileReady", true)
+	local stats = player:FindFirstChild("leaderstats")
+	if stats then
+		stats.Ouro.Value, stats.XP.Value = p.gold, p.xp
+	end
+	local h = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+	if h and not training[player] then
+		h.WalkSpeed = C.Stat(p, "Velocidade")
+	end
+	local base = baseOf(player)
+	if base then
+		presentation:RenderBase(base, p)
+	end
+	ToolInventory.Sync(player, p)
+	remote:FireClient(
+		player,
+		"Profile",
+		{ profile = Data.Copy(p), rotation = C.Rotation(os.time()), temporary = Profiles.memory }
+	)
 end
 spawnWild = function(index)
- local point = spawnPoints[index]
- if not point or not world.Parent or closing then return end
- local item = Factory.Roll(random)
- local model = Factory.Build(wild, point.Position + Vector3.new(0,1.68 * item.size,0),item,false)
- wildData[model] = item
- model:SetAttribute("SpawnIndex",index)
- model.Destroying:Once(function() wildData[model] = nil end)
- creatures:Add(model, C.Species[item.species].Behavior)
+	local point = spawnPoints[index]
+	if not point or not world.Parent or closing then
+		return
+	end
+	local item = Factory.Roll(random)
+	local model = Factory.Build(wild, point.Position + Vector3.new(0, 1.68 * item.size, 0), item, false)
+	wildData[model] = item
+	model:SetAttribute("SpawnIndex", index)
+	model.Destroying:Once(function()
+		wildData[model] = nil
+	end)
+	creatures:Add(model, C.Species[item.species].Behavior)
 end
 capture = require(Modules.CaptureService).new({
- remote=remote, wildFolder=wild, effectsFolder=effects, notice=notice,
- canCarry=function(player)
-  local p = Profiles:Get(player)
-  return p ~= nil and Data.Count(p,"bag") < C.Stat(p,"Bolsa")
- end,
- onCaptured=function(player, model)
-  local item = wildData[model]
-  if not item then return false end
-  local ok, message = Profiles:Change(player, function(p) return Data.Capture(p,item) end)
-  if not ok then notice(player,message); return false end
-  local index = model:GetAttribute("SpawnIndex")
-  model:Destroy()
-  publish(player)
-  remote:FireClient(player,"Reward",table.find(item.mutations,"Dourado") ~= nil, message .. " " .. C.Name(item))
-  task.delay(C.RespawnSeconds,function() spawnWild(index) end)
-  return true
- end,
+	remote = remote,
+	wildFolder = wild,
+	effectsFolder = effects,
+	notice = notice,
+	canCarry = function(player)
+		local p = Profiles:Get(player)
+		return p ~= nil and Data.Count(p, "bag") < C.Stat(p, "Bolsa")
+	end,
+	onCaptured = function(player, model)
+		local item = wildData[model]
+		if not item then
+			return false
+		end
+		local ok, message = Profiles:Change(player, function(p)
+			return Data.Capture(p, item)
+		end)
+		if not ok then
+			notice(player, message)
+			return false
+		end
+		local index = model:GetAttribute("SpawnIndex")
+		model:Destroy()
+		publish(player)
+		remote:FireClient(
+			player,
+			"Reward",
+			table.find(item.mutations, "Dourado") ~= nil,
+			message .. " " .. C.Name(item)
+		)
+		task.delay(C.RespawnSeconds, function()
+			spawnWild(index)
+		end)
+		return true
+	end,
 })
-huntingTools = require(Modules.HuntingTools).new({profiles=Profiles,capture=capture,creatures=creatures,ground=world.IlhaCaca.Gramado,effects=effects,wild=wild})
-creatures.attractor = function(pos, vision) return huntingTools:Attractor(pos,vision) end
-local function toggleTraining(player, base)
- if training[player] then stopTraining(player); notice(player,"Treino encerrado."); return end
- if baseOf(player) ~= base or not near(player,base.Esteira,10) or not Profiles:Get(player) then return end
- if busy(player) then notice(player,"Conclua a caça antes de treinar."); return end
- if presentation:StartTraining(player,base,effects) then
-  training[player] = os.clock()
-  player:SetAttribute("Treinando",true)
-  notice(player,"Treino automático. Use Sair do treino para continuar.")
- end
+huntingTools = require(Modules.HuntingTools).new({
+	profiles = Profiles,
+	capture = capture,
+	creatures = creatures,
+	ground = world.IlhaCaca.Gramado,
+	effects = effects,
+	wild = wild,
+})
+creatures.attractor = function(pos, vision)
+	return huntingTools:Attractor(pos, vision)
 end
-for _,base in ipairs(presentation.bases:GetChildren()) do
- base.Totem.Depositar.ActionText = "Gerenciar criaturas"
- base.Totem.Depositar.Triggered:Connect(function(player)
-  if baseOf(player) == base and near(player,base.Totem,14) and not busy(player) then remote:FireClient(player,"OpenCollection","Base") end
- end)
- base.Esteira.Treinar.Triggered:Connect(function(player) toggleTraining(player,base) end)
+local function toggleTraining(player, base)
+	if training[player] then
+		stopTraining(player)
+		return
+	end
+	local board = Stations.FindBoard(base, "Treino")
+	if baseOf(player) ~= base or not near(player, board, C.Boards.Distance) or not Profiles:Get(player) then
+		return
+	end
+	if busy(player) then
+		notice(player, "Conclua a caça antes de treinar.")
+		return
+	end
+	if presentation:StartTraining(player, base, effects) then
+		training[player] = os.clock()
+		player:SetAttribute("Treinando", true)
+	end
+end
+for _, base in ipairs(presentation.bases:GetChildren()) do
+	base.Esteira.Treinar.Triggered:Connect(function(player)
+		toggleTraining(player, base)
+	end)
 end
 presentation.prompt.Triggered:Connect(function(player)
- if near(player,presentation.shop,C.Shop.Distance) and not busy(player) then publish(player); remote:FireClient(player,"OpenCollection","Loja") end
+	if near(player, presentation.shop, C.Shop.Distance) and not busy(player) then
+		publish(player)
+		remote:FireClient(player, "OpenCollection", "Loja")
+	end
 end)
-for _, entry in ipairs(presentation.upgradePrompts) do
- entry.prompt.Triggered:Connect(function(player)
-  local group = C.UpgradeGroups[entry.group]
-  if baseOf(player) == entry.base and near(player,entry.base:FindFirstChild(group.Anchor),group.Distance) and not busy(player) then
-   publish(player)
-   remote:FireClient(player,"OpenCollection","Melhorias",entry.group)
-  end
- end)
+presentation.seller.Vender.Triggered:Connect(function(player)
+	if near(player, presentation.seller, C.Sell.Distance) and not busy(player) then
+		publish(player)
+		remote:FireClient(player, "OpenCollection", "Venda")
+	end
+end)
+for index = 1, #spawnPoints do
+	spawnWild(index)
 end
-for index=1,#spawnPoints do spawnWild(index) end
 
 local function assignBase(player)
- for i=1,#presentation.bases:GetChildren() do
-  if not owners[i] then
-   owners[i] = player
-   player:SetAttribute("BaseIndex",i)
-   setLabel(baseOf(player),"BASE DE " .. string.upper(player.DisplayName))
-   return true
-  end
- end
- return false
+	for i = 1, #presentation.bases:GetChildren() do
+		if not owners[i] then
+			owners[i] = player
+			player:SetAttribute("BaseIndex", i)
+			setLabel(baseOf(player), "BASE DE " .. string.upper(player.DisplayName))
+			return true
+		end
+	end
+	return false
 end
 local function attachCharacter(player, character)
- stopTraining(player)
- capture:PlayerRemoving(player)
- huntingTools:RemovePlayer(player)
- local h = character:WaitForChild("Humanoid",10)
- if not h then return end
- h.Died:Once(function()
-  stopTraining(player)
-  capture:_finish(player,false,"Captura interrompida.")
-  capture:PlayerRemoving(player)
-  huntingTools:RemovePlayer(player)
- end)
- local p = Profiles:Get(player)
- if p then h.WalkSpeed = C.Stat(p,"Velocidade") end
- -- O laço existente continua em StarterPack; nenhuma cópia de Tool é gerada pelo cliente.
+	stopTraining(player)
+	capture:PlayerRemoving(player)
+	huntingTools:RemovePlayer(player)
+	local h = character:WaitForChild("Humanoid", 10)
+	if not h then
+		return
+	end
+	h.Died:Once(function()
+		stopTraining(player)
+		capture:_finish(player, false, "Captura interrompida.")
+		capture:PlayerRemoving(player)
+		huntingTools:RemovePlayer(player)
+	end)
+	local p = Profiles:Get(player)
+	if p then
+		h.WalkSpeed = C.Stat(p, "Velocidade")
+		ToolInventory.Sync(player, p)
+	end
+	-- O laço existente continua em StarterPack; nenhuma cópia de Tool é gerada pelo cliente.
 end
 local function playerAdded(player)
- player:SetAttribute("ProfileReady",false)
- player:SetAttribute("Treinando",false)
- local stats=Instance.new("Folder")
- stats.Name,stats.Parent="leaderstats",player
- for _,name in ipairs({"Ouro","XP"}) do local v=Instance.new("IntValue"); v.Name,v.Parent=name,stats end
- player.CharacterAdded:Connect(function(character) attachCharacter(player,character) end)
- if player.Character then task.spawn(attachCharacter,player,player.Character) end
- local p = Profiles:Load(player)
- if not p then
-  player:Kick("Não foi possível carregar seu progresso. Aguarde e tente novamente. No Studio, confira o acesso às APIs.")
-  return
- end
- if not player.Parent or closing then Profiles:Save(player,true); return end
- if not assignBase(player) then
-  Profiles:Save(player,true)
-  player:Kick("As bases deste servidor estão ocupadas. Entre em outro servidor.")
-  return
- end
- publish(player)
- if Profiles.memory then notice(player,"Teste temporário: progresso não será salvo.") end
+	player:SetAttribute("ProfileReady", false)
+	player:SetAttribute("Treinando", false)
+	local stats = Instance.new("Folder")
+	stats.Name, stats.Parent = "leaderstats", player
+	for _, name in ipairs({ "Ouro", "XP" }) do
+		local v = Instance.new("IntValue")
+		v.Name, v.Parent = name, stats
+	end
+	player.CharacterAdded:Connect(function(character)
+		attachCharacter(player, character)
+	end)
+	if player.Character then
+		task.spawn(attachCharacter, player, player.Character)
+	end
+	local p = Profiles:Load(player)
+	if not p then
+		player:Kick(
+			"Não foi possível carregar seu progresso. Aguarde e tente novamente. No Studio, confira o acesso às APIs."
+		)
+		return
+	end
+	if not player.Parent or closing then
+		Profiles:Save(player, true)
+		return
+	end
+	if not assignBase(player) then
+		Profiles:Save(player, true)
+		player:Kick("As bases deste servidor estão ocupadas. Entre em outro servidor.")
+		return
+	end
+	publish(player)
+	if Profiles.memory then
+		notice(player, "Teste temporário: progresso não será salvo.")
+	end
 end
 local function playerRemoving(player)
- stopTraining(player)
- capture:PlayerRemoving(player)
- huntingTools:RemovePlayer(player)
- requests[player] = nil
- local base = baseOf(player)
- if base then
-  base.CriaturasInstaladas:ClearAllChildren()
-  setLabel(base,"BASE LIVRE")
-  owners[player:GetAttribute("BaseIndex")] = nil
- end
- Profiles:Save(player,true)
+	stopTraining(player)
+	capture:PlayerRemoving(player)
+	huntingTools:RemovePlayer(player)
+	requests[player] = nil
+	local base = baseOf(player)
+	if base then
+		base.CriaturasInstaladas:ClearAllChildren()
+		setLabel(base, "BASE LIVRE")
+		owners[player:GetAttribute("BaseIndex")] = nil
+	end
+	Profiles:Save(player, true)
 end
 Players.PlayerAdded:Connect(playerAdded)
 Players.PlayerRemoving:Connect(playerRemoving)
-for _,p in ipairs(Players:GetPlayers()) do task.spawn(playerAdded,p) end
+for _, p in ipairs(Players:GetPlayers()) do
+	task.spawn(playerAdded, p)
+end
 
-remote.OnServerEvent:Connect(function(player,action,args)
- if type(action) ~= "string" then return end
- local now=os.clock()
- local request=requests[player] or {time=now,tokens=40,lastAction=0}
- request.tokens=math.min(40,request.tokens+(now-request.time)*20)
- request.time=now
- requests[player]=request
- if request.tokens<1 then return end
- request.tokens-=1
- if action=="StopTraining" then stopTraining(player); return end
- if action=="CancelCapture" then capture:_finish(player,false,"Você soltou o laço."); return end
- if action=="RequestProfile" then
-  if now-request.lastAction>0.5 then request.lastAction=now; publish(player) end
-  return
- end
- if action=="ChargeStart" or action=="ChargeCancel" or action=="Throw" or action=="Hold" then
-  if Profiles:Get(player) then capture:HandleRemote(player,action,args) end
-  return
- end
- if action~="CollectionAction" or type(args)~="table" then return end
- if now-request.lastAction<0.15 then return end
- request.lastAction=now
- local p=Profiles:Get(player)
- if not p then return end
- if args.revision~=p.revision then notice(player,"A coleção mudou. Confira e tente novamente."); publish(player); return end
- if type(args.action)~="string" or type(args.id)~="string" or #args.id>100 then return end
- local ok,message
- if args.action=="Use" then
-  ok,message=huntingTools:Use(player,args.id,args.position)
- elseif not busy(player) then
-  if args.action=="Buy" and not near(player,presentation.shop,C.Shop.Distance) then notice(player,"Aproxime-se da loja no hub."); return end
-  if args.action=="Upgrade" then
-   local def=C.Upgrades[args.id]
-   local group=def and C.UpgradeGroups[def.Group]
-   if not group or not aliveRoot(player) then return end
-   if group.Anchor then
-    local base=baseOf(player)
-    if not base or not near(player,base:FindFirstChild(group.Anchor),group.Distance) then notice(player,group.Hint); return end
-   end
-  end
-  if args.action=="Install" or args.action=="Swap"
-   or args.action=="Sell" and p.creatures[args.id] and p.creatures[args.id].location=="base" then
-   local base=baseOf(player)
-   if not base or not near(player,base.Plataforma,22) then notice(player,"Aproxime-se da sua base."); return end
-  end
-  ok,message=Profiles:Change(player,function(nextProfile) return Data.Action(nextProfile,args.action,args,C.Rotation(os.time())) end)
- else message="Conclua a caça ou saia do treino primeiro." end
- notice(player,message)
- if ok then remote:FireClient(player,"ActionFeedback",args.action) end
- publish(player)
+remote.OnServerEvent:Connect(function(player, action, args)
+	if type(action) ~= "string" then
+		return
+	end
+	local now = os.clock()
+	local request = requests[player] or { time = now, tokens = 40, lastAction = 0 }
+	request.tokens = math.min(40, request.tokens + (now - request.time) * 20)
+	request.time = now
+	requests[player] = request
+	if request.tokens < 1 then
+		return
+	end
+	request.tokens -= 1
+	if action == "ToggleTraining" then
+		local base = baseOf(player)
+		if base then
+			toggleTraining(player, base)
+		end
+		return
+	end
+	if action == "StopTraining" then
+		stopTraining(player)
+		return
+	end
+	if action == "CancelCapture" then
+		capture:_finish(player, false, "Você soltou o laço.")
+		return
+	end
+	if action == "RequestProfile" then
+		if now - request.lastAction > 0.5 then
+			request.lastAction = now
+			publish(player)
+		end
+		return
+	end
+	if action == "ChargeStart" or action == "ChargeCancel" or action == "Throw" or action == "Hold" then
+		if Profiles:Get(player) then
+			capture:HandleRemote(player, action, args)
+		end
+		return
+	end
+	if action ~= "CollectionAction" or type(args) ~= "table" then
+		return
+	end
+	if now - request.lastAction < 0.15 then
+		return
+	end
+	request.lastAction = now
+	local p = Profiles:Get(player)
+	if not p then
+		return
+	end
+	if args.revision ~= p.revision then
+		notice(player, "A coleção mudou. Confira e tente novamente.")
+		publish(player)
+		return
+	end
+	if type(args.action) ~= "string" or type(args.id) ~= "string" or #args.id > 100 then
+		return
+	end
+	local ok, message
+	if args.action == "Use" then
+		ok, message = huntingTools:Use(player, args.id, args.position)
+	elseif not busy(player) then
+		if not aliveRoot(player) then
+			return
+		end
+		if args.action == "Buy" and not near(player, presentation.shop, C.Shop.Distance) then
+			notice(player, "Aproxime-se da loja no hub.")
+			return
+		end
+		if args.action == "Upgrade" then
+			local board = Stations.FindBoard(baseOf(player), args.id)
+			if not board or not near(player, board, C.Boards.Distance) then
+				notice(player, "Aproxime-se da sua placa de melhoria.")
+				return
+			end
+		end
+		if args.action == "Sell" and not near(player, presentation.seller, C.Sell.Distance) then
+			notice(player, "Vá ao mercado para vender.")
+			return
+		end
+		ok, message = Profiles:Change(player, function(nextProfile)
+			return Data.Action(nextProfile, args.action, args, C.Rotation(os.time()))
+		end)
+	else
+		message = "Conclua a caça ou saia do treino primeiro."
+	end
+	notice(player, message)
+	if ok then
+		remote:FireClient(player, "ActionFeedback", args.action)
+	end
+	publish(player)
 end)
 
-local incomeClock,animationClock=0,0
-local rotationId=C.Rotation(os.time()).id
+local incomeClock, animationClock = 0, 0
+local rotationId = C.Rotation(os.time()).id
 RunService.Heartbeat:Connect(function(dt)
- incomeClock+=dt
- animationClock+=dt
- if animationClock>=0.1 then animationClock=0; presentation:AnimateTraining() end
- for player,started in pairs(training) do
-  if not aliveRoot(player) or not Profiles:Get(player) then stopTraining(player)
-  elseif os.clock()-started>=C.TrainingSeconds then
-   training[player]=os.clock()
-   Profiles:Change(player,function(p) p.strength+=C.TrainingGain(p); return true end,true)
-   publish(player)
-  end
- end
- if incomeClock<C.IncomeSeconds then return end
- incomeClock=0
- local nextRotation=C.Rotation(os.time()).id
- local rotated=nextRotation~=rotationId
- rotationId=nextRotation
- for _,player in ipairs(Players:GetPlayers()) do
-  local p=Profiles:Get(player)
-  if p then
-   local income,xp=0,0
-   for _,item in pairs(p.creatures) do if item.location=="base" then income+=C.Value(item,"Income"); xp+=C.Value(item,"XP") end end
-   if income>0 then Profiles:Change(player,function(profile) profile.gold+=income; profile.xp+=xp; return true end,true) end
-   if income>0 or rotated then publish(player) end
-  elseif Profiles.sessions[player] then
-   player:SetAttribute("ProfileReady",false)
-   stopTraining(player)
-   capture:_finish(player,false,"Captura interrompida para proteger seu progresso.")
-   player:Kick("O salvamento está indisponível. Seu progresso está protegido; tente entrar novamente.")
-  end
- end
+	incomeClock += dt
+	animationClock += dt
+	if animationClock >= 0.1 then
+		animationClock = 0
+		presentation:AnimateTraining()
+	end
+	for player, started in pairs(training) do
+		if not aliveRoot(player) or not Profiles:Get(player) then
+			stopTraining(player)
+		elseif os.clock() - started >= C.TrainingSeconds then
+			training[player] = os.clock()
+			Profiles:Change(player, function(p)
+				p.strength += C.TrainingGain(p)
+				return true
+			end, true)
+			publish(player)
+		end
+	end
+	if incomeClock < C.IncomeSeconds then
+		return
+	end
+	incomeClock = 0
+	local nextRotation = C.Rotation(os.time()).id
+	local rotated = nextRotation ~= rotationId
+	rotationId = nextRotation
+	for _, player in ipairs(Players:GetPlayers()) do
+		local p = Profiles:Get(player)
+		if p then
+			local income, xp = 0, 0
+			for _, item in pairs(p.creatures) do
+				if item.location == "base" then
+					income += C.Value(item, "Income")
+					xp += C.Value(item, "XP")
+				end
+			end
+			if income > 0 then
+				Profiles:Change(player, function(profile)
+					profile.gold += income
+					profile.xp += xp
+					return true
+				end, true)
+			end
+			if income > 0 or rotated then
+				publish(player)
+			end
+		elseif Profiles.sessions[player] then
+			player:SetAttribute("ProfileReady", false)
+			stopTraining(player)
+			capture:_finish(player, false, "Captura interrompida para proteger seu progresso.")
+			player:Kick("O salvamento está indisponível. Seu progresso está protegido; tente entrar novamente.")
+		end
+	end
 end)
 task.spawn(function()
- while not closing do
-  task.wait(45)
-  if closing then break end
-  for player in pairs(Profiles.sessions) do task.spawn(function() Profiles:Save(player,not player.Parent) end) end
- end
+	while not closing do
+		task.wait(45)
+		if closing then
+			break
+		end
+		for player in pairs(Profiles.sessions) do
+			task.spawn(function()
+				Profiles:Save(player, not player.Parent)
+			end)
+		end
+	end
 end)
 game:BindToClose(function()
- closing=true
- local pending=0
- for player in pairs(Profiles.sessions) do
-  pending+=1
-  task.spawn(function() stopTraining(player); Profiles:Save(player,true); pending-=1 end)
- end
- local deadline=os.clock()+25
- while pending>0 and os.clock()<deadline do task.wait(0.1) end
+	closing = true
+	local pending = 0
+	for player in pairs(Profiles.sessions) do
+		pending += 1
+		task.spawn(function()
+			stopTraining(player)
+			Profiles:Save(player, true)
+			pending -= 1
+		end)
+	end
+	local deadline = os.clock() + 25
+	while pending > 0 and os.clock() < deadline do
+		task.wait(0.1)
+	end
 end)
-

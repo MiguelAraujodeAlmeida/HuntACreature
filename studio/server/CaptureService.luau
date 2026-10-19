@@ -132,8 +132,11 @@ function CaptureService:_finish(player, success, message)
 	if success and session.creature and session.creature.Parent then
 		local position = session.creature.PrimaryPart.Position
 		success = self.onCaptured(player, session.creature) == true
-		if success then rewardBurst(self.effectsFolder, position, session.golden)
-		else message = "Não foi possível guardar a criatura. Confira sua bolsa." end
+		if success then
+			rewardBurst(self.effectsFolder, position, session.golden)
+		else
+			message = "Não foi possível guardar a criatura. Confira sua bolsa."
+		end
 	end
 	self.remote:FireClient(player, "CaptureEnd", success, message, session.golden)
 end
@@ -220,7 +223,10 @@ function CaptureService:_startCharge(player)
 		deny("Encerre o treino antes de caçar.")
 		return
 	end
-	if player:GetAttribute("ProfileReady") ~= true then deny("Aguarde seus dados carregarem."); return end
+	if player:GetAttribute("ProfileReady") ~= true then
+		deny("Aguarde seus dados carregarem.")
+		return
+	end
 	local lasso, name = equippedLasso(player)
 	if not playerRoot(player) or not lasso then
 		deny()
@@ -316,16 +322,20 @@ function CaptureService:_stepProjectile(player, projectile, dt)
 	projectile.travel = math.min(projectile.distance, projectile.travel + projectile.lasso.ProjectileSpeed * dt)
 	local nextPosition = projectile.startPosition + projectile.direction * projectile.travel
 	local movement = nextPosition - projectile.position
-	local hit = movement.Magnitude > 0 and workspace:Spherecast(
-		projectile.position,
-		Config.LoopRadius,
-		movement,
-		projectile.params
-	) or nil
+	local hit = movement.Magnitude > 0
+			and workspace:Spherecast(projectile.position, Config.LoopRadius, movement, projectile.params)
+		or nil
 	local current = Collision.Snapshot(self.wildFolder)
 	local blockerT = hit and hit.Distance / movement.Magnitude or nil
-	local creature, contactT = Collision.Find(projectile.position, nextPosition, projectile.creatures,
-		current, Config.LoopRadius, blockerT, projectile.params)
+	local creature, contactT = Collision.Find(
+		projectile.position,
+		nextPosition,
+		projectile.creatures,
+		current,
+		Config.LoopRadius,
+		blockerT,
+		projectile.params
+	)
 	projectile.creatures = current
 	-- Spherecast.Position é a superfície atingida, não o centro do laço.
 	projectile.position = projectile.position:Lerp(nextPosition, contactT or blockerT or 1)
@@ -361,7 +371,6 @@ function CaptureService:_stepSession(player, session, dt)
 	if
 		not root
 		or not creature.Parent
-		or not equippedLasso(player)
 		or (root.Position - creature.PrimaryPart.Position).Magnitude > session.maxDistance
 	then
 		self:_finish(player, false, nil)
@@ -456,4 +465,3 @@ function CaptureService:PlayerRemoving(player)
 end
 
 return CaptureService
-

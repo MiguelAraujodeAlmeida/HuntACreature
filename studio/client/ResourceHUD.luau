@@ -57,28 +57,10 @@ function Resources.new(parent, onDetails)
 		limit.Parent = text
 		local scale = Instance.new("UIScale")
 		scale.Parent = text
-		-- O cartão inteiro é clicável, inclusive em telas pequenas.
-		local plus = Instance.new("TextButton")
-		plus.Name = "Detalhes"
-		plus.Size = UDim2.fromScale(1, 1)
-		plus.Text = ""
-		plus.BackgroundTransparency = 1
-		plus.ZIndex = 5
-		plus.Parent = card
-		plus.Activated:Connect(function()
-			Audio.Play("Click")
-			onDetails(spec[1])
-		end)
-		local indicator = W.frame(card, "Mais", UDim2.fromOffset(26, 30), UDim2.new(1, -31, 0.5, -15), S.UI.Green, 8)
-		W.gradient(indicator, S.UI.Green:Lerp(S.UI.White, 0.25), S.UI.Green:Lerp(S.UI.Ink, 0.3))
-		W.stroke(indicator, S.UI.Ink, 2)
-		local shine = W.frame(indicator, "Luz", UDim2.new(1, -6, 0.3, 0), UDim2.fromOffset(3, 3), S.UI.White, 4)
-		shine.BackgroundTransparency = 0.65
-		W.text(indicator, "Simbolo", "+", UDim2.fromScale(1, 1), UDim2.fromScale(0, 0), 24)
 		local gain = W.text(card, "Ganho", "", UDim2.fromOffset(100, 26), UDim2.fromOffset(80, -6), 19, spec[4])
 		gain.Visible = false
 		gain.AnchorPoint = Vector2.new(0.5, 0)
-		self.items[index] = { text = text, scale = scale, card = card, gain = gain, icon = icon, label = label, indicator = indicator }
+		self.items[index] = { text = text, scale = scale, card = card, gain = gain, icon = icon, label = label }
 	end
 	return self
 end
@@ -94,16 +76,17 @@ function Resources:Resize(layout)
 	self.Root.Position = mode == "stack" and UDim2.new(0, margin, 1, -margin) or UDim2.fromOffset(margin, margin)
 	for i, item in ipairs(self.items) do
 		item.card.Size = UDim2.fromOffset(width, height)
-		item.card.Position = UDim2.fromOffset(row and (i - 1) * (width + gap) or 0, row and 0 or (i - 1) * (height + gap))
+		item.card.Position =
+			UDim2.fromOffset(row and (i - 1) * (width + gap) or 0, row and 0 or (i - 1) * (height + gap))
 		local iconSize = height - 8
 		item.icon.Size = UDim2.fromOffset(iconSize, iconSize)
 		item.icon.Position = UDim2.fromOffset(4, 4)
 		local left = iconSize + 10
 		item.label.Position = UDim2.fromOffset(left, 5)
-		item.label.Size = UDim2.fromOffset(width - left - 36, 13)
+		item.label.Size = UDim2.fromOffset(width - left - 12, 13)
 		item.label.TextSize = 11
 		item.text.Position = UDim2.fromOffset(left, 18)
-		item.text.Size = UDim2.fromOffset(width - left - 36, height - 22)
+		item.text.Size = UDim2.fromOffset(width - left - 12, height - 22)
 		item.text:FindFirstChildOfClass("UITextSizeConstraint").MaxTextSize = layout.short and 21 or 25
 		item.gain.Size = UDim2.fromOffset(width - 30, 24)
 	end
@@ -113,7 +96,10 @@ function Resources:Update(gold, xp, force)
 		local item = self.items[i]
 		item.text.Text = formatNumber(value)
 		if item.value and value > item.value then
-			if i == 1 then Audio.Play("Income") end
+			if i == 1 and os.clock() - (self.lastIncomeSound or 0) >= 5 then
+				self.lastIncomeSound = os.clock()
+				Audio.Play("Income")
+			end
 			if item.gainTween then
 				item.gainTween:Cancel()
 			end
@@ -149,4 +135,3 @@ function Resources:Update(gold, xp, force)
 	end
 end
 return Resources
-

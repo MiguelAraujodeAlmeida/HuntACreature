@@ -1,41 +1,40 @@
-# Hunt A Creature — protótipo jogável
+# Hunt A Creature — fontes do protótipo
 
-O lugar aberto no Roblox Studio contém a segunda revisão dos itens **1, 2, 3 e 5** do [plano de prioridades](../PLANO_PRIORIZADO.md). O hub e a ilha ainda são ligados pela ponte: o teletransporte do item 4 ficou para outra etapa.
+Atualizado em 18/10/2026. Lugar **[Testing] Hunt a Creature**, placeId **102310424634629**. Última entrega: [menus, placas e inventário](MENUS_INVENTARIO_2026-10-18.md), aplicada em Edit e aguardando teste humano.
 
-## Como testar
+## Estado
 
-1. Salve o lugar no Roblox Studio e clique **Play**.
-2. Equipe **Laço de treino** na barra padrão. Atravesse a ponte e encontre um Lumito.
-3. **PC:** aponte com o cursor para onde deseja lançar, segure o botão esquerdo do mouse para carregar a força e solte. **Celular:** mire com a câmera e segure o botão **Lançar**. **Controle:** mire pelo centro da tela e use R2.
-4. A força altera somente o alcance. Com carga máxima e alvo dentro do alcance, o centro do laço percorre uma linha reta até o ponto sob o cursor (ou a mira central no celular/controle), sem gravidade. Se faltar alcance, ele para antes. O minigame abre somente quando o ponto mirado pertence a uma criatura.
-5. Durante a captura, segure **Espaço** no PC, **Puxar** no celular ou **A** no controle para mover a zona para a direita; solte para movê-la para a esquerda. Mantenha o marcador dentro da zona até completar a captura.
-6. Volte ao hub e use **Instalar criaturas** no totem da sua base. Ouro e XP entram periodicamente. O treino atual ainda usa a esteira e será redesenhado no item 8.
+- 37 fontes atuais recuperados do Studio após continuidade em outro dispositivo; baseline Git `7b2649a`.
+- 42 fontes finais locais/Studio conferidos e compilados. Sincronização é **manual**, sem Script Sync/Rojo verificado.
+- Jogo inclui captura, IA inicial do Lumito, perfil persistente, ferramentas, treino no manequim, cinco categorias de melhorias, Index e loja com cota individual.
+- Revisão atual: upgrades por placas físicas, Criaturas com Equipar/Desequipar, mercado de venda, inventário nativo e renda por segundo (5×).
+- Nenhum Play iniciado pelo assistente nesta revisão; experiência e persistência real aguardam validação específica do desenvolvedor.
 
-## Organização para revisão
+## Organização
 
-| Arquivo | Responsabilidade |
-|---|---|
-| `shared/VisualStyle.luau` | Fonte, cores e IDs dos ícones usados pelo HUD. |
-| `shared/CaptureConfig.luau` | Ajustes por tipo de laço: tempo de carga, alcance e velocidade; também parâmetros do minigame. |
-| `client/HUD.luau` | Construção da interface e apresentação dos estados/recompensas. |
-| `client/GlossyButton.luau` | Componente de botão: acabamento, ícone, legenda, foco, pressão, seleção e reflexos; sem regras de jogo. |
-| `client/CaptureController.luau` | Mouse, toque e controle; mira e comandos de captura. |
-| `server/CaptureService.luau` | Validação da carga, projétil, acerto e simulação do minigame no servidor. |
-| `HuntACreature.server.luau` | Criaturas, bases, economia, treino e integração com captura. |
-| `HuntACreature.client.luau` | Inicialização dos módulos de interface e controle. |
-| `BuildWorld.luau` | Construção do cenário com materiais e cores desta versão. |
-| `STYLE_GUIDE.md` | Padrão visual para futuras alterações e modelos. |
-| `assets/` | Ícones originais de recursos e bolsa, usados no HUD. |
+| Local | Destino no Studio | Responsabilidade |
+|---|---|---|
+| shared/ | ReplicatedStorage.HACShared | Configuração, geometria compartilhada, estilo e catálogos |
+| server/ | ServerScriptService.HACServer | Captura, IA, perfil/persistência, recursos, ferramentas e mundo |
+| client/ | StarterPlayer.StarterPlayerScripts.HACClient | Entrada, HUD, menus, placas e seleção de ferramentas |
+| HuntACreature.server.luau | ServerScriptService.HuntACreature | Integração e validação de acesso |
+| HuntACreature.client.luau | StarterPlayer.StarterPlayerScripts.HuntACreatureClient | Inicialização e snapshots |
 
-Os módulos correspondentes estão inseridos no lugar em `ReplicatedStorage/HACShared`, `ServerScriptService/HACServer` e `StarterPlayer/StarterPlayerScripts/HACClient`. Os arquivos locais são a cópia editável do código. As fontes anteriores dos scripts principais e do primeiro HUD estão em `archive/`.
+Parâmetros: GameplayConfig, CaptureConfig, CreatureProfiles e VisualStyle em shared/. Guia de arte: [STYLE_GUIDE.md](STYLE_GUIDE.md).
 
-**Atenção ao cenário:** `BuildWorld.luau` reconstrói o mundo somente no modo **Edit** e substitui o cenário anterior do protótipo. Não o execute depois de construir manualmente algo que queira preservar.
+UpgradePage é legado sem rota ativa. QuickSlot reserva espaço invisível para compatibilidade de layout; os slots visíveis pertencem ao Backpack nativo. O único laço implementado continua no StarterPack. Não ampliar código morto para criar novos acessos duplicados.
 
-## Limites atuais
+## Processo e reversibilidade
 
-- Uma espécie, com variante dourada; até três criaturas carregadas e três instaladas por base.
-- Quatro bases simultâneas para testes multiplayer.
-- Valores de dificuldade e economia ainda ajustáveis após testes de jogador.
-- Sem persistência entre sessões, compras, trocas ou eventos.
-- Captura concluída entra na bolsa imediatamente; transporte físico da criatura ainda não existe.
-- A direção visual agora tem um padrão definido, mas modelos finais, mapa maior, criaturas móveis e efeitos de recompensa avançados são etapas posteriores.
+1. Ler Estado Atual/backlog no cofre `C:/Users/melg_/OneDrive/Documents/Hunt A Creature/Hunt A Creature`.
+2. Comparar fontes atuais do Studio/disco antes de editar. Preservar a versão mais recente de cada domínio.
+3. Separar configuração, regras autoritativas, input e apresentação; revisão/verificações leves, sem Play ou QA pesado autônomo.
+4. Aplicar em Edit, conferir igualdade/diff, atualizar cofre e registrar commit. Desenvolvedor testa a experiência.
+
+Backup anterior em `../contexto/retomada-2026-10-18/`: export dos 37 fontes, cópia dos arquivos locais antigos e notas do cofre. Clone anterior dos objetos em `ServerStorage.HACBeforeMenus20261018`. Fontes/clone interno não substituem lugar salvo; **salvamento completo .rbxl/nuvem não confirmado**.
+
+BuildWorld.luau e archive/ contêm histórico. Não executar o construtor antigo sobre o cenário atual. Mapa, Tools e propriedades não estão integralmente representados no Git.
+
+## Limites
+
+Lumito é a amostra (tamanhos e Dourado), não catálogo final. Ponte permanece provisória; teletransporte/mapa amplo, arte/modelos finais e configurações de áudio estão adiados. Economia acelerada mantém preços anteriores. Persistência existe, mas teste real de reconexão/cotas não foi confirmado nesta rodada. Ordem da barra nativa não possui persistência personalizada.

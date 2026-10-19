@@ -11,7 +11,8 @@ Ao implementar:
 - Entregar fatias jogáveis e reversíveis. Manter servidor autoritativo para captura, recursos, inventário e progressão; validar entradas do cliente.
 - Separar parâmetros de balanceamento, regras de jogo, entrada e apresentação. Alterar apenas o domínio necessário e evitar aumentar os scripts monolíticos.
 - Preservar o objetivo de diversão, clareza, recompensa e suporte a PC/celular. Não declarar uma experiência aprovada porque o código passou em teste técnico.
-- Testar proporcionalmente ao risco; registrar o que foi observado e o que não foi testado.
+- Fazer revisão e verificações leves; não iniciar Play, emulação de dispositivos, benchmarks ou QA extensivo sem pedido explícito. O desenvolvedor realiza os testes manuais. Registrar o que foi observado e o que não foi testado.
+- Não usar agentes auxiliares sem pedido explícito do desenvolvedor.
 - Antes de encerrar, salvar/verificar o lugar no Studio, conferir o diff local e atualizar `Estado Atual.md` e o item do backlog correspondente no cofre. Decisões duradouras vão em uma ADR curta.
 
 Fontes técnicas locais: `studio/README.md`, `studio/STYLE_GUIDE.md`. Processo: `03_Engenharia/Fluxo de Desenvolvimento.md` no cofre.

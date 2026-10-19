@@ -115,8 +115,17 @@ function Controller.new(player, remote, hud)
 		end
 	end)
 	self.renderConnection = RunService.RenderStepped:Connect(function()
-		if self.hud.sheetKind and self.charging then self:_cancelCharge() end
-		if not self.equipped or self.capturing or self.flying or self.hud.sheetKind or self.player:GetAttribute("Treinando") or self.hud.Collection and self.hud.Collection.selected then
+		if self.hud.sheetKind and self.charging then
+			self:_cancelCharge()
+		end
+		if
+			not self.equipped
+			or self.capturing
+			or self.flying
+			or self.hud.sheetKind
+			or self.player:GetAttribute("Treinando")
+			or self.hud.Collection and self.hud.Collection.selected
+		then
 			self.feedback:Hide(self.flying)
 			return
 		end
@@ -161,7 +170,14 @@ function Controller:_aimRay(center)
 end
 
 function Controller:_startCharge(mode, input)
-	if self.hud.Collection and self.hud.Collection.selected and not self.hud.sheetKind and not self.capturing and not self.flying and not self.player:GetAttribute("Treinando") then
+	if
+		self.hud.Collection
+		and self.hud.Collection.selected
+		and not self.hud.sheetKind
+		and not self.capturing
+		and not self.flying
+		and not self.player:GetAttribute("Treinando")
+	then
 		self.hud.Collection:Place(self:_aimRay(mode ~= "mouse"))
 		return
 	end
@@ -250,7 +266,9 @@ function Controller:HandleEvent(action, a, b, c)
 			self.hud:Notice(a)
 		end
 	elseif action == "CaptureStart" then
-		if self.hud.Collection then self.hud.Collection.selected = nil end
+		if self.hud.Collection then
+			self.hud.Collection.selected = nil
+		end
 		self.flying = false
 		self.feedback:Hide()
 		self.charging = false
@@ -280,4 +298,3 @@ function Controller:HandleEvent(action, a, b, c)
 end
 
 return Controller
-

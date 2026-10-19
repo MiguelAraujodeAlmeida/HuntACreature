@@ -1,20 +1,23 @@
-# Hunt A Creature — linguagem visual v3 (botões)
+# Hunt A Creature — direção visual atual
 
-Referência de energia: interface nas bordas, contraste forte, formas grandes e mundo de brinquedo como na imagem enviada de *Steal an Egg*. A identidade própria usa **corda, laço, expedição e mutações**.
+Atualizado em 18/10/2026. Referência vigente: arte glossy enviada pelo desenvolvedor, ícones de brinquedo com volume, painéis escuros e contornos luminosos ciano/dourado. A direção é revisável e ainda depende de parecer humano.
 
-## Regras
+## Componentes
 
-- **Fonte:** Fredoka One nas legendas dos botões, branca com contorno azul profundo. Gotham Bold para leitura e Black para números/títulos do HUD existente. Valores em `shared/VisualStyle.luau`; evitar escolhas isoladas em cada botão.
-- **Paleta:** tinta escura translúcida, branco quente, corda dourada e acentos de aventura em turquesa, coral e verde. Cor forte indica ação ou recompensa, não moldura para toda informação.
-- **Ícones:** moeda espiral, estrela de experiência, laço de força e bolsa de explorador são assets próprios em `assets/`. O HUD mostra os recursos com ícone, número e legenda, sem caixas coloridas.
-- **Controles:** a bolsa é a ação lateral persistente. O botão de lançamento aparece somente no toque. A barra de carga ocupa o centro inferior quando está ativa. A disputa de captura é uma faixa compacta com alvo, zona, progresso e botão de puxar.
-- **Botões v3:** referência glossy enviada em 16/10/2026. Bisel duplo, face em degradê, sombra inferior e reflexos. Ciano para navegação, dourado para ação com o laço, coral para fechar. Nos tiles, ícone grande e legenda sobre placa escura. Bolsa 112 × 116 px; lançar 94 × 98 px; ambos 84 × 88 px no modo compacto. Fechar mantém área de 44 × 44 px.
-- **Interação:** foco aumenta o desenho e inclina o ícone; pressionar comprime e abaixa; soltar retorna com elasticidade curta. Reflexo e estrela respondem ao foco/ativação. Sem animação infinita. O alvo de input mantém tamanho fixo. `client/GlossyButton.luau` concentra o desenho e os efeitos; `Style.Button` concentra fonte, cores e movimento. Não colocar captura, inventário ou economia nesse componente.
-- **Textos:** não manter tutoriais ou status permanentes sobre a cena. Avisos são curtos e temporários; o fluxo detalhado fica fora do HUD.
-- **Mundo:** superfícies simples, modulares e saturadas, com poucos materiais repetidos. Evitar textura fotográfica isolada. O mapa completo será tratado em uma etapa posterior.
-- **Criaturas:** silhuetas claras, formas grandes e expressões legíveis à distância. Variações raras usam luz/cor extra, mas mantêm a família visual de origem.
-- **Recompensa:** antecipação (carga), impacto (acerto), corda visível na disputa, resolução e confirmação com estrelas no HUD e faíscas no mundo. Intensidade cresce com a raridade.
+- **Fonte:** Fredoka One para texto e títulos, centralizada em shared/VisualStyle.luau. Texto branco com contorno escuro e números legíveis.
+- **Arte:** skins e ícones v4 independentes, referenciados em VisualStyle. Preservar proporção; tamanhos/layout vêm de HUDLayout. Ouro dourado, XP roxo, força ciano; navegação glossy ciano.
+- **Interação:** GlossyButton concentra foco, pressão, retorno, brilho e seleção; área de input estável. UIEffects/AudioFeedback concentram feedback, sem economia no componente.
+- **HUD:** recursos compactos no canto inferior esquerdo no desktop; Criaturas/Index na lateral; carga longa central inferior quando ativa. Disputa compacta. Layout considera área segura/toque; validação manual necessária.
+- **Inventário:** CoreGui.Backpack do Roblox. Não duplicar slots, atalhos numéricos ou ferramentas inexistentes numa segunda barra.
+- **Placas:** fundo físico escuro, benefício verde, nível branco, custo em botão vermelho; Treinar verde. UpgradeBoards apresenta, WorldStations posiciona, GameplayConfig define preços/benefícios.
+- **Menus:** nome, estado, capacidade, valor/renda e ação relevante. Criaturas: Equipar/Desequipar; Venda: preço/confirmação. Evitar guias longos, botões repetidos e avisos do que já está visível.
 
-## Limite desta entrega
+## Mundo e recompensa
 
-O sistema visual é aplicado ao HUD, à captura e à sinalização principal. O cenário completo e os modelos finais de criaturas ainda dependem das etapas específicas de arte do plano.
+Mundo cartunizado modular, saturado e coerente. Amostras de studs/madeira/piso em WorldStyle não são arte final aprovada. Evitar textura fotográfica isolada. Criaturas com silhueta clara e expressão; raridade/mutação reforça a família visual.
+
+Feedback acompanha antecipação, impacto, progresso e resolução. Efeitos expressivos sem cobrir a mira ou impedir decisão. Renda por segundo não exige som a cada pagamento; AudioConfig também aplica cooldown. Sem mute em cada painel; configurações são escopo futuro.
+
+## Aprovação
+
+Compilar e inspecionar prévia não aprova estética, som ou interação. Receber feedback sobre a fatia antes de escalar telas/modelos. Sem título permanente, tutorial constante ou painel grande de captura. Documentar decisões no cofre e alterar componentes compartilhados.

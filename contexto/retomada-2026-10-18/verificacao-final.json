@@ -1,0 +1,231 @@
+{
+  "date": "2026-10-18",
+  "placeId": 102310424634629,
+  "mode": "Edit",
+  "startedPlay": false,
+  "sourceComparison": "Exact strings after local universal newline reading; Studio source fetched in batches.",
+  "sources": [
+    {
+      "path": "ReplicatedStorage.HACShared.VisualStyle",
+      "equal": true,
+      "exists": true
+    },
+    {
+      "path": "ReplicatedStorage.HACShared.CaptureConfig",
+      "equal": true,
+      "exists": true
+    },
+    {
+      "path": "ReplicatedStorage.HACShared.LassoAim",
+      "equal": true,
+      "exists": true
+    },
+    {
+      "path": "ReplicatedStorage.HACShared.LassoVisuals",
+      "equal": true,
+      "exists": true
+    },
+    {
+      "path": "ReplicatedStorage.HACShared.WorldStyle",
+      "equal": true,
+      "exists": true
+    },
+    {
+      "path": "ReplicatedStorage.HACShared.AudioConfig",
+      "equal": true,
+      "exists": true
+    },
+    {
+      "path": "ReplicatedStorage.HACShared.GameplayConfig",
+      "equal": true,
+      "exists": true
+    },
+    {
+      "path": "ReplicatedStorage.HACShared.ToolPlacement",
+      "equal": true,
+      "exists": true
+    },
+    {
+      "path": "ServerScriptService.HACServer.CaptureService",
+      "equal": true,
+      "exists": true
+    },
+    {
+      "path": "ServerScriptService.HACServer.CreatureProfiles",
+      "equal": true,
+      "exists": true
+    },
+    {
+      "path": "ServerScriptService.HACServer.CreatureBehaviorService",
+      "equal": true,
+      "exists": true
+    },
+    {
+      "path": "ServerScriptService.HACServer.LumitoBehavior",
+      "equal": true,
+      "exists": true
+    },
+    {
+      "path": "ServerScriptService.HACServer.LassoCollision",
+      "equal": true,
+      "exists": true
+    },
+    {
+      "path": "ServerScriptService.HACServer.CreatureFactory",
+      "equal": true,
+      "exists": true
+    },
+    {
+      "path": "ServerScriptService.HACServer.HuntingTools",
+      "equal": true,
+      "exists": true
+    },
+    {
+      "path": "ServerScriptService.HACServer.ProfileData",
+      "equal": true,
+      "exists": true
+    },
+    {
+      "path": "ServerScriptService.HACServer.ProfileService",
+      "equal": true,
+      "exists": true
+    },
+    {
+      "path": "ServerScriptService.HACServer.WorldPresentation",
+      "equal": true,
+      "exists": true
+    },
+    {
+      "path": "StarterPlayer.StarterPlayerScripts.HACClient.HUD",
+      "equal": true,
+      "exists": true
+    },
+    {
+      "path": "StarterPlayer.StarterPlayerScripts.HACClient.CaptureController",
+      "equal": true,
+      "exists": true
+    },
+    {
+      "path": "StarterPlayer.StarterPlayerScripts.HACClient.GlossyButton",
+      "equal": true,
+      "exists": true
+    },
+    {
+      "path": "StarterPlayer.StarterPlayerScripts.HACClient.HUDWidgets",
+      "equal": true,
+      "exists": true
+    },
+    {
+      "path": "StarterPlayer.StarterPlayerScripts.HACClient.ResourceHUD",
+      "equal": true,
+      "exists": true
+    },
+    {
+      "path": "StarterPlayer.StarterPlayerScripts.HACClient.CaptureHUD",
+      "equal": true,
+      "exists": true
+    },
+    {
+      "path": "StarterPlayer.StarterPlayerScripts.HACClient.QuickSlot",
+      "equal": true,
+      "exists": true
+    },
+    {
+      "path": "StarterPlayer.StarterPlayerScripts.HACClient.UIEffects",
+      "equal": true,
+      "exists": true
+    },
+    {
+      "path": "StarterPlayer.StarterPlayerScripts.HACClient.LassoFeedback",
+      "equal": true,
+      "exists": true
+    },
+    {
+      "path": "StarterPlayer.StarterPlayerScripts.HACClient.AudioFeedback",
+      "equal": true,
+      "exists": true
+    },
+    {
+      "path": "StarterPlayer.StarterPlayerScripts.HACClient.HUDLayout",
+      "equal": true,
+      "exists": true
+    },
+    {
+      "path": "StarterPlayer.StarterPlayerScripts.HACClient.CollectionUI",
+      "equal": true,
+      "exists": true
+    },
+    {
+      "path": "StarterPlayer.StarterPlayerScripts.HACClient.CollectionView",
+      "equal": true,
+      "exists": true
+    },
+    {
+      "path": "StarterPlayer.StarterPlayerScripts.HACClient.ToolPlacementPreview",
+      "equal": true,
+      "exists": true
+    },
+    {
+      "path": "StarterPlayer.StarterPlayerScripts.HACClient.ShopPage",
+      "equal": true,
+      "exists": true
+    },
+    {
+      "path": "StarterPlayer.StarterPlayerScripts.HACClient.UpgradePage",
+      "equal": true,
+      "exists": true
+    },
+    {
+      "path": "StarterPlayer.StarterPlayerScripts.HACClient.IndexPage",
+      "equal": true,
+      "exists": true
+    },
+    {
+      "path": "ServerScriptService.HuntACreature",
+      "equal": true,
+      "exists": true
+    },
+    {
+      "path": "StarterPlayer.StarterPlayerScripts.HuntACreatureClient",
+      "equal": true,
+      "exists": true
+    },
+    {
+      "path": "ServerScriptService.HACServer.WorldStations",
+      "equal": true,
+      "exists": true
+    },
+    {
+      "path": "ServerScriptService.HACServer.ToolInventory",
+      "equal": true,
+      "exists": true
+    },
+    {
+      "path": "StarterPlayer.StarterPlayerScripts.HACClient.NativeInventory",
+      "equal": true,
+      "exists": true
+    },
+    {
+      "path": "StarterPlayer.StarterPlayerScripts.HACClient.UpgradeBoards",
+      "equal": true,
+      "exists": true
+    },
+    {
+      "path": "StarterPlayer.StarterPlayerScripts.HACClient.CreaturePage",
+      "equal": true,
+      "exists": true
+    }
+  ],
+  "world": {
+    "boards": 8,
+    "legacyPromptsActive": 0,
+    "seller": true,
+    "internalBackup": true,
+    "temporaryPreview": false
+  },
+  "limits": [
+    "No real input or DataStore test",
+    "Full place save not confirmed"
+  ],
+  "lightRuleChecksPassed": 11
+}
