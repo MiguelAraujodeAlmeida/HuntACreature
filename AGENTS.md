@@ -6,6 +6,7 @@ Jogo Roblox de longo prazo. Feedback recente do desenvolvedor prevalece sobre pr
 
 - **Cofre Obsidian:** `C:\Users\melg_\OneDrive\Documents\Hunt A Creature\Hunt A Creature`.
 - **GitHub canônico do cofre:** https://github.com/MiguelAraujodeAlmeida/HuntaCreature-Obsidian
+- **GitHub canônico do código:** https://github.com/MiguelAraujodeAlmeida/HuntACreature
 - **Na primeira leitura de arquivos de cada chat/IA/dispositivo, antes de alterar o projeto, absorver integralmente o contexto atualizado do cofre:** README.md, AGENTS.md e todos os arquivos de `current` em `context-manifest.json`, na ordem declarada. Não substituir por um resumo de chat ou apenas Estado Atual.
 - Em outra máquina, localizar o clone real desse repositório. Não assumir este caminho Windows nem criar um cofre paralelo silenciosamente. Se não houver acesso, informar a lacuna.
 - Nas continuações da mesma sessão, verificar revisão/hashes e ler alterações/domínios afetados. Histórico/modelos/relatórios são consulta complementar, não especificação vigente.
@@ -13,8 +14,9 @@ Jogo Roblox de longo prazo. Feedback recente do desenvolvedor prevalece sobre pr
 ## Antes de editar o jogo
 
 1. Consultar Estado Atual, Backlog, decisões e regras do domínio já lidos no conjunto vigente.
-2. Inspecionar código e lugar atual no Studio. Até sync configurado/verificado, comparar versões antes de sobrescrever qualquer lado.
-3. Preservar reversibilidade. Código, lugar salvo, aplicação no Studio e publicação são estados distintos.
+2. Atualizar o checkout pelo Git e trabalhar a partir do commit atual de `main`. O Git é a referência operacional dos fontes versionados.
+3. Usar o Studio para aplicar e salvar alterações no lugar quando a tarefa exigir. Não executar comparações integrais ou rotineiras Studio ↔ disco; só investigar divergência concreta reportada pelo desenvolvedor ou falha de aplicação.
+4. Preservar reversibilidade. Código, lugar salvo, aplicação no Studio e publicação são estados distintos.
 
 ## Ao implementar
 
@@ -30,7 +32,7 @@ Jogo Roblox de longo prazo. Feedback recente do desenvolvedor prevalece sobre pr
 - Atualizar a nota dona das regras alteradas, Estado Atual e Backlog; remover contradições e duplicações, não acumular versões concorrentes.
 - Registrar a solicitação em `00_Inicio/Historico de Contexto.md`, com revisão, resultado, evidência, autoria/ambiente conhecidos e pendências. Decisão duradoura recebe ADR curta em Decisoes Vigentes.
 - Seguir `03_Engenharia/Fluxo de Desenvolvimento.md`: atualizar manifesto, executar `python tools/check_context.py --refresh` e depois sem flag na raiz do cofre, revisar diff, commitar e sincronizar com GitHub; confirmar SHA remoto ou informar sincronização pendente. Não usar force push nem descartar trabalho de outra máquina.
-- Se alterou jogo, salvar/verificar o lugar no Studio e comparar fontes; registrar impedimento real. Documentação/commit não substituem salvamento integral. Se alterou só documentação, não iniciar Studio por rotina.
+- Se alterou jogo, salvar/verificar o lugar no Studio quando aplicável e registrar o commit enviado. Documentação/commit não substituem salvamento integral. Se alterou só documentação, não iniciar Studio por rotina.
 - Manter o cofre sempre atual, enxuto e suficiente para continuidade independente do chat/dispositivo. Essa manutenção é parte da entrega, não opcional.
 
 Fontes técnicas locais: `studio/README.md`, `studio/STYLE_GUIDE.md`, `studio/MENU_STANDARD.md`. O repositório do cofre não armazena o jogo completo.

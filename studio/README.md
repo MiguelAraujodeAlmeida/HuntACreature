@@ -4,7 +4,7 @@ Atualizado em 19/10/2026. Lugar **[Testing] Hunt a Creature**, placeId **1023104
 
 ## Estado
 
-- 53 fontes de runtime conferidos/compilados. Sincronização manual; sem Script Sync/Rojo verificado.
+- Código versionado em https://github.com/MiguelAraujodeAlmeida/HuntACreature; Git é a referência operacional dos fontes. Script Sync/Rojo não está configurado.
 - Base viva, Settings, favoritos protegidos, inglês nativo, Tools/Lassos e Index visual por variantes implementados.
 - Captura, treino, inventário, renda por segundo e placas da revisão anterior preservados.
 - Menus ativos refeitos com MenuTheme/MenuKit, galerias, detalhes e arte de equipamentos. 21 verificações isoladas passaram nesta rodada; prévias visuais em Edit inspecionadas. Nenhum Play iniciado; experiência e persistência real pendentes.
@@ -27,9 +27,9 @@ UpgradePage é legado sem rota ativa. QuickSlot reserva espaço invisível para 
 ## Processo e reversibilidade
 
 1. Na primeira leitura, absorver todo o conjunto vigente do manifesto do cofre `C:/Users/melg_/OneDrive/Documents/Hunt A Creature/Hunt A Creature`, conforme AGENTS.md. Nas continuações, consultar alterações e domínios afetados.
-2. Comparar fontes atuais do Studio/disco antes de editar. Preservar a versão mais recente de cada domínio.
+2. Atualizar o checkout pelo Git e trabalhar a partir de `main`. Não comparar o conjunto inteiro Studio/disco por rotina; investigar somente uma divergência concreta ou falha de aplicação.
 3. Separar configuração, regras autoritativas, input e apresentação; revisão/verificações leves, sem Play ou QA pesado autônomo.
-4. Aplicar em Edit, conferir igualdade/diff, atualizar cofre e registrar commit. Desenvolvedor testa a experiência.
+4. Aplicar em Edit quando a tarefa exigir, salvar/verificar o lugar, atualizar cofre e registrar commit enviado. Desenvolvedor testa a experiência.
 
 Backup anterior em `../contexto/retomada-2026-10-18/`: export dos 37 fontes, cópia dos arquivos locais antigos e notas do cofre. Clone anterior dos objetos em `ServerStorage.HACBeforeMenus20261018`. Fontes/clone interno não substituem lugar salvo; **salvamento completo .rbxl/nuvem não confirmado**.
 
