@@ -26,7 +26,7 @@ UpgradePage é legado sem rota ativa. QuickSlot reserva espaço invisível para 
 
 ## Processo e reversibilidade
 
-1. Ler Estado Atual/backlog no cofre `C:/Users/melg_/OneDrive/Documents/Hunt A Creature/Hunt A Creature`.
+1. Na primeira leitura, absorver todo o conjunto vigente do manifesto do cofre `C:/Users/melg_/OneDrive/Documents/Hunt A Creature/Hunt A Creature`, conforme AGENTS.md. Nas continuações, consultar alterações e domínios afetados.
 2. Comparar fontes atuais do Studio/disco antes de editar. Preservar a versão mais recente de cada domínio.
 3. Separar configuração, regras autoritativas, input e apresentação; revisão/verificações leves, sem Play ou QA pesado autônomo.
 4. Aplicar em Edit, conferir igualdade/diff, atualizar cofre e registrar commit. Desenvolvedor testa a experiência.
@@ -48,3 +48,7 @@ Lumito é a amostra (tamanhos e Dourado), não catálogo final. Ponte permanece 
 ## Entrega de menus
 
 MenuTheme define tokens; MenuKit estrutura e feedback; CreatureCards/CreaturePortrait compõem retratos; ToolPortrait cria arte decorativa dos consumíveis. CollectionUI coordena dados e navegação. Novas telas seguem MENU_STANDARD.md. Backup anterior da rodada em contexto/menus-2026-10-19/antes.zip; mapa dos 53 fontes em map-final.json no mesmo diretório. Salvamento completo do lugar continua não confirmado.
+
+## Contexto portável
+
+Repositório canônico: https://github.com/MiguelAraujodeAlmeida/HuntaCreature-Obsidian. O manifesto define a leitura vigente; Histórico de Contexto registra solicitações entre IAs/dispositivos. Atualizar e sincronizar o cofre em toda entrega conforme AGENTS.md. O clone de contexto não substitui este código nem o lugar salvo.

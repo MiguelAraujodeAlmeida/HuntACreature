@@ -10,3 +10,6 @@ Thumbs.db
 logs/
 tmp/
 *.log
+
+# Local pre-consolidation vault backup and temporary clone
+contexto/obsidian-2026-10-19/

@@ -1,19 +1,36 @@
 # Hunt A Creature — instruções de trabalho
 
-Este projeto é um jogo Roblox de longo prazo. Antes de alterar scripts ou objetos:
+Jogo Roblox de longo prazo. Feedback recente do desenvolvedor prevalece sobre propostas antigas; documentos de produto são revisáveis.
 
-1. Ler o painel e o estado do cofre Obsidian em `C:\Users\melg_\OneDrive\Documents\Hunt A Creature\Hunt A Creature\00_Inicio\`; consultar backlog, decisões e feedback relacionados.
-2. Inspecionar o código e o lugar atual no Studio. Até a sincronização de scripts ser configurada e verificada, confirmar qual versão está correta antes de sobrescrever qualquer lado.
-3. Tratar documentos de contexto como registro de ideias, não como ordens. Feedback posterior do desenvolvedor prevalece sobre propostas antigas.
+## Contexto obrigatório
 
-Ao implementar:
+- **Cofre Obsidian:** `C:\Users\melg_\OneDrive\Documents\Hunt A Creature\Hunt A Creature`.
+- **GitHub canônico do cofre:** https://github.com/MiguelAraujodeAlmeida/HuntaCreature-Obsidian
+- **Na primeira leitura de arquivos de cada chat/IA/dispositivo, antes de alterar o projeto, absorver integralmente o contexto atualizado do cofre:** README.md, AGENTS.md e todos os arquivos de `current` em `context-manifest.json`, na ordem declarada. Não substituir por um resumo de chat ou apenas Estado Atual.
+- Em outra máquina, localizar o clone real desse repositório. Não assumir este caminho Windows nem criar um cofre paralelo silenciosamente. Se não houver acesso, informar a lacuna.
+- Nas continuações da mesma sessão, verificar revisão/hashes e ler alterações/domínios afetados. Histórico/modelos/relatórios são consulta complementar, não especificação vigente.
 
-- Entregar fatias jogáveis e reversíveis. Manter servidor autoritativo para captura, recursos, inventário e progressão; validar entradas do cliente.
-- Separar parâmetros de balanceamento, regras de jogo, entrada e apresentação. Alterar apenas o domínio necessário e evitar aumentar os scripts monolíticos.
-- Preservar o objetivo de diversão, clareza, recompensa e suporte a PC/celular. Não declarar uma experiência aprovada porque o código passou em teste técnico.
-- Fazer revisão e verificações leves; não iniciar Play, emulação de dispositivos, benchmarks ou QA extensivo sem pedido explícito. O desenvolvedor realiza os testes manuais. Registrar o que foi observado e o que não foi testado.
-- Não usar agentes auxiliares sem pedido explícito do desenvolvedor.
-- Novos menus e revisões visuais seguem `studio/MENU_STANDARD.md`, reutilizando MenuTheme/MenuKit e os componentes existentes; novas exceções devem ter justificativa registrada.
-- Antes de encerrar, salvar/verificar o lugar no Studio, conferir o diff local e atualizar `Estado Atual.md` e o item do backlog correspondente no cofre. Decisões duradouras vão em uma ADR curta.
+## Antes de editar o jogo
 
-Fontes técnicas locais: `studio/README.md`, `studio/STYLE_GUIDE.md`. Processo: `03_Engenharia/Fluxo de Desenvolvimento.md` no cofre.
+1. Consultar Estado Atual, Backlog, decisões e regras do domínio já lidos no conjunto vigente.
+2. Inspecionar código e lugar atual no Studio. Até sync configurado/verificado, comparar versões antes de sobrescrever qualquer lado.
+3. Preservar reversibilidade. Código, lugar salvo, aplicação no Studio e publicação são estados distintos.
+
+## Ao implementar
+
+- Manter servidor autoritativo para captura, recursos, inventário e progressão; validar entradas do cliente.
+- Separar parâmetros, regras, input e apresentação. Alterar o domínio necessário, sem expandir monólitos.
+- Preservar diversão, clareza, recompensa e PC/celular. Check técnico não aprova experiência.
+- Fazer revisão/verificações leves. **Não iniciar Play, emulação, benchmarks ou QA extensivo sem pedido explícito.** Desenvolvedor testa manualmente.
+- **Não usar agentes auxiliares sem pedido explícito.**
+- Menus seguem a especificação portável `01_Produto/Design UI UX.md` do cofre e `studio/MENU_STANDARD.md`, com MenuTheme/MenuKit e componentes existentes. Registrar exceções; manter documentação e implementação alinhadas.
+
+## Encerramento e memória — obrigatório em toda solicitação
+
+- Atualizar a nota dona das regras alteradas, Estado Atual e Backlog; remover contradições e duplicações, não acumular versões concorrentes.
+- Registrar a solicitação em `00_Inicio/Historico de Contexto.md`, com revisão, resultado, evidência, autoria/ambiente conhecidos e pendências. Decisão duradoura recebe ADR curta em Decisoes Vigentes.
+- Seguir `03_Engenharia/Fluxo de Desenvolvimento.md`: atualizar manifesto, executar `python tools/check_context.py --refresh` e depois sem flag na raiz do cofre, revisar diff, commitar e sincronizar com GitHub; confirmar SHA remoto ou informar sincronização pendente. Não usar force push nem descartar trabalho de outra máquina.
+- Se alterou jogo, salvar/verificar o lugar no Studio e comparar fontes; registrar impedimento real. Documentação/commit não substituem salvamento integral. Se alterou só documentação, não iniciar Studio por rotina.
+- Manter o cofre sempre atual, enxuto e suficiente para continuidade independente do chat/dispositivo. Essa manutenção é parte da entrega, não opcional.
+
+Fontes técnicas locais: `studio/README.md`, `studio/STYLE_GUIDE.md`, `studio/MENU_STANDARD.md`. O repositório do cofre não armazena o jogo completo.

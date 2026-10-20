@@ -2,6 +2,8 @@
 
 Atualizado em 19/10/2026. Padrão vigente e revisável; feedback do desenvolvedor prevalece. Referências: três screenshots de Index, Shop e Settings enviadas nesta rodada. Usar hierarquia e acabamento, sem copiar produtos, recompensas ou catálogo de outros jogos.
 
+Especificação portável: `01_Produto/Design UI UX.md` no [cofre canônico](https://github.com/MiguelAraujodeAlmeida/HuntaCreature-Obsidian). Este guia descreve a aplicação técnica; mudanças no padrão devem atualizar ambos na mesma entrega, sem regras divergentes.
+
 ## Componentes obrigatórios
 
 | Camada | Fonte | Responsabilidade |
