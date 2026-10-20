@@ -7,7 +7,7 @@ Jogo Roblox de longo prazo. Feedback recente do desenvolvedor prevalece sobre pr
 - **Cofre Obsidian:** `C:\Users\melg_\OneDrive\Documents\Hunt A Creature\Hunt A Creature`.
 - **GitHub canônico do cofre:** https://github.com/MiguelAraujodeAlmeida/HuntaCreature-Obsidian
 - **GitHub canônico do código:** https://github.com/MiguelAraujodeAlmeida/HuntACreature
-- **Na primeira leitura de arquivos de cada chat/IA/dispositivo, antes de alterar o projeto, absorver integralmente o contexto atualizado do cofre:** README.md, AGENTS.md e todos os arquivos de `current` em `context-manifest.json`, na ordem declarada. Não substituir por um resumo de chat ou apenas Estado Atual.
+- **Na primeira leitura de cada chat/IA/dispositivo:** ler README.md, AGENTS.md e o grupo `bootstrap` de `context-manifest.json`. Antes de alterar o projeto, identificar a tarefa e carregar somente os grupos de `domains` necessários: `ui_ux` para interface/arte, `gameplay` para mecânicas, `engineering` para arquitetura/persistência/Studio, `validation` para playtest e `decisions` para regra duradoura. Não carregar todos os domínios por padrão nem substituir a base por resumo de chat.
 - Em outra máquina, localizar o clone real desse repositório. Não assumir este caminho Windows nem criar um cofre paralelo silenciosamente. Se não houver acesso, informar a lacuna.
 - Nas continuações da mesma sessão, verificar revisão/hashes e ler alterações/domínios afetados. Histórico/modelos/relatórios são consulta complementar, não especificação vigente.
 

@@ -26,7 +26,7 @@ UpgradePage é legado sem rota ativa. QuickSlot reserva espaço invisível para 
 
 ## Processo e reversibilidade
 
-1. Na primeira leitura, absorver todo o conjunto vigente do manifesto do cofre `C:/Users/melg_/OneDrive/Documents/Hunt A Creature/Hunt A Creature`, conforme AGENTS.md. Nas continuações, consultar alterações e domínios afetados.
+1. Na primeira leitura, absorver somente `bootstrap` do manifesto do cofre `C:/Users/melg_/OneDrive/Documents/Hunt A Creature/Hunt A Creature`, conforme AGENTS.md. Antes de implementar, consultar apenas os domínios afetados pela tarefa.
 2. Atualizar o checkout pelo Git e trabalhar a partir de `main`. Não comparar o conjunto inteiro Studio/disco por rotina; investigar somente uma divergência concreta ou falha de aplicação.
 3. Separar configuração, regras autoritativas, input e apresentação; revisão/verificações leves, sem Play ou QA pesado autônomo.
 4. Aplicar em Edit quando a tarefa exigir, salvar/verificar o lugar, atualizar cofre e registrar commit enviado. Desenvolvedor testa a experiência.
