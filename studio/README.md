@@ -1,13 +1,14 @@
 # Hunt A Creature — fontes do protótipo
 
-Atualizado em 19/10/2026. Lugar **[Testing] Hunt a Creature**, placeId **102310424634629**. Última entrega: [base, configurações, coleção e inglês](BASE_COLECAO_2026-10-19.md). [Checklist do playtest](CHECKLIST_BASE_COLECAO_2026-10-19.md).
+Atualizado em 19/10/2026. Lugar **[Testing] Hunt a Creature**, placeId **102310424634629**. Última entrega: [menus e reset global](MENUS_RESET_2026-10-19.md). [Checklist do playtest](CHECKLIST_MENUS_RESET_2026-10-19.md). [Padrão de menus](MENU_STANDARD.md).
 
 ## Estado
 
-- 48 fontes de runtime conferidos/compilados. Sincronização manual; sem Script Sync/Rojo verificado.
+- 53 fontes de runtime conferidos/compilados. Sincronização manual; sem Script Sync/Rojo verificado.
 - Base viva, Settings, favoritos protegidos, inglês nativo, Tools/Lassos e Index visual por variantes implementados.
 - Captura, treino, inventário, renda por segundo e placas da revisão anterior preservados.
-- 33 verificações isoladas passaram; nenhum Play iniciado. Aprovação da experiência e persistência real pendentes.
+- Menus ativos refeitos com MenuTheme/MenuKit, galerias, detalhes e arte de equipamentos. 21 verificações isoladas passaram nesta rodada; prévias visuais em Edit inspecionadas. Nenhum Play iniciado; experiência e persistência real pendentes.
+- Reset global por geração fixa `20261019_menu_reset_01` em PersistenceConfig. Todas as contas começam novas nesta versão; progresso posterior persiste. Dados antigos preservados; nenhuma publicação feita.
 
 ## Organização
 
@@ -19,7 +20,7 @@ Atualizado em 19/10/2026. Lugar **[Testing] Hunt a Creature**, placeId **1023104
 | HuntACreature.server.luau | ServerScriptService.HuntACreature | Integração e validação de acesso |
 | HuntACreature.client.luau | StarterPlayer.StarterPlayerScripts.HuntACreatureClient | Inicialização e snapshots |
 
-Parâmetros: GameplayConfig, CaptureConfig, CreatureProfiles e VisualStyle em shared/. Guia de arte: [STYLE_GUIDE.md](STYLE_GUIDE.md).
+Parâmetros: GameplayConfig, CaptureConfig, VisualStyle e MenuTheme em shared/; CreatureProfiles e PersistenceConfig em server/. Guia de arte: [STYLE_GUIDE.md](STYLE_GUIDE.md).
 
 UpgradePage é legado sem rota ativa. QuickSlot reserva espaço invisível para compatibilidade de layout; os slots visíveis pertencem ao Backpack nativo. O único laço implementado continua no StarterPack. Não ampliar código morto para criar novos acessos duplicados.
 
@@ -43,3 +44,7 @@ Backup atual: contexto/evolucao-2026-10-19/antes.zip e ServerStorage.HACBeforeEv
 ## Limites
 
 Lumito é a amostra (tamanhos e Dourado), não catálogo final. Ponte permanece provisória; teletransporte/mapa amplo, arte/modelos finais estão adiados. Economia acelerada mantém preços anteriores. Persistência existe, mas teste real de reconexão/cotas não foi confirmado nesta rodada. Ordem da barra nativa não possui persistência personalizada.
+
+## Entrega de menus
+
+MenuTheme define tokens; MenuKit estrutura e feedback; CreatureCards/CreaturePortrait compõem retratos; ToolPortrait cria arte decorativa dos consumíveis. CollectionUI coordena dados e navegação. Novas telas seguem MENU_STANDARD.md. Backup anterior da rodada em contexto/menus-2026-10-19/antes.zip; mapa dos 53 fontes em map-final.json no mesmo diretório. Salvamento completo do lugar continua não confirmado.

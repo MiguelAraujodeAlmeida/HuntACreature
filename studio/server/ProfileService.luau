@@ -4,13 +4,14 @@ local DataStoreService = game:GetService("DataStoreService")
 local HttpService = game:GetService("HttpService")
 local RunService = game:GetService("RunService")
 local Data = require(script.Parent.ProfileData)
+local Persistence = require(script.Parent.PersistenceConfig)
 local Service = {}
 Service.__index = Service
 local LEASE_SECONDS, FREEZE_MARGIN = 180, 45
 function Service.new()
 	local memory = RunService:IsStudio() and workspace:GetAttribute("HACStudioMemoryMode") == true
 	return setmetatable({sessions = {}, memory = memory,
-		store = not memory and DataStoreService:GetDataStore(RunService:IsStudio() and "HAC_Profiles_Studio_v1" or "HAC_Profiles_v1") or nil}, Service)
+		store = not memory and DataStoreService:GetDataStore(Persistence.StoreName(RunService:IsStudio())) or nil}, Service)
 end
 function Service:Load(player)
 	local token = HttpService:GenerateGUID(false)

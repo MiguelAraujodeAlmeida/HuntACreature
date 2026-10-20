@@ -1,10 +1,10 @@
 local C = require(game.ReplicatedStorage.HACShared.GameplayConfig)
-local Portrait = require(script.Parent.CreaturePortrait)
 local W = require(script.Parent.HUDWidgets)
+local Kit = require(script.Parent.MenuKit)
+local Cards = require(script.Parent.CreatureCards)
 local Page = {}
 function Page.Render(ui)
-	local p = ui.data.profile
-	local selling = ui.tab == "Venda"
+	local p, selling = ui.data.profile, ui.tab == "Venda"
 	ui.pageTitle = selling and "Creature Market" or "Creatures"
 	local items, bag, base = {}, 0, 0
 	for _, item in pairs(p.creatures) do
@@ -21,7 +21,6 @@ function Page.Render(ui)
 			table.insert(items, item)
 		end
 	end
-	ui:Text(string.format("Equipped %d/%d   •   Bag %d/%d", base, C.Stat(p, "Base"), bag, C.Stat(p, "Bolsa")), 32)
 	ui:Tabs(
 		"CreatureFilter",
 		{ { id = "all", name = "All" }, { id = "base", name = "Equipped" }, { id = "bag", name = "Bag" }, {
@@ -34,6 +33,24 @@ function Page.Render(ui)
 			ui.confirm = nil
 			ui:Render()
 		end
+	)
+	local counts = W.frame(ui.scroll, "Capacity", UDim2.new(1, -2, 0, 38), UDim2.new())
+	counts.LayoutOrder, counts.ZIndex = 1, ui.scroll.ZIndex
+	Kit.Badge(
+		counts,
+		"Equipped",
+		string.format("Equipped %d/%d", base, C.Stat(p, "Base")),
+		UDim2.new(0.5, -6, 1, 0),
+		UDim2.new(),
+		W.Style.UI.Green
+	)
+	Kit.Badge(
+		counts,
+		"Bag",
+		string.format("Bag %d/%d", bag, C.Stat(p, "Bolsa")),
+		UDim2.new(0.5, -6, 1, 0),
+		UDim2.fromScale(0.5, 0),
+		W.Style.UI.Cyan
 	)
 	table.sort(items, function(a, b)
 		if (a.favorite == true) ~= (b.favorite == true) then
@@ -48,62 +65,74 @@ function Page.Render(ui)
 		return a.id < b.id
 	end)
 	if #items == 0 then
-		ui:Text("No creatures here yet", 48)
+		ui.creatureSelected = nil
+		Kit.Empty(
+			ui.scroll,
+			"No creatures here",
+			ui.creatureFilter and "Try another filter." or "Your companions will appear here."
+		)
+		return
 	end
+	local chosen
 	for _, item in ipairs(items) do
-		local equipped = item.location == "base"
-		local summary = string.format(
-			"%s • %.2f×\n%d gold/s   •   %d XP/s",
-			C.RarityNames[item.rarity] or item.rarity,
-			item.size,
-			C.Value(item, "Income"),
-			C.Value(item, "XP")
-		)
-		local card = ui:Card(C.Name(item), summary, 188)
-		card.Texto.Position, card.Texto.Size = UDim2.fromOffset(110, 8), UDim2.new(1, -126, 0, 34)
-		card.Descricao.Position, card.Descricao.Size = UDim2.fromOffset(110, 46), UDim2.new(1, -126, 0, 58)
-		card.Descricao.TextXAlignment = Enum.TextXAlignment.Left
-		Portrait.new(card, item, true, UDim2.fromOffset(100, 110), UDim2.fromOffset(6, 6))
-		local status = W.text(
-			card,
-			"Location",
-			equipped and "EQUIPPED" or "IN BAG",
-			UDim2.new(1, -126, 0, 24),
-			UDim2.fromOffset(110, 102),
-			12,
-			equipped and W.Style.UI.Green or W.Style.UI.Cyan,
-			Enum.TextXAlignment.Left
-		)
-		local favorite = ui:ActionButton(card, "Favorite:" .. item.id, item.favorite and "★" or "☆", function()
+		if item.id == ui.creatureSelected then
+			chosen = item
+		end
+	end
+	chosen = chosen or items[1]
+	ui.creatureSelected = chosen.id
+	local detail = Kit.Detail(ui)
+	local grid = Kit.Grid(ui.scroll, #items, ui.contentWidth, 152, 184, 4)
+	for i, item in ipairs(items) do
+		local tile = Cards.Tile(grid, item, true, item.id == chosen.id, "Creature:" .. item.id, function()
+			ui.creatureSelected = item.id
 			ui.confirm = nil
-			ui:Send("SetFavorite", item.id, { value = not item.favorite })
-		end, UDim2.fromOffset(48, 42), UDim2.new(1, -56, 1, -50))
-		favorite:SetSelected(item.favorite == true)
-		local caption = equipped and "Unequip" or "Equip"
+			ui:Render()
+		end, (item.location == "base" and "✓ " or "") .. C.Value(item, "Income") .. " gold/s")
+		tile.LayoutOrder = i
+	end
+	local equipped = chosen.location == "base"
+	Cards.Detail(detail, chosen, true, {
+		status = string.format("%s · %.2f× size", equipped and "Equipped" or "In bag", chosen.size),
+		statusColor = equipped and W.Style.UI.Green or W.Style.UI.Cyan,
+	})
+	local actions = W.frame(detail, "Actions", UDim2.new(1, -2, 0, 60), UDim2.new())
+	actions.ZIndex = detail.ZIndex
+	Kit.Action(actions, "Favorite:" .. chosen.id, chosen.favorite and "★" or "☆", function()
+		ui.confirm = nil
+		ui:Send("SetFavorite", chosen.id, { value = not chosen.favorite })
+	end, UDim2.fromOffset(54, 54), UDim2.new(), chosen.favorite and W.Style.UI.Gold or Kit.Theme.Surface)
+	local caption = equipped and "Unequip" or "Equip"
+	if selling then
+		caption = chosen.favorite and "★ Protected"
+			or ((ui.confirm == chosen.id and "Confirm · " or "Sell · ") .. C.Value(chosen, "Sale") .. " gold")
+	end
+	local action = Kit.Action(actions, (selling and "Sell:" or "Equip:") .. chosen.id, caption, function()
 		if selling then
-			caption = item.favorite and "★ Protected"
-				or ((ui.confirm == item.id and "Confirm • " or "Sell • ") .. C.Value(item, "Sale") .. " gold")
-		end
-		local action = ui:ActionButton(card, (selling and "Sell:" or "Equip:") .. item.id, caption, function()
-			if selling then
-				if item.favorite then
-					return
-				end
-				if ui.confirm == item.id then
-					ui:Send("Sell", item.id)
-					ui.confirm = nil
-				else
-					ui.confirm = item.id
-					ui:Render()
-				end
-			else
-				ui:Send(equipped and "Unequip" or "Equip", item.id)
+			if chosen.favorite then
+				return
 			end
-		end, UDim2.new(1, -70, 0, 42), UDim2.new(0, 6, 1, -50))
-		if selling and item.favorite then
-			action.Root.Interactable = false
-			action.caption.TextTransparency = 0.3
+			if ui.confirm == chosen.id then
+				ui:Send("Sell", chosen.id)
+				ui.confirm = nil
+			else
+				ui.confirm = chosen.id
+				ui:Render()
+			end
+		else
+			ui:Send(equipped and "Unequip" or "Equip", chosen.id)
 		end
+	end, UDim2.new(1, -66, 0, 54), UDim2.fromOffset(66, 0), selling and W.Style.UI.Gold or W.Style.UI.Green)
+	if selling and chosen.favorite then
+		action.Root.Interactable = false
+		action.caption.TextTransparency = 0.3
+	end
+	if selling and ui.confirm == chosen.id then
+		local cancel = Kit.Action(detail, "CancelSale", "Cancel sale", function()
+			ui.confirm = nil
+			ui:Render()
+		end, nil, nil, Kit.Theme.Surface)
+		cancel.Root.LayoutOrder = 2
 	end
 end
 return Page

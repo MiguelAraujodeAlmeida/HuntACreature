@@ -2,7 +2,7 @@
 local UIS = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 local GuiService = game:GetService("GuiService")
-local TextService = game:GetService("TextService")
+local Kit = require(script.Parent.MenuKit)
 local C = require(game.ReplicatedStorage.HACShared.GameplayConfig)
 local W = require(script.Parent.HUDWidgets)
 local Button = require(script.Parent.GlossyButton)
@@ -41,22 +41,12 @@ function UI.new(player, remote, hud, controller)
 	)
 	self.shade = W.frame(hud.Surface, "FundoColecao", UDim2.fromScale(1, 1), UDim2.new(), W.Style.UI.Ink)
 	self.shade.BackgroundTransparency, self.shade.ZIndex, self.shade.Visible, self.shade.Active = 0.25, 21, false, true
-	self.root = W.panel(hud.Surface, "Colecao", UDim2.fromOffset(620, 500), UDim2.fromScale(0.5, 0.5), W.Style.UI.Cyan)
-	self.root.AnchorPoint, self.root.ZIndex, self.root.Visible = Vector2.new(0.5, 0.5), 22, false
-	self.header = text(self.root, "COLLECTION", 42)
-	self.header.Size = UDim2.new(1, -72, 0, 40)
-	self.close = button(self.root, "×", function()
+	local window = Kit.Window(hud.Surface, function()
 		hud:CloseSheet()
-	end, UDim2.fromOffset(44, 40), UDim2.new(1, -52, 0, 6))
-	local scroll = Instance.new("ScrollingFrame")
-	scroll.Name, scroll.Size, scroll.Position = "Lista", UDim2.new(1, -24, 1, -144), UDim2.fromOffset(12, 98)
-	scroll.BackgroundTransparency, scroll.BorderSizePixel, scroll.ScrollBarThickness = 1, 0, 5
-	scroll.AutomaticCanvasSize, scroll.CanvasSize, scroll.Parent = Enum.AutomaticSize.Y, UDim2.new(), self.root
-	local list = Instance.new("UIListLayout")
-	list.Padding, list.SortOrder, list.Parent = UDim.new(0, 8), Enum.SortOrder.LayoutOrder, scroll
-	self.scroll = scroll
-	self.footer = text(self.root, "Loading progress…", 30)
-	self.footer.Position = UDim2.new(0, 8, 1, -35)
+	end)
+	for key, value in pairs(window) do
+		self[key] = value
+	end
 	self.utilities = {}
 	self.preview = Preview.new(player)
 	self.placementHint = text(hud.Surface, "", 42)
@@ -131,7 +121,7 @@ function UI.new(player, remote, hud, controller)
 							seconds % 60,
 							tostring(self.data.profile.gold)
 						)
-					or (self.data.temporary and "TEMPORARY TEST • " or "") .. "Gold: " .. self.data.profile.gold
+					or (self.data.temporary and "TEMPORARY TEST" or "")
 				self:RefreshValues()
 				if self.tab == "Loja" and seconds == 0 and os.clock() - (self.stockRequestedAt or 0) > 1 then
 					self.stockRequestedAt = os.clock()
@@ -152,8 +142,11 @@ function UI.new(player, remote, hud, controller)
 end
 function UI:Resize()
 	local size = self.hud.Surface.AbsoluteSize
-	local nextSize =
-		UDim2.fromOffset(math.min(650, math.max(240, size.X - 24)), math.min(530, math.max(190, size.Y - 24)))
+	local theme = Kit.Theme.Page(self.tab)
+	local nextSize = UDim2.fromOffset(
+		math.min(theme.Width, math.max(240, size.X - 24)),
+		math.min(theme.Height, math.max(190, size.Y - 24))
+	)
 	local resized = self.root.Size ~= nextSize
 	self.root.Size = nextSize
 	local width = size.X < 560 and 54 or (size.Y < 430 and 56 or 68)
@@ -188,6 +181,7 @@ function UI:Open(tab, group)
 		self.upgradeId = nil
 	end
 	self.upgradeGroup = group
+	self:Resize()
 	self.root.Visible, self.shade.Visible = true, true
 	local hud = self.hud
 	hud.BagSkin:SetSelected(self.tab == "Criaturas")
@@ -337,13 +331,21 @@ function UI:Text(message, height)
 	return text(self.scroll, message, height)
 end
 function UI:Tabs(key, options, selected, callback)
-	local row = W.frame(self.scroll, key, UDim2.new(1, -8, 0, 44), UDim2.new())
+	local row = W.frame(self.scroll, key, UDim2.new(1, -2, 0, 46), UDim2.new())
+	row.ZIndex, row.LayoutOrder = self.scroll.ZIndex, 0
 	for i, option in ipairs(options) do
-		local skin = self:ActionButton(row, key .. ":" .. option.id, option.name, function()
-			callback(option.id)
-		end, UDim2.new(1 / #options, -6, 1, 0), UDim2.new((i - 1) / #options, 3, 0, 0))
-		skin:SetSelected(option.id == selected)
-		skin.caption.TextTransparency = option.id == selected and 0 or 0.25
+		local skin = Kit.Action(
+			row,
+			key .. ":" .. option.id,
+			option.name,
+			function()
+				callback(option.id)
+			end,
+			UDim2.new(1 / #options, -6, 1, 0),
+			UDim2.new((i - 1) / #options, 0, 0, 0),
+			option.id == selected and Kit.Theme.Page(self.tab).Accent or Kit.Theme.Surface
+		)
+		skin.caption.TextTransparency = option.id == selected and 0 or 0.15
 	end
 	return row
 end
@@ -357,8 +359,7 @@ function UI:NearShop()
 	return root and shop and (root.Position - shop.Position).Magnitude <= C.Shop.Distance
 end
 function UI:ActionButton(parent, key, caption, callback, size, position)
-	local skin = button(parent, caption, callback, size, position)
-	skin.Root:SetAttribute("FocusKey", key)
+	local skin = Kit.Action(parent, key, caption, callback, size, position)
 	return skin
 end
 function UI:PurchaseButton(parent, key, label, reason, callback)
@@ -380,45 +381,30 @@ function UI:PurchaseButton(parent, key, label, reason, callback)
 	end)
 	return skin
 end
-function UI:Card(title, description, height)
-	local measured = TextService:GetTextSize(
-		description,
-		16,
-		W.Style.DisplayFont,
-		Vector2.new(math.max(120, self.root.Size.X.Offset - 56), 10000)
-	)
-	height = math.max(height or 160, math.ceil(measured.Y) + 100)
-	local card = W.panel(self.scroll, "Cartao", UDim2.new(1, -8, 0, height), UDim2.new(), W.Style.UI.Cyan)
-	local heading = text(card, title, 38)
-	heading.TextScaled = true
-	local limit = Instance.new("UITextSizeConstraint")
-	limit.MinTextSize, limit.MaxTextSize, limit.Parent = 12, 20, heading
-	local body = text(card, description, height - 94)
-	body.Name = "Descricao"
-	body.Position, body.TextSize = UDim2.fromOffset(8, 40), 16
-	body.TextYAlignment = Enum.TextYAlignment.Top
-	return card
-end
 function UI:Render()
 	local position = self.renderedTab == self.tab and self.scroll.CanvasPosition or Vector2.zero
 	self.renderedTab = self.tab
 	local selected = GuiService.SelectedObject
-	local hadFocus = selected and selected:IsDescendantOf(self.scroll)
+	local hadFocus = selected and (selected:IsDescendantOf(self.scroll) or selected:IsDescendantOf(self.detail))
 	local focusKey = hadFocus and selected:GetAttribute("FocusKey")
 	self.valueRefreshers = {}
 	self.pageTitle = "Creatures"
-	for _, child in ipairs(self.scroll:GetChildren()) do
-		if child:IsA("GuiObject") then
-			child:Destroy()
+	for _, host in ipairs({ self.scroll, self.detail }) do
+		for _, child in ipairs(host:GetChildren()) do
+			if child:IsA("GuiObject") then
+				child:Destroy()
+			end
 		end
 	end
+	self.detail.CanvasPosition = Vector2.zero
+	local theme = Kit.Theme.Page(self.tab)
+	self.headerSurface.BackgroundColor3 = theme.Accent
+	self.tag.Text = theme.Tag
+	Kit.Layout(self, false)
 	if not self.data then
 		text(self.scroll, "Loading progress…", 50)
 		return
 	end
-	local top = 54
-	self.scroll.Position = UDim2.fromOffset(12, top)
-	self.scroll.Size = UDim2.new(1, -24, 1, -top - 46)
 	if Pages[self.tab] then
 		Pages[self.tab].Render(self)
 	end
@@ -426,7 +412,7 @@ function UI:Render()
 	self:RefreshValues()
 	if hadFocus then
 		local restored
-		for _, child in ipairs(self.scroll:GetDescendants()) do
+		for _, child in ipairs(self.root:GetDescendants()) do
 			if focusKey and child:IsA("GuiButton") and child:GetAttribute("FocusKey") == focusKey then
 				restored = child
 				break

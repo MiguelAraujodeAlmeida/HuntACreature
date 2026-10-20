@@ -1,0 +1,18 @@
+{
+  "sources": 53,
+  "sourceComparison": "exact match with Studio Edit",
+  "compileErrors": 0,
+  "isolatedChecks": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"21\":\"Narrow layout stacks details in main scroll\",\"20\":\"Unknown variant remains silhouette\",\"19\":\"Lassos show owned equipment\",\"18\":\"Populated menu and detail build: Index\",\"9\":\"Empty-profile menu builds: Venda\",\"1\":\"Studio and live reset namespaces are distinct\",\"15\":\"Server still rejects favorite sale\",\"3\":\"Old v1 names are not active\",\"2\":\"Both namespaces have the explicit generation\",\"5\":\"New profiles have zero progression\",\"4\":\"Datastore name is within limit\",\"7\":\"Settings start enabled\",\"6\":\"Starter equipment retained\",\"14\":\"Favoriting works\",\"8\":\"Empty-profile menu builds: Criaturas\",\"16\":\"Populated menu and detail build: Criaturas\",\"17\":\"Populated menu and detail build: Venda\",\"13\":\"Capture still records discovery\",\"12\":\"Empty-profile menu builds: Settings\",\"11\":\"Empty-profile menu builds: Loja\",\"10\":\"Empty-profile menu builds: Index\"}"
+      }
+    ],
+    "isError": false
+  },
+  "playStarted": false,
+  "preview": "Shop, Index, Settings and Market inspected via native Studio window; removed",
+  "datastoreIO": false,
+  "fullPlaceSaveConfirmed": false
+}

@@ -1,0 +1,267 @@
+[
+  {
+    "local": "studio/shared/AudioConfig.luau",
+    "path": "ReplicatedStorage.HACShared.AudioConfig",
+    "sha256": "5940551ec2e352cb43dd38a894885f429304effdf00f8384536d75a72317b8c5"
+  },
+  {
+    "local": "studio/shared/CaptureConfig.luau",
+    "path": "ReplicatedStorage.HACShared.CaptureConfig",
+    "sha256": "73edbde13b8f21aea120b4a8ee84a40dfd4660a922c42c5e3bd51e4217e58bfa"
+  },
+  {
+    "local": "studio/shared/GameplayConfig.luau",
+    "path": "ReplicatedStorage.HACShared.GameplayConfig",
+    "sha256": "f8e220124217d5bdcb35db8649f04e90e66ebe7a6539d6be28024ab8562c2a70"
+  },
+  {
+    "local": "studio/shared/LassoAim.luau",
+    "path": "ReplicatedStorage.HACShared.LassoAim",
+    "sha256": "260a7bab99ff1a0c3b3c7c85701bcb940e76376214b9765dc36e0efd989b759f"
+  },
+  {
+    "local": "studio/shared/LassoVisuals.luau",
+    "path": "ReplicatedStorage.HACShared.LassoVisuals",
+    "sha256": "4ca54610d31ffbc467cd2343f256db75d836349c7263530b3503b0a164472496"
+  },
+  {
+    "local": "studio/shared/ToolPlacement.luau",
+    "path": "ReplicatedStorage.HACShared.ToolPlacement",
+    "sha256": "2b6a458bd93419a22060c86bbd51c52d6f3280835efc4bd6c76ab125758827cb"
+  },
+  {
+    "local": "studio/shared/VisualStyle.luau",
+    "path": "ReplicatedStorage.HACShared.VisualStyle",
+    "sha256": "d156d850c43ed1cc6dc3af6bdad76c5045416874a473f5bd44e412f35888c55b"
+  },
+  {
+    "local": "studio/shared/WorldStyle.luau",
+    "path": "ReplicatedStorage.HACShared.WorldStyle",
+    "sha256": "fdf491428c12d967b6a6a48a2dd5aa4fc13e0767c78b535938291aab47b17f25"
+  },
+  {
+    "local": "studio/server/CaptureService.luau",
+    "path": "ServerScriptService.HACServer.CaptureService",
+    "sha256": "c9680dbc61496e521c264b7ca7bc70bb51564d8c2200b266d8486691adcc37fe"
+  },
+  {
+    "local": "studio/server/CreatureBehaviorService.luau",
+    "path": "ServerScriptService.HACServer.CreatureBehaviorService",
+    "sha256": "53ba9ab75a525ee91f96593c9f57ff2efd3a3e11519f3a9e0ede9a13eab83350"
+  },
+  {
+    "local": "studio/server/CreatureFactory.luau",
+    "path": "ServerScriptService.HACServer.CreatureFactory",
+    "sha256": "3935c6c071413ad92e6d316f15d10f9c32d8392eceefa8a4f3daa163a328d301"
+  },
+  {
+    "local": "studio/server/CreatureProfiles.luau",
+    "path": "ServerScriptService.HACServer.CreatureProfiles",
+    "sha256": "210a7ec84642f44a71b25b680eb5d38cd719cad6b06bb0e5043049fbd3dfe3d2"
+  },
+  {
+    "local": "studio/server/HuntingTools.luau",
+    "path": "ServerScriptService.HACServer.HuntingTools",
+    "sha256": "c37e4b9319866bb36cc44a03526681136d54275184ca9b455eb41e57373f3a1d"
+  },
+  {
+    "local": "studio/server/LassoCollision.luau",
+    "path": "ServerScriptService.HACServer.LassoCollision",
+    "sha256": "dcc4373fe149e0b715a592f432507202b154870d6bb874e242429b00f78a7827"
+  },
+  {
+    "local": "studio/server/LumitoBehavior.luau",
+    "path": "ServerScriptService.HACServer.LumitoBehavior",
+    "sha256": "e737655baee2d30e834698954d1dee2e8703d7c5fde873c8b6f3d4d6a33cdd2b"
+  },
+  {
+    "local": "studio/server/ProfileData.luau",
+    "path": "ServerScriptService.HACServer.ProfileData",
+    "sha256": "ea8b7cd75a491324404d44b28eb14c61f9947d366ccd31e86ee33e3b206430d7"
+  },
+  {
+    "local": "studio/server/ProfileService.luau",
+    "path": "ServerScriptService.HACServer.ProfileService",
+    "sha256": "25a7a092cab71d1bf6601ea1a7363e3661629c8a9ee851445dbcdc6ebdf8bcaf"
+  },
+  {
+    "local": "studio/server/ToolInventory.luau",
+    "path": "ServerScriptService.HACServer.ToolInventory",
+    "sha256": "4970959b95dc35e5dd73c38b3396de03591dbfa74495a0cf526f3756c24a20b3"
+  },
+  {
+    "local": "studio/server/WorldPresentation.luau",
+    "path": "ServerScriptService.HACServer.WorldPresentation",
+    "sha256": "e4a31e1eed52e117b8b30076072f8789574ef9f14f3fe8abdd49249ce4b91a0f"
+  },
+  {
+    "local": "studio/server/WorldStations.luau",
+    "path": "ServerScriptService.HACServer.WorldStations",
+    "sha256": "5147d47ee9cd3b2ec444fefcde180418b6c35c7ea83bade034e3acbf7436e9ba"
+  },
+  {
+    "local": "studio/client/AudioFeedback.luau",
+    "path": "StarterPlayer.StarterPlayerScripts.HACClient.AudioFeedback",
+    "sha256": "e88670a15ceacb40d851536a89ca80a7bc9783dbd77d8685d4dc6e25df579c6b"
+  },
+  {
+    "local": "studio/client/CaptureController.luau",
+    "path": "StarterPlayer.StarterPlayerScripts.HACClient.CaptureController",
+    "sha256": "51300604143cbb0db69219710123b32187970d2e06540ea9746dfd3bf7afa828"
+  },
+  {
+    "local": "studio/client/CaptureHUD.luau",
+    "path": "StarterPlayer.StarterPlayerScripts.HACClient.CaptureHUD",
+    "sha256": "6140054f75496cca414e0cde3ec68166ab56eb7ece1320d1f8645633aff9e184"
+  },
+  {
+    "local": "studio/client/CollectionUI.luau",
+    "path": "StarterPlayer.StarterPlayerScripts.HACClient.CollectionUI",
+    "sha256": "dcc816930ee9f504e5d58da00e050e8d07d510760fc5784f1f657cfc7275bb94"
+  },
+  {
+    "local": "studio/client/CollectionView.luau",
+    "path": "StarterPlayer.StarterPlayerScripts.HACClient.CollectionView",
+    "sha256": "6e56e9dd1f21f8fb1bbfb0010349538821011a30498a68032eabd9d1f404efc5"
+  },
+  {
+    "local": "studio/client/CreaturePage.luau",
+    "path": "StarterPlayer.StarterPlayerScripts.HACClient.CreaturePage",
+    "sha256": "1f917341de56f4f78b68a455d8a605ef58a35e101b70a8a2bde3c1e41b739e7c"
+  },
+  {
+    "local": "studio/client/GlossyButton.luau",
+    "path": "StarterPlayer.StarterPlayerScripts.HACClient.GlossyButton",
+    "sha256": "053ac657f0528b5939e69700d057e4f9fd681446b7856da07ffec19c5fcaa371"
+  },
+  {
+    "local": "studio/client/HUD.luau",
+    "path": "StarterPlayer.StarterPlayerScripts.HACClient.HUD",
+    "sha256": "685e6ba22899de023bc8a09eeb8331c4c588c20dd461ef64e10257804bfba81a"
+  },
+  {
+    "local": "studio/client/HUDLayout.luau",
+    "path": "StarterPlayer.StarterPlayerScripts.HACClient.HUDLayout",
+    "sha256": "06a74d75a6fe2499ca5d35cf9877cd7de557a197cd5dc634a69344dd91ad9f34"
+  },
+  {
+    "local": "studio/client/HUDWidgets.luau",
+    "path": "StarterPlayer.StarterPlayerScripts.HACClient.HUDWidgets",
+    "sha256": "2be544b553a3d3862678d8bbfa42a244135afd5c622b34d33902b9e0de505670"
+  },
+  {
+    "local": "studio/client/IndexPage.luau",
+    "path": "StarterPlayer.StarterPlayerScripts.HACClient.IndexPage",
+    "sha256": "d29cdf7c000bdeea71b0c768c1cbea36c050e0fed2ba0aab1aa484ce4d8d5109"
+  },
+  {
+    "local": "studio/client/LassoFeedback.luau",
+    "path": "StarterPlayer.StarterPlayerScripts.HACClient.LassoFeedback",
+    "sha256": "1e7e5c955d1d9f8c7dabbb5e778ae220596c9b4baff760c8a87d52dc9ee336fc"
+  },
+  {
+    "local": "studio/client/NativeInventory.luau",
+    "path": "StarterPlayer.StarterPlayerScripts.HACClient.NativeInventory",
+    "sha256": "2c9f284997226143b0ac11fa64ad70f05b50a23307ae9862da2cf9c9233fdeb6"
+  },
+  {
+    "local": "studio/client/QuickSlot.luau",
+    "path": "StarterPlayer.StarterPlayerScripts.HACClient.QuickSlot",
+    "sha256": "68d831d65a975f18ec4901e758bdc454ad4e006eb0ca592a123c64343a849629"
+  },
+  {
+    "local": "studio/client/ResourceHUD.luau",
+    "path": "StarterPlayer.StarterPlayerScripts.HACClient.ResourceHUD",
+    "sha256": "eb74e53ddc6a7c20a30af9b8d5cfaf3399dd416f4146fbdf0a7c16d210d7a29f"
+  },
+  {
+    "local": "studio/client/ShopPage.luau",
+    "path": "StarterPlayer.StarterPlayerScripts.HACClient.ShopPage",
+    "sha256": "d6f792df64c66f63675ec633c0e40034daf31bf9241a3ab2d604d5800de4b75b"
+  },
+  {
+    "local": "studio/client/ToolPlacementPreview.luau",
+    "path": "StarterPlayer.StarterPlayerScripts.HACClient.ToolPlacementPreview",
+    "sha256": "49e1fdd592fc077c5d511669b5d724419e0b29c4f25f8e106803628c6c33a3cc"
+  },
+  {
+    "local": "studio/client/UIEffects.luau",
+    "path": "StarterPlayer.StarterPlayerScripts.HACClient.UIEffects",
+    "sha256": "7cfc6ea2e782ac261e886f4b3f531473d27448da6dc93f76f094de9f1d09fa84"
+  },
+  {
+    "local": "studio/client/UpgradeBoards.luau",
+    "path": "StarterPlayer.StarterPlayerScripts.HACClient.UpgradeBoards",
+    "sha256": "28e4d531badd6d3d9f01b4bd5673f0e7c160952709c375c2b4ce476e31d8abb7"
+  },
+  {
+    "local": "studio/client/UpgradePage.luau",
+    "path": "StarterPlayer.StarterPlayerScripts.HACClient.UpgradePage",
+    "sha256": "a63bf24e5bc86b33ecc5d2f56b8a87e429766a8fef5d33434cb6587544ba3355"
+  },
+  {
+    "local": "studio/HuntACreature.server.luau",
+    "path": "ServerScriptService.HuntACreature",
+    "sha256": "918f9529e34d0a1b98b7c9586200c87dded43454139766ac87b49b5253ce003f"
+  },
+  {
+    "local": "studio/HuntACreature.client.luau",
+    "path": "StarterPlayer.StarterPlayerScripts.HuntACreatureClient",
+    "sha256": "a6c2546871d47eb65c0b8485d4b5c955b2431658828c55fe5024696c7ef90d30"
+  },
+  {
+    "local": "studio/server/BaseRoamingService.luau",
+    "path": "ServerScriptService.HACServer.BaseRoamingService",
+    "sha256": "96ab4d45fefb05d9da0e0e768f6577f04d9aee5681e48b3c32b8a7a0eb60b384"
+  },
+  {
+    "local": "studio/server/CatalogPresentation.luau",
+    "path": "ServerScriptService.HACServer.CatalogPresentation",
+    "sha256": "60c9ef0b2d8972c7e3f3336a2565420c038360842cf286a73b522566e5edaa39"
+  },
+  {
+    "local": "studio/client/CreaturePortrait.luau",
+    "path": "StarterPlayer.StarterPlayerScripts.HACClient.CreaturePortrait",
+    "sha256": "12bcf97d84110529378aa55a4083c759cbdc92d14ca5d8f6ca7a596e38e6ffe5"
+  },
+  {
+    "local": "studio/client/LocalPreferences.luau",
+    "path": "StarterPlayer.StarterPlayerScripts.HACClient.LocalPreferences",
+    "sha256": "4d7dc50c50d66ad3d96cf3f30671870709dfda70c0b0171946f240e0fce2c9dc"
+  },
+  {
+    "local": "studio/client/NavGlyph.luau",
+    "path": "StarterPlayer.StarterPlayerScripts.HACClient.NavGlyph",
+    "sha256": "3f9726c4748c8259176a832f2b99b01a122dd68eb31651e4225a757a845fa794"
+  },
+  {
+    "local": "studio/client/SettingsPage.luau",
+    "path": "StarterPlayer.StarterPlayerScripts.HACClient.SettingsPage",
+    "sha256": "7fafaf032c3d8ee5b60a9e147891d39501ca05c01dad926a7304e8e1354b9b1d"
+  },
+  {
+    "local": "studio/shared/MenuTheme.luau",
+    "path": "game.ReplicatedStorage.HACShared.MenuTheme",
+    "sha256": "2fd9be5b223d8860adf4dfd2f0d33a96221973225159ac4383a8ff45be3264ad"
+  },
+  {
+    "local": "studio/server/PersistenceConfig.luau",
+    "path": "game.ServerScriptService.HACServer.PersistenceConfig",
+    "sha256": "640e84ce706f1c7a359fe39809fde8d67971cb79b2ed7b4f6583ac1d5de640e3"
+  },
+  {
+    "local": "studio/client/CreatureCards.luau",
+    "path": "game.StarterPlayer.StarterPlayerScripts.HACClient.CreatureCards",
+    "sha256": "d9da2feaf4787736ab08f0d65d4b90e8696c21a80946da9eb63cc7004a3c3c06"
+  },
+  {
+    "local": "studio/client/MenuKit.luau",
+    "path": "game.StarterPlayer.StarterPlayerScripts.HACClient.MenuKit",
+    "sha256": "2d0ce11420152e975ff02f85f33e0f2504d7fceacf7dce70bad6e8edb3ee9e06"
+  },
+  {
+    "local": "studio/client/ToolPortrait.luau",
+    "path": "game.StarterPlayer.StarterPlayerScripts.HACClient.ToolPortrait",
+    "sha256": "215830d5e125d1ebaa130d51b0cf7341b29cd03842b4fe3a57f7beb602026e69"
+  }
+]

@@ -2,6 +2,10 @@
 
 Atualizado em 19/10/2026. Referência vigente: arte glossy enviada pelo desenvolvedor, ícones de brinquedo com volume, painéis escuros e contornos luminosos ciano/dourado. A direção é revisável e ainda depende de parecer humano.
 
+## Menus — padrão vigente
+
+Referências atuais: Index, Shop e Settings enviadas em 19/10. Cabeçalho forte colorido, corpo escuro com studs, fonte arredondada contornada, X vermelho, imagens antes de texto, ações por seleção. Todas as páginas ativas usam MenuTheme/MenuKit e componentes compartilhados; novas páginas seguem [MENU_STANDARD.md](MENU_STANDARD.md). As referências orientam composição, sem copiar catálogo ou inventar recompensas. Padrão revisável, aguardando feedback humano.
+
 ## Componentes
 
 - **Idioma:** inglês nos textos visíveis. IDs de dados legados permanecem estáveis; traduzir apresentação, nunca saves por substituição global.

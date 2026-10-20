@@ -13,6 +13,7 @@ Ao implementar:
 - Preservar o objetivo de diversão, clareza, recompensa e suporte a PC/celular. Não declarar uma experiência aprovada porque o código passou em teste técnico.
 - Fazer revisão e verificações leves; não iniciar Play, emulação de dispositivos, benchmarks ou QA extensivo sem pedido explícito. O desenvolvedor realiza os testes manuais. Registrar o que foi observado e o que não foi testado.
 - Não usar agentes auxiliares sem pedido explícito do desenvolvedor.
+- Novos menus e revisões visuais seguem `studio/MENU_STANDARD.md`, reutilizando MenuTheme/MenuKit e os componentes existentes; novas exceções devem ter justificativa registrada.
 - Antes de encerrar, salvar/verificar o lugar no Studio, conferir o diff local e atualizar `Estado Atual.md` e o item do backlog correspondente no cofre. Decisões duradouras vão em uma ADR curta.
 
 Fontes técnicas locais: `studio/README.md`, `studio/STYLE_GUIDE.md`. Processo: `03_Engenharia/Fluxo de Desenvolvimento.md` no cofre.

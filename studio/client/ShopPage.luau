@@ -1,4 +1,7 @@
 local C = require(game.ReplicatedStorage.HACShared.GameplayConfig)
+local W = require(script.Parent.HUDWidgets)
+local Kit = require(script.Parent.MenuKit)
+local Art = require(script.Parent.ToolPortrait)
 local Page = {}
 function Page.Render(ui)
 	ui.pageTitle = "Hunting Shop"
@@ -12,49 +15,97 @@ function Page.Render(ui)
 			ui:Render()
 		end
 	)
+	local hero = Kit.Surface(
+		ui.scroll,
+		"CategoryBanner",
+		UDim2.new(1, -2, 0, 90),
+		UDim2.new(),
+		Kit.Theme.Page("Loja").Accent:Lerp(Kit.Theme.Ink, 0.6)
+	)
+	hero.LayoutOrder = 1
+	local icon = W.icon(hero, "Lasso", W.Style.Icons.Lasso, UDim2.fromOffset(74, 74), UDim2.fromOffset(10, 8))
+	icon.ZIndex = hero.ZIndex + 1
+	local title = Kit.Label(
+		hero,
+		"Headline",
+		ui.shopCategory == "Lassos" and "Find your reach" or "Ready for the hunt",
+		UDim2.new(1, -124, 0, 48),
+		UDim2.fromOffset(100, 4),
+		30,
+		nil,
+		Enum.TextXAlignment.Left
+	)
+	title.TextScaled = true
+	local cap = Instance.new("UITextSizeConstraint")
+	cap.MinTextSize, cap.MaxTextSize, cap.Parent = 18, 30, title
+	Kit.Label(
+		hero,
+		"Subheading",
+		ui.shopCategory == "Lassos" and "Range · charge · control" or "Lure. Slow. Capture.",
+		UDim2.new(1, -124, 0, 34),
+		UDim2.fromOffset(100, 49),
+		17,
+		Kit.Theme.Muted,
+		Enum.TextXAlignment.Left
+	)
+	local ids = {}
 	for _, id in ipairs(C.ShopIds()) do
-		local def = C.Items[id]
-		if ui.shopCategory ~= def.Category then
-			continue
+		if C.Items[id].Category == ui.shopCategory then
+			table.insert(ids, id)
 		end
+	end
+	local grid = Kit.Grid(ui.scroll, #ids, ui.contentWidth, 234, 330, 2)
+	for order, id in ipairs(ids) do
+		local def = C.Items[id]
 		local offer = ui.data.rotation.offers[id]
-		local price = offer and offer.price or def.Price
-		local stock = offer and offer.stock or 0
+		local price, stock = offer and offer.price or def.Price, offer and offer.stock or 0
 		local bought = C.Bought(ui.data.profile, ui.data.rotation, id)
 		local owned = def.Permanent and ui.data.profile.owned[id]
-		local state = owned and "Owned"
-			or stock == 0 and "Sold out"
-			or string.format("Stock: %d/%d", math.max(0, stock - bought), stock)
-		local description = def.Description
-		if not def.Permanent then
-			local seconds = def.EffectSeconds or def.Duration
-			description ..= (seconds and "\nDuration: " .. seconds .. " s" or "")
-			if def.Cooldown then
-				description ..= " • cooldown: " .. def.Cooldown .. " s"
-			end
-		end
-		description ..= "\n" .. state
+		local theme = Kit.Theme.Tools[id] or { Accent = W.Style.UI.Cyan, Tag = "GEAR" }
+		local card = Kit.Surface(grid, "Offer_" .. id, UDim2.new(), UDim2.new(), Kit.Theme.Surface)
+		card.LayoutOrder = order
+		local stage = Kit.Surface(
+			card,
+			"ArtStage",
+			UDim2.new(1, -16, 0, 146),
+			UDim2.fromOffset(8, 8),
+			theme.Accent:Lerp(Kit.Theme.Ink, 0.48)
+		)
+		Art.new(stage, id, UDim2.new(1, -8, 1, -8), UDim2.fromOffset(4, 4))
+		Kit.Badge(stage, "Type", theme.Tag, UDim2.fromOffset(82, 24), UDim2.fromOffset(6, 6), theme.Accent)
+		Kit.Badge(
+			stage,
+			"Stock",
+			owned and "OWNED" or stock - bought <= 0 and "SOLD OUT" or tostring(stock - bought) .. " LEFT",
+			UDim2.fromOffset(96, 24),
+			UDim2.new(1, -102, 1, -30),
+			stock - bought > 0 and W.Style.UI.Green or Kit.Theme.Muted
+		)
+		Kit.Label(card, "Name", def.Name, UDim2.new(1, -16, 0, 34), UDim2.fromOffset(8, 158), 23)
+		Kit.Label(
+			card,
+			"Description",
+			def.Description,
+			UDim2.new(1, -20, 0, 44),
+			UDim2.fromOffset(10, 194),
+			15,
+			Kit.Theme.Muted
+		)
+		local stats
 		if def.Permanent then
-			local config = require(game.ReplicatedStorage.HACShared.CaptureConfig)
-			local lasso = config.Lassos[def.Name]
-			if lasso then
-				description ..= string.format(
-					"\nRange: %d studs • Full charge: %.1f s",
-					lasso.MaximumRange,
-					lasso.ChargeSeconds
-				)
-			end
+			local lasso = require(game.ReplicatedStorage.HACShared.CaptureConfig).Lassos[def.Name]
+			stats = lasso and string.format("%d studs · %.1f s charge", lasso.MaximumRange, lasso.ChargeSeconds)
+				or "Permanent"
 		else
-			description ..= "\nOwned: " .. tostring(ui.data.profile.items[id] or 0)
+			stats = string.format(
+				"%d s effect · Owned %d",
+				def.EffectSeconds or def.Duration or 0,
+				ui.data.profile.items[id] or 0
+			)
 		end
-		local card = ui:Card(def.Name, description, 206)
-		if def.Permanent then
-			local W = require(script.Parent.HUDWidgets)
-			W.icon(card, "Lasso", W.Style.Icons.Lasso, UDim2.fromOffset(40, 40), UDim2.new(1, -48, 0, 0))
-			card.Texto.Size = UDim2.new(1, -58, 0, 38)
-		end
+		Kit.Label(card, "Stats", stats, UDim2.new(1, -16, 0, 28), UDim2.fromOffset(8, 239), 14, theme.Accent)
 		local rotation = ui.data.rotation.id
-		ui:PurchaseButton(card, "Buy:" .. id, "Buy • " .. price .. " gold", function()
+		ui:PurchaseButton(card, "Buy:" .. id, "Buy · " .. price .. " gold", function()
 			local current = ui.data.profile
 			if def.Permanent and current.owned[id] then
 				return "Owned"
