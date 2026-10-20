@@ -5,7 +5,7 @@ Atualizado em 19/10/2026. Lugar **[Testing] Hunt a Creature**, placeId **1023104
 ## Estado
 
 - Código versionado em https://github.com/MiguelAraujodeAlmeida/HuntACreature; Git é a referência operacional dos fontes. Script Sync/Rojo não está configurado.
-- Base viva, Settings, favoritos protegidos, inglês nativo, Tools/Lassos e Index visual por variantes implementados.
+- Base viva, Settings, favoritos protegidos, inglês nativo, Tools/Lassos e Index visual por variantes implementados. Tamanho individual é multiplicador oculto contínuo de 1× a 5×; a curva e o teto ficam em GameplayConfig.
 - Caça polida: estados de mira, carga, voo/retorno, ritmo da disputa, reação do Lumito e recompensa curta com retrato e renda potencial na base. Treino, inventário, renda e placas preservados.
 - Menus ativos usam MenuTheme/MenuKit, galerias, detalhes e arte de equipamentos. A rodada de caça teve compilação estática em Edit; diversão, precisão, PC/celular e persistência real dependem do desenvolvedor.
 - Reset global por geração fixa `20261019_menu_reset_01` em PersistenceConfig. Todas as contas começam novas nesta versão; progresso posterior persiste. Dados antigos preservados; nenhuma publicação feita.
@@ -43,7 +43,7 @@ Backup da evolução: contexto/evolucao-2026-10-19/antes.zip e ServerStorage.HAC
 
 ## Limites
 
-Lumito é a amostra (tamanhos e Dourado), não catálogo final. Ponte permanece provisória; teletransporte/mapa amplo, arte/modelos finais estão adiados. Economia acelerada mantém preços anteriores. Persistência existe, mas teste real de reconexão/cotas não foi confirmado nesta rodada. Ordem da barra nativa não possui persistência personalizada.
+Lumito é a amostra (escala individual e Dourado), não catálogo final. O próximo redesign visual abrange apenas a aparência base; mutações serão trabalhadas depois no Studio. A base atual pode não comportar o passeio de vários gigantes: o visual excedente fica visível e imóvel. Ponte permanece provisória; teletransporte/mapa amplo estão adiados. Economia acelerada mantém preços anteriores. Persistência existe, mas teste real de reconexão/cotas não foi confirmado nesta rodada. Ordem da barra nativa não possui persistência personalizada.
 
 ## Entrega de menus
 

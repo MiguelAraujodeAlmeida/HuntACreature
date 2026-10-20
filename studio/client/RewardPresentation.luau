@@ -47,8 +47,6 @@ function Reward:Show(data)
 	self.Rates.Text = string.format("AT BASE: +%d GOLD/s  +%d XP/s", data.goldPerSecond or 0, data.xpPerSecond or 0)
 	local details = {}
 	if data.firstVariant and data.golden and not data.firstSpecies then table.insert(details, "NEW INDEX VARIANT") end
-	if data.size and data.size > 1.05 then table.insert(details, "LARGE") end
-	if data.size and data.size < 0.95 then table.insert(details, "SMALL") end
 	if data.rarity and data.rarity ~= "Common" then table.insert(details, data.rarity:upper()) end
 	self.Detail.Text = table.concat(details, "  •  ")
 	self.Detail.TextColor3 = accent

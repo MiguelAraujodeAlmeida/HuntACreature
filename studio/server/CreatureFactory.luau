@@ -107,12 +107,12 @@ local function makeCreature(parent, position, golden, scale)
 	return model
 end
 
-local function addWildLabel(model)
+local function addWildLabel(model, scale)
 	local gui = Instance.new("BillboardGui")
 	gui.Name = "Identificacao"
 	gui.Adornee = model.PrimaryPart
 	gui.Size = UDim2.fromOffset(230, 46)
-	gui.StudsOffsetWorldSpace = Vector3.new(0, 3.3, 0)
+	gui.StudsOffsetWorldSpace = Vector3.new(0, 2.25 * scale + 1.5, 0)
 	gui.AlwaysOnTop = true
 	gui.MaxDistance = 65
 	gui.Parent = model.PrimaryPart
@@ -129,19 +129,11 @@ local function addWildLabel(model)
 end
 
 function Factory.Roll(random)
-	local roll, size = random:NextInteger(1, 100), C.Sizes[2]
-	for _, entry in ipairs(C.Sizes) do
-		roll -= entry.Weight
-		if roll <= 0 then
-			size = entry
-			break
-		end
-	end
 	return {
 		id = HttpService:GenerateGUID(false),
 		species = "Lumito",
 		rarity = C.Species.Lumito.Rarity,
-		size = size.Scale,
+		size = C.RollSize(random),
 		mutations = random:NextNumber() < C.Mutations.Dourado.Chance and { "Dourado" } or {},
 		location = "bag",
 	}
@@ -157,7 +149,7 @@ function Factory.Build(parent, position, item, installed)
 	model:SetAttribute("SizeFactor", item.size)
 	model:SetAttribute("Difficulty", (golden and C.Mutations.Dourado.Difficulty or 1) * (0.9 + item.size * 0.1))
 	if not installed then
-		addWildLabel(model)
+		addWildLabel(model, item.size)
 	end
 	return model
 end

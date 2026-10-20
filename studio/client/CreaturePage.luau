@@ -93,7 +93,7 @@ function Page.Render(ui)
 	end
 	local equipped = chosen.location == "base"
 	Cards.Detail(detail, chosen, true, {
-		status = string.format("%s · %.2f× size", equipped and "Equipped" or "In bag", chosen.size),
+		status = equipped and "Equipped" or "In bag",
 		statusColor = equipped and W.Style.UI.Green or W.Style.UI.Cyan,
 	})
 	local actions = W.frame(detail, "Actions", UDim2.new(1, -2, 0, 60), UDim2.new())

@@ -106,7 +106,13 @@ function Roaming:Sync(base, profile)
 					direction = Vector3.new(0, 0, -1),
 				}
 				agent.position = self:Choose(agent)
-				-- Retry next profile update if no space is currently free.
+				if not agent.position then
+					-- The current base cannot fit several giant footprints. Keep the owned
+					-- creature visible and still, rather than silently dropping its model.
+					local center = floor.CFrame:PointToWorldSpace(Vector3.new(0, 0, floor.Size.Z * 0.12))
+					agent.position = Vector3.new(center.X, agent.height, center.Z)
+					agent.stationary = true
+				end
 				if agent.position then
 					model = Factory.Build(folder, agent.position, item, true)
 					agent.model = model
@@ -134,7 +140,7 @@ function Roaming:Step(dt)
 		end
 		agent.pause -= dt
 		local moving = false
-		if agent.pause <= 0 then
+		if agent.pause <= 0 and not agent.stationary then
 			agent.target = agent.target or self:Choose(agent)
 			if agent.target then
 				local delta = agent.target - agent.position

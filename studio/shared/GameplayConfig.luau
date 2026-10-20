@@ -15,11 +15,12 @@ C.Species = {
 	},
 }
 C.Mutations = { Dourado = { Name = "Gold", Chance = 0.18, Value = 3, Difficulty = 1.2 } }
-C.Sizes = {
-	{ Name = "Small", Scale = 0.85, Weight = 25 },
-	{ Name = "Normal", Scale = 1, Weight = 55 },
-	{ Name = "Large", Scale = 1.2, Weight = 20 },
-}
+C.Size = { Minimum = 1, Maximum = 5, Curve = 5, Precision = 100 }
+function C.RollSize(random)
+	-- Continuous scale; large specimens are uncommon without a separate rarity tier.
+	local size = C.Size.Minimum + (C.Size.Maximum - C.Size.Minimum) * random:NextNumber() ^ C.Size.Curve
+	return math.clamp(math.floor(size * C.Size.Precision + 0.5) / C.Size.Precision, C.Size.Minimum, C.Size.Maximum)
+end
 C.IncomeSeconds = 1 -- Mesmo valor por pagamento: rendimento 5x, solicitado em 18/10.
 C.TrainingSeconds = 2
 C.RespawnSeconds = 7

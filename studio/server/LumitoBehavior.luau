@@ -85,7 +85,9 @@ end
 
 function Behavior:_groundAt(position)
 	if not self:_inside(position) then return nil end
-	local hit = workspace:Raycast(position + Vector3.new(0, 3, 0), Vector3.new(0, -9, 0), self.cast)
+	-- The ray must still reach the floor when the root is several studs above it.
+	local reach = math.max(9, self.height * 2 + 5)
+	local hit = workspace:Raycast(position + Vector3.new(0, 3, 0), Vector3.new(0, -reach, 0), self.cast)
 	if not hit or hit.Normal.Y < 0.85 then return nil end
 	local y = hit.Position.Y + self.height
 	if math.abs(y - self.position.Y) > self.profile.MaxStepHeight then return nil end
@@ -95,8 +97,8 @@ end
 function Behavior:_separated(position)
 	-- Não empurrar personagens nem sobrepor outros Lumitos. Permite sair de uma
 	-- sobreposição provocada pelo próprio jogador, em vez de prender a criatura.
-	local function clear(otherPosition, gap)
-		if math.abs(position.Y - otherPosition.Y) > 4 then return true end
+	local function clear(otherPosition, gap, otherHeight)
+		if math.abs(position.Y - otherPosition.Y) > self.height + otherHeight then return true end
 		local nextDistance = flat(position - otherPosition).Magnitude
 		local currentDistance = flat(self.position - otherPosition).Magnitude
 		local movement = flat(position - self.position)
@@ -109,11 +111,11 @@ function Behavior:_separated(position)
 	end
 	for model, other in pairs(self.service.agents) do
 		if other ~= self and model.Parent == self.service.wildFolder then
-			if not clear(other.position, self.radius + other.radius) then return false end
+			if not clear(other.position, self.radius + other.radius, other.height) then return false end
 		end
 	end
 	for _, actor in ipairs(self.service.actors) do
-		if actor.root.Parent and not clear(actor.root.Position, self.radius + 1.1) then return false end
+		if actor.root.Parent and not clear(actor.root.Position, self.radius + 1.1, 3) then return false end
 	end
 	return true
 end

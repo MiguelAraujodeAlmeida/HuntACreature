@@ -57,9 +57,14 @@ function Data.Validate(p)
 	for id, item in pairs(p.creatures) do
 		assert(type(id) == "string" and item.id == id and C.Species[item.species], "Criatura inválida")
 		assert(
-			table.find(C.Rarities, item.rarity) and type(item.size) == "number" and item.size >= 0.5 and item.size <= 2,
+			table.find(C.Rarities, item.rarity)
+				and type(item.size) == "number"
+				and item.size >= 0.5
+				and item.size <= C.Size.Maximum,
 			"Variação inválida"
 		)
+		-- Existing 0.85× specimens become 1×; retain IDs, location and mutations.
+		item.size = math.max(C.Size.Minimum, item.size)
 		assert(type(item.mutations) == "table", "Mutações inválidas")
 		for _, mutation in ipairs(item.mutations) do
 			assert(C.Mutations[mutation], "Mutação desconhecida")

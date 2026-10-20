@@ -151,7 +151,6 @@ capture = require(Modules.CaptureService).new({
 			name = C.Name(item),
 			species = item.species,
 			mutations = item.mutations,
-			size = item.size,
 			rarity = C.RarityNames[item.rarity] or item.rarity,
 			golden = table.find(item.mutations, "Dourado") ~= nil,
 			firstSpecies = firstSpecies,
