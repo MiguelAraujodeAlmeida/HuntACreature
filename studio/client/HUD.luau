@@ -1,14 +1,13 @@
 -- HUD v4. Orquestra apresentação; captura, valores e inventário continuam no servidor.
 local RunService = game:GetService("RunService")
-local TweenService = game:GetService("TweenService")
 local UIS = game:GetService("UserInputService")
 local W = require(script.Parent.HUDWidgets)
 local Button = require(script.Parent.GlossyButton)
 local Resources = require(script.Parent.ResourceHUD)
 local Capture = require(script.Parent.CaptureHUD)
+local RewardPresentation = require(script.Parent.RewardPresentation)
 local QuickSlot = require(script.Parent.QuickSlot)
 local S = W.Style
-local Effects = require(script.Parent.UIEffects)
 local Layout = require(script.Parent.HUDLayout)
 local Audio = require(script.Parent.AudioFeedback)
 local GuiService = game:GetService("GuiService")
@@ -16,7 +15,7 @@ local HUD = {}
 HUD.__index = HUD
 function HUD.new(player)
 	local self = setmetatable(
-		{ player = player, connections = {}, equipped = false, capturing = false, toastVersion = 0, rewardVersion = 0 },
+		{ player = player, connections = {}, equipped = false, capturing = false, toastVersion = 0 },
 		HUD
 	)
 	local gui = Instance.new("ScreenGui")
@@ -108,15 +107,7 @@ function HUD.new(player)
 	self.ToastText = W.text(self.Toast, "Texto", "", UDim2.new(1, -35, 1, -14), UDim2.fromOffset(17, 7), 22)
 	self.ToastScale = Instance.new("UIScale")
 	self.ToastScale.Parent = self.Toast
-	self.RewardRoot = W.panel(gui, "Vitoria", UDim2.fromOffset(550, 110), UDim2.fromScale(0.5, 0.27), S.UI.Gold)
-	self.RewardRoot.AnchorPoint = Vector2.new(0.5, 0.5)
-	self.RewardRoot.Visible = false
-	self.RewardRoot.ZIndex = 45
-	self.RewardScale = Instance.new("UIScale")
-	self.RewardScale.Parent = self.RewardRoot
-	W.icon(self.RewardRoot, "Estrela", S.Icons.XP, UDim2.fromOffset(108, 108), UDim2.fromOffset(-23, -7))
-	W.text(self.RewardRoot, "Titulo", "CAPTURED!", UDim2.fromOffset(410, 40), UDim2.fromOffset(88, 8), 32, S.UI.Gold)
-	self.RewardText = W.text(self.RewardRoot, "Recompensa", "", UDim2.fromOffset(425, 48), UDim2.fromOffset(84, 48), 23)
+	self.RewardView = RewardPresentation.new(gui, self.Surface, self.BagButton)
 	table.insert(
 		self.connections,
 		self.BagButton.Activated:Connect(function()
@@ -212,9 +203,7 @@ function HUD:Resize(view)
 	self.Toast.Position = UDim2.new(0.5, 0, 0, margin + layout.resourceHeight + 8)
 	self.ToastText.TextSize = layout.short and 16 or 20
 	self.ToastScale.Scale = 1
-	self.RewardBaseScale = math.min(1, (view.X - margin * 2) / 550)
-	self.RewardScale.Scale = self.RewardBaseScale
-	self.RewardRoot.Position = UDim2.fromScale(0.5, layout.short and 0.38 or 0.3)
+	self.RewardView:Resize(view, layout)
 	-- A mira representa o centro da câmera, não o centro da área abaixo da topbar.
 	local camera = workspace.CurrentCamera
 	if camera then
@@ -265,6 +254,7 @@ end
 function HUD:ResetThrow()
 	Audio.StopCharge()
 	self.Capture.wasFull = false
+	self.Capture.ChargeScale.Scale = 1
 	self.ChargePanel.Visible = false
 	self.ThrowSkin:SetHeld(false)
 	self.ThrowSkin:SetSelected(false)
@@ -323,53 +313,8 @@ function HUD:Notice(message)
 		end
 	end)
 end
-function HUD:Reward(golden, message)
-	self.rewardVersion += 1
-	local version = self.rewardVersion
-	self.RewardText.Text = message
-	self.RewardRoot.Visible = true
-	self.RewardScale.Scale = 0.35 * self.RewardBaseScale
-	TweenService:Create(
-		self.RewardScale,
-		TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
-		{ Scale = self.RewardBaseScale }
-	):Play()
-	for i = 1, 10 do
-		local spark = W.icon(
-			self.Surface,
-			"EstrelaVitoria",
-			S.Icons.XP,
-			UDim2.fromOffset(golden and 48 or 34, golden and 48 or 34),
-			self.RewardRoot.Position
-		)
-		spark.AnchorPoint = Vector2.new(0.5, 0.5)
-		spark.ZIndex = 44
-		local angle = i * math.pi / 5
-		local distance = math.min(golden and 260 or 205, self.view.X * 0.4)
-		TweenService:Create(spark, TweenInfo.new(0.85, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-			Position = self.RewardRoot.Position
-				+ UDim2.fromOffset(math.cos(angle) * distance, math.sin(angle) * distance * 0.48),
-			Rotation = i % 2 == 0 and 80 or -80,
-			ImageTransparency = 1,
-		}):Play()
-		task.delay(0.9, function()
-			spark:Destroy()
-		end)
-	end
+function HUD:Reward(data)
 	self.BagSkin:Shine()
-	Audio.Reward(golden)
-	local origin = self.RewardRoot.AbsolutePosition + self.RewardRoot.AbsoluteSize / 2
-	local destination = self.BagButton.AbsolutePosition + self.BagButton.AbsoluteSize / 2
-	Effects.Fly(
-		self.Surface,
-		S.Icons.Bag,
-		origin - self.Surface.AbsolutePosition,
-		destination - self.Surface.AbsolutePosition
-	)
-	task.delay(2.5, function()
-		if not self.dead and version == self.rewardVersion then
-			self.RewardRoot.Visible = false
-		end
-	end)
+	self.RewardView:Show(data)
 end
 return HUD

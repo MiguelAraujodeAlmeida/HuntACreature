@@ -238,9 +238,10 @@ function Behavior:Step(dt)
 	if self.model:GetAttribute("BusyUserId") ~= nil then
 		if self.state ~= "Capturing" then
 			self:_setState("Capturing")
-			self:_pose(false)
 		end
-		return -- A disputa existente mantém o alvo imóvel e não consome o timer de fuga.
+		self.phase += dt * (self.model:GetAttribute("CapturePhase") == "resist" and 15 or 9)
+		self:_pose(false)
+		return -- A criatura resiste no lugar, sem consumir o timer de fuga.
 	elseif self.state == "Capturing" then
 		self:_setState("Tired") -- Escapou do laço: oferece janela lenta, sem sprint imediato.
 	end
@@ -290,12 +291,15 @@ function Behavior:_pose(moving)
 		local text = label and label:FindFirstChildOfClass("TextLabel")
 		if text then text.Text = self.model.Name .. (slow and " • SLOWED" or self.state == "Panicking" and " !" or self.state == "Tired" and " …" or "") end
 	end
-	local bounce = moving and math.abs(math.sin(self.phase)) * (self.state == "Panicking" and 0.13 or 0.045) or 0
-	local roll = moving and math.sin(self.phase) * (self.state == "Panicking" and 0.07 or 0.025) or 0
+	local struggling = self.state == "Capturing"
+	local bounce = moving and math.abs(math.sin(self.phase)) * (self.state == "Panicking" and 0.13 or 0.045)
+		or struggling and math.abs(math.sin(self.phase)) * 0.08 or 0
+	local roll = moving and math.sin(self.phase) * (self.state == "Panicking" and 0.07 or 0.025)
+		or struggling and math.sin(self.phase) * 0.07 or 0
 	local pose = CFrame.new(self.position + Vector3.new(0, bounce, 0)) * self.facing * CFrame.Angles(0, 0, roll)
 	self.model:PivotTo(pose)
 	for i, foot in ipairs(self.feet) do
-		local step = moving and math.sin(self.phase + (i - 1) * math.pi) or 0
+		local step = (moving or struggling) and math.sin(self.phase + (i - 1) * math.pi) or 0
 		foot.part.CFrame = pose * foot.rest * CFrame.new(0, math.max(0, step) * 0.18 * self.scale, step * 0.24 * self.scale)
 	end
 end

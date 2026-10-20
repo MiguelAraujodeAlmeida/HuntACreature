@@ -206,6 +206,7 @@ function Controller:_releaseCharge()
 		return
 	end
 	local aim = self:_aimRay(self.chargeMode ~= "mouse")
+	local power = math.clamp((os.clock() - self.chargeStarted) / self.lasso.ChargeSeconds, 0, 1)
 	self.charging = false
 	self.chargeInput = nil
 	self.chargeMode = nil
@@ -214,7 +215,7 @@ function Controller:_releaseCharge()
 		self.feedback:Hide(true)
 		self.remote:FireServer("Throw", aim)
 		Audio.StopCharge()
-		Audio.Play("Throw")
+		Audio.Play("Throw", 0.9 + power * 0.25)
 		self.hud:ThrowLaunched()
 	else
 		self.remote:FireServer("ChargeCancel")
@@ -260,10 +261,10 @@ function Controller:HandleEvent(action, a, b, c)
 	elseif action == "ThrowLaunched" then
 		self.hud:ThrowLaunched()
 	elseif action == "ThrowMiss" then
-		Audio.Play("Return")
+		Audio.Play("Return", a == "obstacle" and 0.82 or a == "rejected" and 0.7 or 1.1)
 		self.hud:ResetThrow()
-		if a then
-			self.hud:Notice(a)
+		if a == "rejected" and b and (b:find("Bag full", 1, true) or b:find("Requires", 1, true)) then
+			self.hud:Notice(b)
 		end
 	elseif action == "CaptureStart" then
 		if self.hud.Collection then
@@ -291,7 +292,7 @@ function Controller:HandleEvent(action, a, b, c)
 		self.hud:EndCapture(a, b)
 		self.hud.Reticle.Visible = self.equipped and UserInputService.TouchEnabled
 	elseif action == "Reward" then
-		self.hud:Reward(a, b)
+		self.hud:Reward(a)
 	elseif action == "Notice" then
 		self.hud:Notice(a)
 	end

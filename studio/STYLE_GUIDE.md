@@ -24,6 +24,8 @@ Mundo cartunizado modular, saturado e coerente. Amostras de studs/madeira/piso e
 
 Feedback acompanha antecipação, impacto, progresso e resolução. Efeitos expressivos sem cobrir a mira ou impedir decisão. Renda por segundo não exige som a cada pagamento; AudioConfig também aplica cooldown. Mute centralizado em Settings, junto da visibilidade local de criaturas na base.
 
+Na caça, contorno discreto diferencia distante, possível, alinhado, bloqueado e ocupado por intensidade/preenchimento/cor. A carga mostra alcance e um ápice breve; o voo tem rastro quente e o recolhimento, identidade ciano. Obstáculo e fim de alcance usam efeitos curtos em vez de avisos rotineiros. A disputa alterna resistência e abertura no alvo, corda e HUD compacta; poção mostra seu estado ali. Vitória exibe retrato, descoberta/Gold/tamanho quando aplicável e renda potencial **na base**, sem prometer crédito instantâneo. Efeitos são limitados e limpos ao fim da ação.
+
 ## Aprovação
 
 Compilar e inspecionar prévia não aprova estética, som ou interação. Receber feedback sobre a fatia antes de escalar telas/modelos. Sem título permanente, tutorial constante ou painel grande de captura. Documentar decisões no cofre e alterar componentes compartilhados.

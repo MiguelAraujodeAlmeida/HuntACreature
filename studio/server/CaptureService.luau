@@ -128,10 +128,13 @@ function CaptureService:_finish(player, success, message)
 	end
 	if session.creature and session.creature.Parent then
 		session.creature:SetAttribute("BusyUserId", nil)
+		session.creature:SetAttribute("CapturePhase", nil)
 	end
+	local reward
 	if success and session.creature and session.creature.Parent then
 		local position = session.creature.PrimaryPart.Position
-		success = self.onCaptured(player, session.creature) == true
+		success, reward = self.onCaptured(player, session.creature)
+		success = success == true
 		if success then
 			rewardBurst(self.effectsFolder, position, session.golden)
 		else
@@ -139,6 +142,9 @@ function CaptureService:_finish(player, success, message)
 		end
 	end
 	self.remote:FireClient(player, "CaptureEnd", success, message, session.golden)
+	if success and reward then
+		self.remote:FireClient(player, "Reward", reward)
+	end
 end
 
 function CaptureService:_beginCapture(player, creature, lasso)
@@ -174,6 +180,7 @@ function CaptureService:_beginCapture(player, creature, lasso)
 		target = 0.5,
 		goal = 0.5,
 		goalTimer = 0,
+		rhythm = 0,
 		progress = 0.16,
 		maxDistance = lasso.MaximumRange + 10,
 		streak = 0,
@@ -182,6 +189,7 @@ function CaptureService:_beginCapture(player, creature, lasso)
 		sendTime = 0,
 	}
 	self.remote:FireClient(player, "CaptureStart", creature.Name, golden)
+	Visuals.Burst(self.effectsFolder, creature.PrimaryPart.Position, golden and Color3.fromRGB(255, 218, 80) or Color3.fromRGB(86, 239, 220), 9)
 	return true
 end
 
@@ -199,7 +207,7 @@ function CaptureService:_clearProjectile(player, ready)
 	end
 end
 
-function CaptureService:_returnProjectile(player, reason)
+function CaptureService:_returnProjectile(player, kind, reason)
 	local projectile = self.projectiles[player]
 	if not projectile or projectile.returning then
 		return
@@ -208,7 +216,8 @@ function CaptureService:_returnProjectile(player, reason)
 	if projectile.line then
 		projectile.line.beam.CurveSize0 = 1.2
 	end
-	self.remote:FireClient(player, "ThrowMiss", reason)
+	Visuals.Returning(projectile.visual, projectile.line)
+	self.remote:FireClient(player, "ThrowMiss", kind, reason)
 end
 
 function CaptureService:_startCharge(player)
@@ -274,6 +283,8 @@ function CaptureService:_throw(player, ray)
 	local blockers = Aim.Params({ player.Character, self.effectsFolder, self.wildFolder })
 	local visual = Visuals.Loop(self.effectsFolder)
 	visual:PivotTo(CFrame.lookAt(resolved.origin, resolved.origin + resolved.direction))
+	Visuals.Flight(visual, power)
+	Visuals.Burst(self.effectsFolder, resolved.origin, Color3.fromRGB(255, 211, 94), 3 + math.floor(power * 4))
 	self.projectiles[player] = {
 		visual = visual,
 		line = Visuals.Line(player.Character, visual.PrimaryPart),
@@ -348,36 +359,32 @@ function CaptureService:_stepProjectile(player, projectile, dt)
 			* CFrame.Angles(0, 0, projectile.travel * 0.14)
 	)
 	if hit or creature then
-		Visuals.Burst(
-			self.effectsFolder,
-			projectile.position,
-			creature and Color3.fromRGB(255, 221, 60) or Color3.fromRGB(100, 225, 255),
-			creature and 12 or 5
-		)
 		if creature then
 			local captured, reason = self:_beginCapture(player, creature, projectile.lasso)
 			if captured then
 				self:_clearProjectile(player, false)
 			else
-				self:_returnProjectile(player, reason)
+				Visuals.Burst(self.effectsFolder, projectile.position, Color3.fromRGB(255, 169, 92), 5)
+				self:_returnProjectile(player, "rejected", reason)
 			end
 		else
-			self:_returnProjectile(player)
+			Visuals.Burst(self.effectsFolder, projectile.position, Color3.fromRGB(100, 225, 255), 5)
+			self:_returnProjectile(player, "obstacle")
 		end
 	elseif projectile.travel >= projectile.distance then
-		self:_returnProjectile(player)
+		self:_returnProjectile(player, "range")
 	end
 end
 
 function CaptureService:_stepSession(player, session, dt)
 	local creature = session.creature
 	local root = playerRoot(player)
-	if
-		not root
-		or not creature.Parent
-		or (root.Position - creature.PrimaryPart.Position).Magnitude > session.maxDistance
-	then
+	if not root or not creature.Parent then
 		self:_finish(player, false, nil)
+		return
+	end
+	if (root.Position - creature.PrimaryPart.Position).Magnitude > session.maxDistance then
+		self:_finish(player, false, "Too far from the creature.")
 		return
 	end
 	local elapsed = os.clock() - session.started
@@ -385,14 +392,30 @@ function CaptureService:_stepSession(player, session, dt)
 		self:_finish(player, false, "The creature escaped.")
 		return
 	end
+	session.rhythm += dt
+	local beat = session.rhythm % Config.RhythmSeconds
+	local phase = beat >= Config.OpeningStart and "opening" or beat >= Config.ResistStart and "resist" or "normal"
+	if phase ~= session.phase then
+		session.phase = phase
+		creature:SetAttribute("CapturePhase", phase)
+		if session.tether then
+			session.tether.beam.Color = ColorSequence.new(
+				phase == "opening" and Color3.fromRGB(111, 245, 168)
+					or phase == "resist" and Color3.fromRGB(255, 174, 95)
+					or Color3.fromRGB(255, 220, 122)
+			)
+		end
+	end
 	session.goalTimer -= dt
 	if session.goalTimer <= 0 then
-		session.goal = self.random:NextNumber(0.18, 0.82)
-		session.goalTimer = self.random:NextNumber(session.golden and 0.5 or 0.65, session.golden and 0.85 or 1.05)
+		local step = Config.GoalStep * (session.golden and 1.15 or 1)
+		session.goal = math.clamp(session.target + self.random:NextNumber(-step, step), 0.18, 0.82)
+		session.goalTimer = self.random:NextNumber(0.72, 1.02)
 	end
 	local difficulty = creature:GetAttribute("Difficulty") or 1
 	local potion = (session.potionUntil or 0) > os.clock()
-	local targetSpeed = 2.15 * difficulty * (potion and Gameplay.Items.Pocao.Slow or 1)
+	local speedFactor = phase == "resist" and Config.ResistSpeed or phase == "opening" and Config.OpeningSpeed or 1
+	local targetSpeed = 2.15 * difficulty * speedFactor * (potion and Gameplay.Items.Pocao.Slow or 1)
 	session.target += (session.goal - session.target) * math.min(1, dt * targetSpeed)
 	local desiredVelocity = session.holding and Config.ZoneMaxSpeed or -Config.ZoneMaxSpeed * 0.86
 	session.zoneVelocity += (desiredVelocity - session.zoneVelocity) * math.min(1, dt * Config.ZoneFriction)
@@ -407,7 +430,8 @@ function CaptureService:_stepSession(player, session, dt)
 		session.tether.beam.Width0 = overlap and 0.23 or 0.16
 		session.tether.beam.Width1 = session.tether.beam.Width0
 	end
-	local gain = Config.NormalGain / difficulty
+	local gainFactor = phase == "resist" and Config.ResistGain or phase == "opening" and Config.OpeningGain or 1
+	local gain = Config.NormalGain * gainFactor / difficulty
 	session.streak = math.clamp(session.streak + (overlap and 1 or -2) * dt, 0, 1.5)
 	session.progress =
 		math.clamp(session.progress + (overlap and gain * (1 + session.streak * 0.35) or -Config.MissDecay) * dt, 0, 1)
@@ -423,6 +447,7 @@ function CaptureService:_stepSession(player, session, dt)
 			streak = session.streak,
 			timeLeft = Config.CaptureTimeLimit - elapsed,
 			potion = potion,
+			phase = phase,
 		})
 	end
 	if session.progress >= 1 then
@@ -464,6 +489,7 @@ function CaptureService:PlayerRemoving(player)
 	end
 	if session and session.creature.Parent then
 		session.creature:SetAttribute("BusyUserId", nil)
+		session.creature:SetAttribute("CapturePhase", nil)
 	end
 	self.sessions[player] = nil
 end

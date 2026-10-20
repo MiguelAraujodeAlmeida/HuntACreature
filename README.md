@@ -8,8 +8,8 @@ Comece por `00_Inicio/Painel do Projeto.md` e `00_Inicio/Estado Atual.md`. As re
 
 ## Estado de sincronização
 
-Os arquivos `studio/` são cópias editáveis da revisão atual do Studio. A sincronização automática **ainda não foi configurada/verificada**. Antes de mudar scripts, compare os dois lados. O cenário fica no lugar do Roblox Studio; `studio/BuildWorld.luau` é um gerador destrutivo do cenário do protótipo e exige cópia prévia do lugar.
+Os arquivos `studio/` são as fontes versionadas de referência. A sincronização automática com o Studio **ainda não foi configurada**: aplique mudanças no lugar e salve-o separadamente. Compare Studio e disco somente diante de divergência concreta ou falha de aplicação. `studio/BuildWorld.luau` é histórico e destrutivo para o cenário atual.
 
 ## Próxima etapa operacional
 
-Salvar uma cópia recuperável do lugar, comparar scripts locais/Studio e configurar um único fluxo de sincronização (candidato: Script Sync). Depois executar uma pequena alteração de prova, validar ida/volta e registrar o resultado no cofre.
+O lugar de teste foi salvo na Roblox após o polimento da caça em 20/10/2026. Publicação e playtest manual continuam separados. A exportação integral recuperável (.rbxl) e a sincronização automática ainda precisam de um fluxo verificado.

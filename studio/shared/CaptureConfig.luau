@@ -24,9 +24,17 @@ Config.StateInterval = 0.05
 Config.ZoneFriction = 7.5
 Config.ZoneMaxSpeed = 0.93
 Config.ZoneRadius = 0.16
-Config.NormalGain = 0.29
+Config.NormalGain = 0.18 -- Uma boa disputa dura varios ciclos, sem captura instantanea.
 Config.StrengthRadiusBonus = 0.09
 Config.StrengthHalfBonus = 30
-Config.MissDecay = 0.07
+Config.MissDecay = 0.075
+Config.RhythmSeconds = 3.6
+Config.ResistStart = 1.25
+Config.OpeningStart = 2.35
+Config.ResistSpeed = 1.28
+Config.OpeningSpeed = 0.62
+Config.ResistGain = 0.78
+Config.OpeningGain = 1.32
+Config.GoalStep = 0.25
 
 return Config

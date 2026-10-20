@@ -131,7 +131,10 @@ capture = require(Modules.CaptureService).new({
 		if not item then
 			return false
 		end
+		local firstSpecies, firstVariant
 		local ok, message = Profiles:Change(player, function(p)
+			firstSpecies = not p.discoveries[item.species]
+			firstVariant = not (p.variantDiscoveries and p.variantDiscoveries[C.VariantKey(item)])
 			return Data.Capture(p, item)
 		end)
 		if not ok then
@@ -141,16 +144,21 @@ capture = require(Modules.CaptureService).new({
 		local index = model:GetAttribute("SpawnIndex")
 		model:Destroy()
 		publish(player)
-		remote:FireClient(
-			player,
-			"Reward",
-			table.find(item.mutations, "Dourado") ~= nil,
-			message .. " " .. C.Name(item)
-		)
 		task.delay(C.RespawnSeconds, function()
 			spawnWild(index)
 		end)
-		return true
+		return true, {
+			name = C.Name(item),
+			species = item.species,
+			mutations = item.mutations,
+			size = item.size,
+			rarity = C.RarityNames[item.rarity] or item.rarity,
+			golden = table.find(item.mutations, "Dourado") ~= nil,
+			firstSpecies = firstSpecies,
+			firstVariant = firstVariant,
+			goldPerSecond = C.Value(item, "Income"),
+			xpPerSecond = C.Value(item, "XP"),
+		}
 	end,
 })
 huntingTools = require(Modules.HuntingTools).new({

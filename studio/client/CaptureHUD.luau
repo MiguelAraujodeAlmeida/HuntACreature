@@ -53,11 +53,16 @@ function Capture.new(parent)
 	self.ProgressFill = progress
 	self.Track = W.frame(self.Root, "Disputa", UDim2.fromOffset(350, 42), UDim2.fromOffset(87, 79), S.UI.Ink, 13)
 	self.Track.ClipsDescendants = true
-	W.stroke(self.Track, S.UI.Cyan, 2)
+	self.TrackStroke = W.stroke(self.Track, S.UI.Cyan, 2)
 	self.Zone = W.frame(self.Track, "Zona", UDim2.fromScale(0.32, 1), UDim2.fromScale(0.34, 0), S.UI.Cyan, 10)
 	W.gradient(self.Zone, S.UI.Cyan, Color3.fromRGB(12, 95, 240))
 	self.Target = W.frame(self.Track, "Alvo", UDim2.fromOffset(12, 42), UDim2.fromOffset(170, 0), S.UI.Gold, 6)
 	W.stroke(self.Target, S.UI.White, 2)
+	self.Phase = W.text(self.Track, "Ritmo", "", UDim2.fromOffset(60, 17), UDim2.fromOffset(5, 2), 13, S.UI.White)
+	self.Phase.ZIndex = 11
+	self.Potion = W.text(self.Track, "Pocao", "SLOWED", UDim2.fromOffset(67, 17), UDim2.new(1, -72, 0, 2), 13, S.UI.Green)
+	self.Potion.ZIndex = 11
+	self.Potion.Visible = false
 	self.Hold = Button.new(self.Root, {
 		name = "SegurarLaco",
 		text = "PULL",
@@ -73,6 +78,10 @@ function Capture.new(parent)
 end
 function Capture:Reset()
 	self.milestone = 0
+	self.lastPhase = nil
+	self.wasPotion = false
+	self.Phase.Text = ""
+	self.Potion.Visible = false
 	self.desired = { target = 0.5, zone = 0.5, progress = 0.16, overlap = false, timeLeft = 28 }
 	self.display = { target = 0.5, zone = 0.5, progress = 0.16 }
 end
@@ -138,9 +147,11 @@ function Capture:SetCharging(power, range, maxRange)
 		Effects.Burst(self.Charge, W.Style.UI.Gold, 6)
 	end
 	self.wasFull = power >= 1
-	self.Power.Text = string.format("%d%%", math.floor(power * 100))
+	self.Power.Text = power >= 1 and "MAX" or string.format("%d%%", math.floor(power * 100))
 	self.ChargeFill.Size = UDim2.fromScale(math.max(0.005, power), 1)
 	self.Power.TextColor3 = power >= 1 and S.UI.White or S.UI.Gold
+	self.ChargeFill.BackgroundColor3 = S.UI.Gold:Lerp(S.UI.White, power * 0.45)
+	self.ChargeScale.Scale = 1 + power * 0.025 + (power >= 1 and math.sin(os.clock() * 5) * 0.012 or 0)
 end
 function Capture:SetHolding(value)
 	self.Hold:SetHeld(value)
@@ -165,6 +176,22 @@ function Capture:Render(dt)
 	self.Timer.Text = string.format("%ds", math.max(0, math.ceil(s.timeLeft or 0)))
 	self.Timer.TextColor3 = s.potion and S.UI.Green or S.UI.White
 	self.Target.BackgroundColor3 = s.potion and S.UI.Green or S.UI.Gold
+	self.Target.Size = UDim2.new(0, s.overlap and 13 or 10, 1, 0)
+	self.TrackStroke.Color = s.phase == "opening" and S.UI.Green or s.phase == "resist" and S.UI.Gold or S.UI.Cyan
+	self.Phase.Text = s.phase == "opening" and "OPEN" or s.phase == "resist" and "RESIST" or ""
+	self.Phase.TextColor3 = s.phase == "opening" and S.UI.Green or S.UI.Gold
+	self.Potion.Visible = s.potion == true
+	if s.phase ~= self.lastPhase then
+		if s.phase == "opening" then
+			Effects.Burst(self.Track, S.UI.Green, 3)
+		end
+		self.lastPhase = s.phase
+	end
+	if s.potion and not self.wasPotion then
+		Effects.Burst(self.Potion, S.UI.Green, 4)
+		Audio.Play("Charged", 0.86)
+	end
+	self.wasPotion = s.potion == true
 	local milestone = math.floor(d.progress * 4)
 	if milestone > self.milestone then
 		self.milestone = milestone

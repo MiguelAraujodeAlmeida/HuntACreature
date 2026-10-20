@@ -73,6 +73,7 @@ function Feedback:Hide(hideTool)
 	self.Highlight.Enabled = false
 	self.Highlight.Adornee = nil
 	self.lastTarget = nil
+	self.lastState = nil
 end
 function Feedback:Update(ray, lasso, power, charging)
 	local character = self.player.Character
@@ -88,29 +89,59 @@ function Feedback:Update(ray, lasso, power, charging)
 	if effects then
 		table.insert(exclusions, effects)
 	end
-	local resolved = Aim.Resolve(origin, ray, Aim.Range(lasso, power), Aim.Params(exclusions), Config.AimLimit)
-	local target = resolved.hit and Aim.Creature(resolved.hit.Instance, wild)
-	if target and target:GetAttribute("BusyUserId") then
-		target = nil
+	local range = Aim.Range(lasso, power)
+	local resolved = Aim.Resolve(origin, ray, range, Aim.Params(exclusions), Config.AimLimit)
+	local aimed = resolved.hit and Aim.Creature(resolved.hit.Instance, wild)
+	local camera = workspace.CurrentCamera
+	local cursor = camera and camera:WorldToViewportPoint(ray.origin + ray.direction * 20)
+	local target, nearest = aimed, math.huge
+	if not target and camera and cursor then
+		for _, creature in ipairs(wild:GetChildren()) do
+			if creature:IsA("Model") and creature.PrimaryPart then
+				local screen, visible = camera:WorldToViewportPoint(creature.PrimaryPart.Position)
+				local pixels = (Vector2.new(screen.X, screen.Y) - Vector2.new(cursor.X, cursor.Y)).Magnitude
+				if visible and pixels < 82 and pixels < nearest then
+					target, nearest = creature, pixels
+				end
+			end
+		end
+	end
+	local detected = target
+	if not target and self.lastTarget and self.lastTarget.Parent and os.clock() - (self.focusTime or 0) < 0.12 then
+		target = self.lastTarget
+	end
+	local state
+	if target and target.PrimaryPart then
+		local distance = (target.PrimaryPart.Position - origin).Magnitude
+		local busy = target:GetAttribute("BusyUserId")
+		local locked = (self.player:GetAttribute("Forca") or 0) < Gameplay.MinimumStrength(target:GetAttribute("Species"))
+		local obstruction = workspace:Raycast(origin, target.PrimaryPart.Position - origin, Aim.Params(exclusions))
+		local blocked = obstruction and Aim.Creature(obstruction.Instance, wild) ~= target
+		state = busy and "busy" or locked and "locked" or distance > range + Config.LoopRadius and "far"
+			or blocked and "blocked" or aimed == target and "aimed" or "near"
+		if detected then self.focusTime = os.clock() end
 	end
 	self.Highlight.Adornee = target
 	self.Highlight.Enabled = target ~= nil
-	self.Highlight.OutlineColor = target and target:GetAttribute("Golden") and Color3.fromRGB(255, 211, 35)
-		or Color3.fromRGB(59, 245, 227)
-	local locked = target
-		and (self.player:GetAttribute("Forca") or 0) < Gameplay.MinimumStrength(target:GetAttribute("Species"))
-	if locked then
-		self.Highlight.OutlineColor = Color3.fromRGB(255, 85, 100)
-	end
-	self.Highlight.OutlineTransparency = 0.08 + (math.sin(os.clock() * 5) + 1) * 0.04
-	if target and target ~= self.lastTarget then
+	local palette = {
+		far = Color3.fromRGB(171, 195, 204), near = Color3.fromRGB(72, 221, 219),
+		aimed = target and target:GetAttribute("Golden") and Color3.fromRGB(255, 211, 35) or Color3.fromRGB(91, 255, 195),
+		blocked = Color3.fromRGB(255, 174, 90), busy = Color3.fromRGB(187, 148, 222),
+		locked = Color3.fromRGB(255, 133, 116),
+	}
+	self.Highlight.OutlineColor = palette[state] or palette.near
+	self.Highlight.FillColor = palette[state] or palette.near
+	self.Highlight.FillTransparency = state == "aimed" and 0.84 or state == "busy" and 0.9
+		or state == "blocked" and 0.95 or 1
+	local baseTransparency = state == "aimed" and 0.04 or state == "near" and 0.35
+		or state == "blocked" and 0.55 or state == "busy" and 0.48 or 0.7
+	self.Highlight.OutlineTransparency = baseTransparency + (state == "aimed" and (math.sin(os.clock() * 3) + 1) * 0.035 or 0)
+	if target and state == "aimed" and (target ~= self.lastTarget or self.lastState ~= "aimed") then
 		Visuals.Burst(self.Folder, resolved.endpoint, Color3.fromRGB(91, 255, 206), 4)
 	end
 	self.lastTarget = target
-	self.Marker.Color = target and Color3.fromRGB(71, 255, 164) or Color3.fromRGB(255, 216, 73)
-	if locked then
-		self.Marker.Color = Color3.fromRGB(255, 85, 100)
-	end
+	self.lastState = state
+	self.Marker.Color = palette[state] or Color3.fromRGB(255, 216, 73)
 	self.Marker.Position = resolved.endpoint
 	self.Marker.Transparency = charging and 0.15 or 1
 	if charging then
@@ -133,7 +164,7 @@ function Feedback:Update(ray, lasso, power, charging)
 		self:StopSpin()
 	end
 	self:SetToolHidden(charging)
-	return Aim.Range(lasso, power)
+	return range
 end
 function Feedback:Destroy()
 	self:SetToolHidden(false)

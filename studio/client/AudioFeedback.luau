@@ -89,11 +89,11 @@ function Audio.StopCharge()
 	Audio.chargeVoice = nil
 end
 
-function Audio.Reward(golden)
+function Audio.Reward(golden, discovery)
 	Audio.Play(golden and "Rare" or "Win")
-	if golden then
+	if golden or discovery then
 		local generation = Audio.generation
-		for i = 1, 3 do
+		for i = 1, discovery and 4 or 3 do
 			task.delay(0.35 + i * 0.13, function()
 				if generation == Audio.generation then Audio.Play("Sparkle", 1 + i * 0.12) end
 			end)

@@ -31,6 +31,42 @@ function V.Loop(parent)
 	model.Parent = parent
 	return model
 end
+function V.Flight(model, power)
+	local center = model.PrimaryPart
+	local a = Instance.new("Attachment")
+	a.Position = Vector3.new(-Config.LoopRadius * 0.8, 0, 0)
+	a.Parent = center
+	local b = Instance.new("Attachment")
+	b.Position = Vector3.new(Config.LoopRadius * 0.8, 0, 0)
+	b.Parent = center
+	local trail = Instance.new("Trail")
+	trail.Name = "TrilhaDoArremesso"
+	trail.Attachment0, trail.Attachment1 = a, b
+	trail.Lifetime = 0.12 + power * 0.1
+	trail.MinLength = 0.4
+	trail.FaceCamera = true
+	trail.LightEmission = 0.4
+	trail.Color = ColorSequence.new(Color3.fromRGB(255, 228, 143), Color3.fromRGB(255, 191, 65))
+	trail.Transparency = NumberSequence.new(0.25, 1)
+	trail.Parent = center
+end
+function V.Returning(model, line)
+	local trail = model.PrimaryPart:FindFirstChild("TrilhaDoArremesso")
+	if trail then
+		trail.Lifetime = 0.1
+		trail.Color = ColorSequence.new(Color3.fromRGB(88, 220, 255), Color3.fromRGB(143, 244, 255))
+	end
+	for _, child in ipairs(model:GetChildren()) do
+		if child.Name == "Corda" then
+			child.Color = Color3.fromRGB(103, 213, 236)
+			child.Transparency = 0.24
+		end
+	end
+	if line then
+		line.beam.Color = ColorSequence.new(Color3.fromRGB(105, 222, 244))
+		line.beam.Width0, line.beam.Width1 = 0.09, 0.09
+	end
+end
 function V.Line(character, part)
 	local hand = character
 		and (
