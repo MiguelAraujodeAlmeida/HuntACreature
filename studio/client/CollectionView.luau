@@ -36,7 +36,8 @@ function View.Content(data, tab)
 	elseif tab == "Melhorias" then
 		return p.upgrades
 	elseif tab == "Loja" then
-		return { rotation = data.rotation, shop = p.shop, owned = p.owned, items = p.items }
+		return { rotation = data.rotation, shop = p.shop, owned = p.owned, items = p.items,
+			rank = require(game.ReplicatedStorage.HACShared.HunterProgression).Level(p.xp) }
 	end
 	return nil
 end

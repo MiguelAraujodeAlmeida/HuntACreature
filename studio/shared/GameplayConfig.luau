@@ -10,6 +10,7 @@ C.Species = {
 		Sale = 12,
 		Income = 1,
 		XP = 1,
+		ResearchXP = 1,
 		MinimumStrength = 0,
 		Description = "A playful wanderer. Flees from hunters until it tires.",
 	},

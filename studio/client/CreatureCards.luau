@@ -63,7 +63,7 @@ function Cards.Detail(parent, item, known, options)
 	cap.MinTextSize, cap.MaxTextSize, cap.Parent = 16, 28, name
 	Kit.Stat(panel, "Income", W.Style.Icons.Coin, known and C.Value(item, "Income") .. "/s" or "?", 0, 258)
 	Kit.Stat(panel, "XP", W.Style.Icons.XP,
-		known and Rank.PassiveXPPerCreature .. " / " .. Rank.PassiveSeconds .. "s at base" or "?", 0.5, 258)
+		known and Rank.ResearchValue(item) .. " / " .. Rank.PassiveSeconds .. "s at base" or "?", 0.5, 258)
 	local status = options.status or ""
 	Kit.Label(
 		panel,

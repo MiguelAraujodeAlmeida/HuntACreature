@@ -88,7 +88,7 @@ publish = function(player)
 	local previousRank = player:GetAttribute("HunterRank")
 	player:SetAttribute("HunterRank", level)
 	if previousRank and level > previousRank then
-		notice(player, "Hunter Rank " .. level .. "! Gold and training bonuses increased.")
+		remote:FireClient(player, "HunterRankUp", { from = previousRank, to = level })
 	end
 	player:SetAttribute("ProfileReady", true)
 	local stats = player:FindFirstChild("leaderstats")
@@ -164,7 +164,7 @@ capture = require(Modules.CaptureService).new({
 			firstVariant = firstVariant,
 			goldPerSecond = C.Value(item, "Income"),
 			xpEarned = Rank.CaptureReward(item, firstSpecies, firstVariant),
-			passiveXP = Rank.PassiveXPPerCreature,
+			passiveXP = Rank.ResearchValue(item),
 			passiveSeconds = Rank.PassiveSeconds,
 		}
 	end,
@@ -447,11 +447,12 @@ RunService.Heartbeat:Connect(function(dt)
 	for _, player in ipairs(Players:GetPlayers()) do
 		local p = Profiles:Get(player)
 		if p then
-			local income, active = 0, 0
+			local income, active, research = 0, 0, 0
 			for _, item in pairs(p.creatures) do
 				if item.location == "base" then
 					income += C.Value(item, "Income")
 					active += 1
+					research += Rank.ResearchValue(item)
 				end
 			end
 			passiveElapsed[player] = active > 0 and (passiveElapsed[player] or 0) + elapsed or 0
@@ -463,7 +464,7 @@ RunService.Heartbeat:Connect(function(dt)
 				Profiles:Change(player, function(profile)
 					Rank.CreditGold(profile, income)
 					if passiveDue then
-						profile.xp += Rank.PassiveReward(active, profile.xp)
+						profile.xp += Rank.PassiveReward(research, profile.xp)
 					end
 					return true
 				end, true)

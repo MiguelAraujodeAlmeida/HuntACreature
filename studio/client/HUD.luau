@@ -4,6 +4,7 @@ local UIS = game:GetService("UserInputService")
 local W = require(script.Parent.HUDWidgets)
 local Button = require(script.Parent.GlossyButton)
 local Resources = require(script.Parent.ResourceHUD)
+local RankDisplay = require(script.Parent.HunterRankHUD)
 local Capture = require(script.Parent.CaptureHUD)
 local RewardPresentation = require(script.Parent.RewardPresentation)
 local QuickSlot = require(script.Parent.QuickSlot)
@@ -58,6 +59,15 @@ function HUD.new(player)
 	self.IndexSkin.Root.Activated:Connect(function()
 		if self.Collection then
 			self.Collection:Open("Index")
+		end
+	end)
+	self.Rank = RankDisplay.new(gui, function()
+		if self.Collection then
+			if self.Collection.root.Visible and self.Collection.tab == "HunterRank" then
+				self:CloseSheet()
+			else
+				self.Collection:Open("HunterRank")
+			end
 		end
 	end)
 	self.SettingsSkin = Button.new(
@@ -170,24 +180,34 @@ function HUD:Resize(view)
 	self.Capture:Resize(layout)
 	local margin = layout.margin
 	self.BagButton.Size = UDim2.fromOffset(layout.bag, layout.bag)
-	local bagY = layout.desktop and math.max(margin, view.Y - 3 * (layout.resourceHeight + 8) - layout.bag - 28)
+	local bagY = layout.desktop and math.max(margin, view.Y - 2 * (layout.resourceHeight + 8) - layout.bag - 28)
 		or margin + layout.resourceHeight + 14
 	self.BagButton.Position = layout.narrow and UDim2.new(1, -margin - layout.bag, 0, margin + 5)
 		or UDim2.fromOffset(margin, bagY)
 	local navWidth = math.max(100, layout.bag)
 	self.IndexSkin.Root.Size = UDim2.fromOffset(navWidth, 44)
+	local rankSize = layout.bag
+	local rankPosition
 	if layout.narrow then
-		local y = margin + 5 + layout.bag + 6
+		rankPosition = UDim2.new(1, -margin - rankSize, 0, margin + 11 + layout.bag)
+	elseif layout.desktop then
+		rankPosition = UDim2.fromOffset(margin, bagY - 50 - rankSize - 8)
+	else
+		rankPosition = UDim2.fromOffset(margin + layout.bag + 8, bagY)
+	end
+	self.Rank:Resize(view, rankPosition, rankSize)
+	if layout.narrow then
+		local y = margin + 17 + layout.bag * 2
 		self.IndexSkin.Root.Position = UDim2.new(1, -margin - navWidth, 0, y)
 	elseif layout.desktop then
 		self.IndexSkin.Root.Position = UDim2.fromOffset(margin, bagY - 50)
 	else
-		self.IndexSkin.Root.Position = UDim2.fromOffset(margin + layout.bag + 8, bagY)
+		self.IndexSkin.Root.Position = UDim2.fromOffset(margin + layout.bag * 2 + 16, bagY)
 	end
-	self.SettingsSkin.Root.Position = layout.narrow and UDim2.new(1, -margin - navWidth, 0, margin + layout.bag + 61)
+	self.SettingsSkin.Root.Position = layout.narrow and UDim2.new(1, -margin - navWidth, 0, margin + 63 + layout.bag * 2)
 		or (
 			layout.desktop and UDim2.new(1, -margin - 116, 0, margin)
-			or UDim2.fromOffset(margin + layout.bag + 8, bagY + 50)
+			or UDim2.fromOffset(margin + layout.bag * 2 + navWidth + 22, bagY)
 		)
 	self.SettingsSkin.Root.Size = UDim2.fromOffset(layout.narrow and navWidth or 116, 40)
 	self.BagBadge.Size = UDim2.fromOffset(32, 24)
@@ -231,11 +251,14 @@ function HUD:UpdateStats()
 	local stats = self.player:FindFirstChild("leaderstats")
 	local gold = stats and stats:FindFirstChild("Gold")
 	local xp = stats and stats:FindFirstChild("XP")
-	self.Resources:Update(gold and gold.Value or 0, xp and xp.Value or 0,
-		self.player:GetAttribute("Forca") or 0, self.player:GetAttribute("HunterRank") or 1)
+	self.Resources:Update(gold and gold.Value or 0, self.player:GetAttribute("Forca") or 0)
+	self.Rank:Update(xp and xp.Value or 0)
 	local carried = self.player:GetAttribute("Carregando") or 0
 	local bagCapacity = self.player:GetAttribute("BagCapacity") or 3
 	self.BagCount.Text = string.format("%d/%d", carried, bagCapacity)
+end
+function HUD:RankUp(from, to)
+	self.Rank:Celebrate(from, to)
 end
 function HUD:SetEquipped(value)
 	self.equipped = value

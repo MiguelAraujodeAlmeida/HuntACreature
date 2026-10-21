@@ -28,6 +28,7 @@ Não criar novas telas copiando o antigo `UI:Card(título, parágrafo)`. Esse co
 - Uma ação principal por seleção. Confirmar venda e oferecer cancelamento; favorito bloqueia venda. Compra indisponível exibe o motivo real.
 - Estados obrigatórios: carregando, vazio, selecionado, indisponível, confirmação (quando destrutivo), atualização de dados.
 - Não adicionar produtos, timers artificiais, percentuais, recompensas de coleção ou itens futuros só para preencher espaços.
+- Hunter Rank mostra o rank atual, percentual até o próximo e benefícios do próximo marco. Não expor custo bruto em XP, lista completa dos ranks nem rotular o último rank atualmente configurado como máximo. Exibir silhuetas apenas para equipamento real com `RequiredHunterRank`; missões ficam marcadas como futuras até existir sistema próprio.
 
 ## Layout e interação
 

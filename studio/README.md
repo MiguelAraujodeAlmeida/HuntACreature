@@ -8,7 +8,7 @@ Atualizado em 21/10/2026. Lugar **[Testing] Hunt a Creature**, placeId **1023104
 - Base viva, Settings, favoritos protegidos, inglês nativo, Tools/Lassos e Index visual por variantes implementados. Tamanho individual é multiplicador oculto contínuo de 1× a 5×; a curva e o teto ficam em GameplayConfig.
 - Caça polida: estados de mira, carga, voo/retorno, ritmo da disputa, reação do Lumito e recompensa curta com retrato e renda potencial na base. Treino, inventário, renda e placas preservados.
 - Menus ativos usam MenuTheme/MenuKit, galerias, detalhes e arte de equipamentos. A rodada de caça teve compilação estática em Edit; diversão, precisão, PC/celular e persistência real dependem do desenvolvedor.
-- Protótipo de Hunter Rank com 10 níveis por XP total, captura/descoberta como fonte principal, XP passivo pequeno por criatura equipada, bônus de ouro/treino e requisito opcional `RequiredHunterRank` na loja. Nenhum item atual foi bloqueado.
+- Hunter Rank tem entrada própria no HUD, barra de progresso, celebração de subida e página que revela somente o próximo rank e benefícios reais. XP vem principalmente de captura/descoberta, com bônus por Gold/tamanho e pesquisa menor por criatura equipada. Requisito `RequiredHunterRank` é opcional por item; nenhum item atual foi bloqueado.
 - Reset global por geração fixa `20261021_hunter_rank_01` em PersistenceConfig. Todos os perfis começam novos quando esta versão entrar em uso; gerações anteriores permanecem recuperáveis. Aplicação em Edit e publicação são estados separados.
 
 ## Organização
@@ -23,7 +23,7 @@ Atualizado em 21/10/2026. Lugar **[Testing] Hunt a Creature**, placeId **1023104
 
 Parâmetros: GameplayConfig, CaptureConfig, VisualStyle e MenuTheme em shared/; CreatureProfiles e PersistenceConfig em server/. Guia de arte: [STYLE_GUIDE.md](STYLE_GUIDE.md).
 
-`HunterProgression.luau` concentra a curva de dez ranks, recompensas de captura, intervalo do XP passivo e bônus por rank. `ProfileData` credita XP e valida compras no servidor; `HuntACreature.server` credita renda/treino mantendo resíduos fracionários no perfil. O XP é acumulado e não consumido nem reiniciado ao subir de rank. Os preços e a renda de espécies futuras continuam livres por entrada no catálogo; a economia inicial não foi inflada sem novo conteúdo para sustentá-la.
+`HunterProgression.luau` concentra a curva inicial de dez ranks, recompensas de captura, pesquisa passiva por espécie/variante, intervalo e bônus por rank. `ProfileData` credita XP e valida compras no servidor; `HuntACreature.server` credita renda/treino mantendo resíduos fracionários no perfil. O XP é acumulado e não consumido nem reiniciado ao subir de rank. `HunterRankHUD` apresenta entrada/progresso/celebração; `HunterRankPage` apresenta próximo marco e missões ainda indisponíveis. Os preços e a renda de espécies futuras continuam livres por entrada no catálogo; a economia inicial não foi inflada sem novo conteúdo para sustentá-la.
 
 UpgradePage é legado sem rota ativa. QuickSlot reserva espaço invisível para compatibilidade de layout; os slots visíveis pertencem ao Backpack nativo. O único laço implementado continua no StarterPack. Não ampliar código morto para criar novos acessos duplicados.
 

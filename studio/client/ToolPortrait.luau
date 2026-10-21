@@ -2,9 +2,10 @@
 local TweenService = game:GetService("TweenService")
 local W = require(script.Parent.HUDWidgets)
 local Art = {}
-function Art.new(parent, id, size, position)
+function Art.new(parent, id, size, position, silhouette)
 	if id == "LacoTreino" then
 		local icon = W.icon(parent, "LassoArt", W.Style.Icons.Lasso, size, position)
+		if silhouette then icon.ImageColor3 = Color3.fromRGB(19, 27, 57) end
 		icon.ZIndex = parent.ZIndex + 1
 		return icon
 	end
@@ -18,7 +19,7 @@ function Art.new(parent, id, size, position)
 	local function part(name, shape, scale, cf, color)
 		local p = Instance.new("Part")
 		p.Name, p.Shape, p.Size, p.CFrame = name, shape, scale, cf
-		p.Color, p.Material = color, Enum.Material.SmoothPlastic
+		p.Color, p.Material = silhouette and Color3.fromRGB(19, 27, 57) or color, Enum.Material.SmoothPlastic
 		p.Anchored, p.CanCollide, p.CanTouch, p.CanQuery = true, false, false, false
 		p.Parent = world
 		return p
@@ -75,7 +76,7 @@ function Art.new(parent, id, size, position)
 				cyan
 			)
 		end
-	else
+	elseif id == "Pocao" then
 		part("Bottle", ball, Vector3.new(2, 2.2, 2), CFrame.new(0, -0.15, 0), purple)
 		part(
 			"Neck",
@@ -93,6 +94,10 @@ function Art.new(parent, id, size, position)
 		)
 		part("Label", ball, Vector3.new(0.9, 0.95, 0.15), CFrame.new(0, -0.15, -0.98), Color3.fromRGB(255, 247, 217))
 		part("Star", ball, Vector3.new(0.28, 0.3, 0.2), CFrame.new(0, -0.15, -1.07), purple)
+	else
+		part("UnknownCore", block, Vector3.new(2.2, 2.5, 1.8), CFrame.new(0, 0, 0), cyan)
+		part("UnknownHandle", cylinder, Vector3.new(0.5, 1.7, 1.7),
+			CFrame.new(0, -1.3, 0) * CFrame.Angles(0, 0, math.pi / 2), gold)
 	end
 	local camera = Instance.new("Camera")
 	camera.FieldOfView = 32

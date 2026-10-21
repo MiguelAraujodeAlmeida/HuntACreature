@@ -187,6 +187,7 @@ function UI:Open(tab, group)
 	local hud = self.hud
 	hud.BagSkin:SetSelected(self.tab == "Criaturas")
 	hud.IndexSkin:SetSelected(self.tab == "Index")
+	hud.Rank.Skin:SetSelected(self.tab == "HunterRank")
 	hud.SettingsSkin:SetSelected(self.tab == "Settings")
 	if not self.openScale then
 		self.openScale = Instance.new("UIScale")
@@ -211,6 +212,7 @@ function UI:Close()
 	self.confirm = nil
 	self.hud.BagSkin:SetSelected(false)
 	self.hud.IndexSkin:SetSelected(false)
+	self.hud.Rank.Skin:SetSelected(false)
 	self.hud.SettingsSkin:SetSelected(false)
 end
 function UI:Send(action, id, extra)
@@ -274,6 +276,7 @@ function UI:UpdateTools()
 	self.hud.IndexSkin.Root.Visible = not self.controller.capturing
 		and not self.exit.Root.Visible
 		and not self.hud.sheetKind
+	self.hud.Rank.Root.Visible = self.hud.IndexSkin.Root.Visible
 	local left = math.max(0, math.ceil((self.player:GetAttribute("CooldownPocao") or 0) - workspace:GetServerTimeNow()))
 	self.potion.Root.Visible = self.controller.capturing
 		and self.activeItem == "Pocao"

@@ -27,7 +27,7 @@ function Button.new(parent, o)
 		local face = W.icon(visual, "Arte", S.Skins.Tile, UDim2.fromScale(1, 1), UDim2.fromScale(0, 0))
 		face.ScaleType = Enum.ScaleType.Stretch
 		self.icon = W.icon(face, "Icone", o.icon, UDim2.fromScale(0.78, 0.76), UDim2.fromScale(0.11, 0.005))
-		local plate = W.panel(face, "Placa", UDim2.fromScale(0.9, 0.28), UDim2.fromScale(0.05, 0.68), S.UI.Cyan)
+		local plate = W.panel(face, "Placa", UDim2.fromScale(0.9, 0.28), UDim2.fromScale(0.05, 0.68), o.color or S.UI.Cyan)
 		self.caption =
 			W.text(plate, "Legenda", o.text, UDim2.new(1, -12, 1, -4), UDim2.fromOffset(6, 0), o.textSize or 25)
 	else

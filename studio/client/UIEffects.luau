@@ -8,7 +8,7 @@ function E.Burst(parent, color, count)
 		local t = W.text(parent, "ParticulaUI", "✦", UDim2.fromOffset(16, 16), UDim2.fromScale(0.5, 0.5), 16, color)
 		t.AnchorPoint = Vector2.new(0.5, 0.5)
 		t:FindFirstChildOfClass("UIStroke").Enabled = false
-		t.ZIndex = 8
+		t.ZIndex = parent.ZIndex + 3
 		local angle = math.pi * 2 * i / (count or 5)
 		TweenService:Create(t, TweenInfo.new(0.38, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
 			Position = UDim2.new(0.5, math.cos(angle) * 45, 0.5, math.sin(angle) * 36),

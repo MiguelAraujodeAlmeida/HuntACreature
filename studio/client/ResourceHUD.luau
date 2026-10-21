@@ -7,7 +7,6 @@ local Resources = {}
 Resources.__index = Resources
 local specs = {
 	{ "Ouro", "GOLD", S.Icons.Coin, S.UI.Gold },
-	{ "XP", "XP", S.Icons.XP, S.UI.Purple },
 	{ "Forca", "STRENGTH", S.Icons.Strength, S.UI.Cyan },
 }
 local function formatNumber(value)
@@ -23,7 +22,7 @@ local function formatNumber(value)
 end
 function Resources.new(parent, onDetails)
 	local self = setmetatable({ items = {} }, Resources)
-	self.Root = W.frame(parent, "Recursos", UDim2.fromOffset(244, 184), UDim2.new(0, 16, 1, -200))
+	self.Root = W.frame(parent, "Recursos", UDim2.fromOffset(244, 120), UDim2.new(0, 16, 1, -136))
 	self.Scale = Instance.new("UIScale")
 	self.Scale.Parent = self.Root
 	for index, spec in ipairs(specs) do
@@ -68,10 +67,11 @@ function Resources:Resize(layout)
 	local mode, margin = layout.resourceMode, layout.margin
 	local row = mode == "row"
 	local gap, height = 8, layout.resourceHeight
-	local width = row and math.min(224, (layout.width - margin * 2 - gap * 2) / 3)
+	local width = row and math.min(224, (layout.width - margin * 2 - gap * (#specs - 1)) / #specs)
 		or (mode == "narrow" and math.min(190, layout.width - layout.bag - margin * 3) or 224)
 	self.Scale.Scale = 1
-	self.Root.Size = UDim2.fromOffset(row and (width * 3 + gap * 2) or width, row and height or height * 3 + gap * 2)
+	self.Root.Size = UDim2.fromOffset(row and (width * #specs + gap * (#specs - 1)) or width,
+		row and height or height * #specs + gap * (#specs - 1))
 	self.Root.AnchorPoint = mode == "stack" and Vector2.new(0, 1) or Vector2.zero
 	self.Root.Position = mode == "stack" and UDim2.new(0, margin, 1, -margin) or UDim2.fromOffset(margin, margin)
 	for i, item in ipairs(self.items) do
@@ -91,9 +91,8 @@ function Resources:Resize(layout)
 		item.gain.Size = UDim2.fromOffset(width - 30, 24)
 	end
 end
-function Resources:Update(gold, xp, force, rank)
-	self.items[2].label.Text = "XP · RANK " .. tostring(rank or 1)
-	for i, value in ipairs({ gold, xp, force }) do
+function Resources:Update(gold, force)
+	for i, value in ipairs({ gold, force }) do
 		local item = self.items[i]
 		item.text.Text = formatNumber(value)
 		if item.value and value > item.value then

@@ -73,7 +73,8 @@ function Page.Render(ui)
 			UDim2.fromOffset(8, 8),
 			theme.Accent:Lerp(Kit.Theme.Ink, 0.48)
 		)
-		Art.new(stage, id, UDim2.new(1, -8, 1, -8), UDim2.fromOffset(4, 4))
+		Art.new(stage, id, UDim2.new(1, -8, 1, -8), UDim2.fromOffset(4, 4),
+			Rank.Level(ui.data.profile.xp) < (def.RequiredHunterRank or 1))
 		Kit.Badge(stage, "Type", theme.Tag, UDim2.fromOffset(82, 24), UDim2.fromOffset(6, 6), theme.Accent)
 		Kit.Badge(
 			stage,

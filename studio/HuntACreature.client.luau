@@ -28,6 +28,8 @@ remote.OnClientEvent:Connect(function(action, a, b, c)
 		collection:Open(a, b)
 	elseif action == "ActionFeedback" then
 		require(modules.AudioFeedback).Play(a == "Use" and "Hit" or "Progress")
+	elseif action == "HunterRankUp" then
+		hud:RankUp(a.from, a.to)
 	end
 	controller:HandleEvent(action, a, b, c)
 end)
