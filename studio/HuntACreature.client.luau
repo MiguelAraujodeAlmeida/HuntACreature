@@ -51,7 +51,7 @@ end)
 stats:WaitForChild("XP").Changed:Connect(function()
 	hud:UpdateStats()
 end)
-for _, attribute in ipairs({ "Carregando", "Instaladas", "Renda", "Forca", "Treinando", "BagCapacity", "BaseCapacity" }) do
+for _, attribute in ipairs({ "Carregando", "Instaladas", "Renda", "Forca", "Treinando", "BagCapacity", "BaseCapacity", "HunterRank" }) do
 	player:GetAttributeChangedSignal(attribute):Connect(function()
 		hud:UpdateStats()
 	end)

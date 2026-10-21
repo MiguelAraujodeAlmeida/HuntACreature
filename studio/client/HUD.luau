@@ -231,7 +231,8 @@ function HUD:UpdateStats()
 	local stats = self.player:FindFirstChild("leaderstats")
 	local gold = stats and stats:FindFirstChild("Gold")
 	local xp = stats and stats:FindFirstChild("XP")
-	self.Resources:Update(gold and gold.Value or 0, xp and xp.Value or 0, self.player:GetAttribute("Forca") or 0)
+	self.Resources:Update(gold and gold.Value or 0, xp and xp.Value or 0,
+		self.player:GetAttribute("Forca") or 0, self.player:GetAttribute("HunterRank") or 1)
 	local carried = self.player:GetAttribute("Carregando") or 0
 	local bagCapacity = self.player:GetAttribute("BagCapacity") or 3
 	self.BagCount.Text = string.format("%d/%d", carried, bagCapacity)

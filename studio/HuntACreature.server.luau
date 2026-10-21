@@ -3,6 +3,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local C = require(ReplicatedStorage.HACShared.GameplayConfig)
+local Rank = require(ReplicatedStorage.HACShared.HunterProgression)
 local Modules = script.Parent.HACServer
 local Data = require(Modules.ProfileData)
 local ToolInventory = require(Modules.ToolInventory)
@@ -28,7 +29,7 @@ local spawnPoints = world.IlhaCaca.PontosCriaturas:GetChildren()
 table.sort(spawnPoints, function(a, b)
 	return a.Name < b.Name
 end)
-local random, wildData, owners, training, requests = Random.new(), {}, {}, {}, {}
+local random, wildData, owners, training, requests, passiveElapsed = Random.new(), {}, {}, {}, {}, {}
 local capture, huntingTools
 local publish, spawnWild
 local closing = false
@@ -81,12 +82,18 @@ publish = function(player)
 	player:SetAttribute("Instaladas", Data.Count(p, "base"))
 	player:SetAttribute("BagCapacity", C.Stat(p, "Bolsa"))
 	player:SetAttribute("BaseCapacity", C.Stat(p, "Base"))
-	player:SetAttribute("Renda", income)
+	player:SetAttribute("Renda", income * Rank.GoldMultiplier(p.xp))
 	player:SetAttribute("Forca", p.strength)
+	local level = Rank.Level(p.xp)
+	local previousRank = player:GetAttribute("HunterRank")
+	player:SetAttribute("HunterRank", level)
+	if previousRank and level > previousRank then
+		notice(player, "Hunter Rank " .. level .. "! Gold and training bonuses increased.")
+	end
 	player:SetAttribute("ProfileReady", true)
 	local stats = player:FindFirstChild("leaderstats")
 	if stats then
-		stats.Gold.Value, stats.XP.Value = p.gold, p.xp
+		stats.Gold.Value, stats.XP.Value, stats.Rank.Value = p.gold, p.xp, level
 	end
 	local h = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
 	if h and not training[player] then
@@ -156,7 +163,9 @@ capture = require(Modules.CaptureService).new({
 			firstSpecies = firstSpecies,
 			firstVariant = firstVariant,
 			goldPerSecond = C.Value(item, "Income"),
-			xpPerSecond = C.Value(item, "XP"),
+			xpEarned = Rank.CaptureReward(item, firstSpecies, firstVariant),
+			passiveXP = Rank.PassiveXPPerCreature,
+			passiveSeconds = Rank.PassiveSeconds,
 		}
 	end,
 })
@@ -252,7 +261,7 @@ local function playerAdded(player)
 	player:SetAttribute("Treinando", false)
 	local stats = Instance.new("Folder")
 	stats.Name, stats.Parent = "leaderstats", player
-	for _, name in ipairs({ "Gold", "XP" }) do
+	for _, name in ipairs({ "Gold", "XP", "Rank" }) do
 		local v = Instance.new("IntValue")
 		v.Name, v.Parent = name, stats
 	end
@@ -286,6 +295,7 @@ local function playerRemoving(player)
 	capture:PlayerRemoving(player)
 	huntingTools:RemovePlayer(player)
 	requests[player] = nil
+	passiveElapsed[player] = nil
 	local base = baseOf(player)
 	if base then
 		base.CriaturasInstaladas:ClearAllChildren()
@@ -394,6 +404,9 @@ remote.OnServerEvent:Connect(function(player, action, args)
 	end
 	notice(player, message)
 	if ok then
+		if args.action == "Equip" or args.action == "Unequip" then
+			passiveElapsed[player] = 0
+		end
 		remote:FireClient(player, "ActionFeedback", args.action)
 	end
 	publish(player)
@@ -414,7 +427,10 @@ RunService.Heartbeat:Connect(function(dt)
 		elseif os.clock() - started >= C.TrainingSeconds then
 			training[player] = os.clock()
 			Profiles:Change(player, function(p)
-				p.strength += C.TrainingGain(p)
+				local amount = C.TrainingGain(p) * Rank.TrainingMultiplier(p.xp) + p.strengthCarry
+				local whole = math.floor(amount)
+				p.strength += whole
+				p.strengthCarry = amount - whole
 				return true
 			end, true)
 			publish(player)
@@ -423,6 +439,7 @@ RunService.Heartbeat:Connect(function(dt)
 	if incomeClock < C.IncomeSeconds then
 		return
 	end
+	local elapsed = incomeClock
 	incomeClock = 0
 	local nextRotation = C.Rotation(os.time()).id
 	local rotated = nextRotation ~= rotationId
@@ -430,21 +447,28 @@ RunService.Heartbeat:Connect(function(dt)
 	for _, player in ipairs(Players:GetPlayers()) do
 		local p = Profiles:Get(player)
 		if p then
-			local income, xp = 0, 0
+			local income, active = 0, 0
 			for _, item in pairs(p.creatures) do
 				if item.location == "base" then
 					income += C.Value(item, "Income")
-					xp += C.Value(item, "XP")
+					active += 1
 				end
 			end
-			if income > 0 then
+			passiveElapsed[player] = active > 0 and (passiveElapsed[player] or 0) + elapsed or 0
+			local passiveDue = passiveElapsed[player] >= Rank.PassiveSeconds
+			if passiveDue then
+				passiveElapsed[player] %= Rank.PassiveSeconds
+			end
+			if income > 0 or passiveDue and active > 0 then
 				Profiles:Change(player, function(profile)
-					profile.gold += income
-					profile.xp += xp
+					Rank.CreditGold(profile, income)
+					if passiveDue then
+						profile.xp += Rank.PassiveReward(active, profile.xp)
+					end
 					return true
 				end, true)
 			end
-			if income > 0 or rotated then
+			if income > 0 or passiveDue and active > 0 or rotated then
 				publish(player)
 			end
 		elseif Profiles.sessions[player] then

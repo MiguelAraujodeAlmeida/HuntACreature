@@ -44,7 +44,7 @@ function Reward:Show(data)
 		or data.firstVariant and "NEW INDEX VARIANT!" or "CAPTURED!"
 	self.Title.TextColor3 = accent
 	self.Name.Text = data.name or data.species
-	self.Rates.Text = string.format("AT BASE: +%d GOLD/s  +%d XP/s", data.goldPerSecond or 0, data.xpPerSecond or 0)
+	self.Rates.Text = string.format("+%d HUNTER XP  ·  AT BASE: +%d GOLD/s", data.xpEarned or 0, data.goldPerSecond or 0)
 	local details = {}
 	if data.firstVariant and data.golden and not data.firstSpecies then table.insert(details, "NEW INDEX VARIANT") end
 	if data.rarity and data.rarity ~= "Common" then table.insert(details, data.rarity:upper()) end

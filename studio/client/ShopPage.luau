@@ -1,4 +1,5 @@
 local C = require(game.ReplicatedStorage.HACShared.GameplayConfig)
+local Rank = require(game.ReplicatedStorage.HACShared.HunterProgression)
 local W = require(script.Parent.HUDWidgets)
 local Kit = require(script.Parent.MenuKit)
 local Art = require(script.Parent.ToolPortrait)
@@ -61,6 +62,7 @@ function Page.Render(ui)
 		local price, stock = offer and offer.price or def.Price, offer and offer.stock or 0
 		local bought = C.Bought(ui.data.profile, ui.data.rotation, id)
 		local owned = def.Permanent and ui.data.profile.owned[id]
+		local requiredRank = def.RequiredHunterRank or 1
 		local theme = Kit.Theme.Tools[id] or { Accent = W.Style.UI.Cyan, Tag = "GEAR" }
 		local card = Kit.Surface(grid, "Offer_" .. id, UDim2.new(), UDim2.new(), Kit.Theme.Surface)
 		card.LayoutOrder = order
@@ -103,10 +105,14 @@ function Page.Render(ui)
 				ui.data.profile.items[id] or 0
 			)
 		end
-		Kit.Label(card, "Stats", stats, UDim2.new(1, -16, 0, 28), UDim2.fromOffset(8, 239), 14, theme.Accent)
+		Kit.Label(card, "Stats", stats .. (requiredRank > 1 and " · RANK " .. requiredRank or ""),
+			UDim2.new(1, -16, 0, 28), UDim2.fromOffset(8, 239), 14, theme.Accent)
 		local rotation = ui.data.rotation.id
 		ui:PurchaseButton(card, "Buy:" .. id, "Buy · " .. price .. " gold", function()
 			local current = ui.data.profile
+			if Rank.Level(current.xp) < requiredRank then
+				return "Requires Hunter Rank " .. requiredRank
+			end
 			if def.Permanent and current.owned[id] then
 				return "Owned"
 			end

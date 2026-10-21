@@ -22,7 +22,7 @@ Não criar novas telas copiando o antigo `UI:Card(título, parágrafo)`. Esse co
 
 - Janela escura texturizada, contorno escuro, cabeçalho de cor por função, título grande, X vermelho no canto superior direito.
 - Studs usam a textura já existente; uma ImageLabel em Tile por superfície, sem milhares de Frames decorativos.
-- Ciano: criaturas/index. Verde: equipamentos. Dourado: mercado/valor/variante Gold. Azul claro: preferências.
+- Ciano: criaturas/index. Roxo: Hunter Rank. Verde: equipamentos. Dourado: mercado/valor/variante Gold. Azul claro: preferências.
 - Texto em inglês. Manter IDs internos estáveis. Títulos e números dominam; descrições curtas e de baixo contraste, sem instruções contínuas.
 - Criatura/item vem antes de sua ficha textual. Não trocar imagens por emoji ou blocos de texto.
 - Uma ação principal por seleção. Confirmar venda e oferecer cancelamento; favorito bloqueia venda. Compra indisponível exibe o motivo real.

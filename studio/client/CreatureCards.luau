@@ -1,5 +1,6 @@
 -- One visual language for discovery, ownership and selling; no gameplay mutations.
 local C = require(game.ReplicatedStorage.HACShared.GameplayConfig)
+local Rank = require(game.ReplicatedStorage.HACShared.HunterProgression)
 local W = require(script.Parent.HUDWidgets)
 local Kit = require(script.Parent.MenuKit)
 local Portrait = require(script.Parent.CreaturePortrait)
@@ -61,7 +62,8 @@ function Cards.Detail(parent, item, known, options)
 	local cap = Instance.new("UITextSizeConstraint")
 	cap.MinTextSize, cap.MaxTextSize, cap.Parent = 16, 28, name
 	Kit.Stat(panel, "Income", W.Style.Icons.Coin, known and C.Value(item, "Income") .. "/s" or "?", 0, 258)
-	Kit.Stat(panel, "XP", W.Style.Icons.XP, known and C.Value(item, "XP") .. "/s" or "?", 0.5, 258)
+	Kit.Stat(panel, "XP", W.Style.Icons.XP,
+		known and Rank.PassiveXPPerCreature .. " / " .. Rank.PassiveSeconds .. "s at base" or "?", 0.5, 258)
 	local status = options.status or ""
 	Kit.Label(
 		panel,

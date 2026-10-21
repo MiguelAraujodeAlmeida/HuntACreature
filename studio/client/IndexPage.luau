@@ -73,6 +73,10 @@ function Page.Render(ui)
 		W.bar(progress, "Progress", UDim2.new(1, -24, 0, 18), UDim2.fromOffset(12, 48), W.Style.UI.Green)
 	track.ZIndex = progress.ZIndex + 2
 	fill.Size = UDim2.fromScale(#all > 0 and found / #all or 0, 1)
+	local rank = Kit.Action(ui.scroll, "HunterRank", "Hunter Rank  →", function()
+		ui:Open("HunterRank")
+	end, UDim2.new(1, -2, 0, 46))
+	rank.Root.LayoutOrder = 2
 	if #ids == 0 then
 		Kit.Empty(ui.scroll, "No entries", "Try another rarity.")
 		return

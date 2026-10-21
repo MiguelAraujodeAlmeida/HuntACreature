@@ -29,6 +29,8 @@ function View.Content(data, tab)
 		return { creatures = p.creatures, capacity = p.upgrades }
 	elseif tab == "Index" then
 		return { discoveries = p.discoveries, variants = p.variantDiscoveries, creatures = p.creatures }
+	elseif tab == "HunterRank" then
+		return { rank = require(game.ReplicatedStorage.HACShared.HunterProgression).Level(p.xp) }
 	elseif tab == "Settings" then
 		return p.settings
 	elseif tab == "Melhorias" then

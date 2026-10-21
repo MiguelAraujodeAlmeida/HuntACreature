@@ -14,6 +14,7 @@ local T = {
 	SplitWidth = 740,
 	Pages = {
 		Index = { Accent = S.UI.Cyan, Tag = "FIELD JOURNAL", Width = 1000, Height = 660 },
+		HunterRank = { Accent = S.UI.Purple, Tag = "YOUR HUNTING JOURNEY", Width = 760, Height = 660 },
 		Criaturas = { Accent = S.UI.Cyan, Tag = "YOUR COMPANIONS", Width = 1000, Height = 660 },
 		Venda = { Accent = S.UI.Gold, Tag = "CREATURE MARKET", Width = 1000, Height = 660 },
 		Loja = { Accent = S.UI.Green, Tag = "HUNTER SUPPLIES", Width = 1000, Height = 660 },

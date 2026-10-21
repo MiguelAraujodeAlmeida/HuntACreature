@@ -12,6 +12,7 @@ local Preview = require(script.Parent.ToolPlacementPreview)
 local Pages = {
 	Settings = require(script.Parent.SettingsPage),
 	Index = require(script.Parent.IndexPage),
+	HunterRank = require(script.Parent.HunterRankPage),
 	Criaturas = require(script.Parent.CreaturePage),
 	Venda = require(script.Parent.CreaturePage),
 	Loja = require(script.Parent.ShopPage),

@@ -91,7 +91,8 @@ function Resources:Resize(layout)
 		item.gain.Size = UDim2.fromOffset(width - 30, 24)
 	end
 end
-function Resources:Update(gold, xp, force)
+function Resources:Update(gold, xp, force, rank)
+	self.items[2].label.Text = "XP · RANK " .. tostring(rank or 1)
 	for i, value in ipairs({ gold, xp, force }) do
 		local item = self.items[i]
 		item.text.Text = formatNumber(value)

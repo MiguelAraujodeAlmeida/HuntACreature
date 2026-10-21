@@ -1,5 +1,6 @@
 -- Operações síncronas: nenhuma pode ceder execução no meio de uma transferência.
 local C = require(game.ReplicatedStorage.HACShared.GameplayConfig)
+local Rank = require(game.ReplicatedStorage.HACShared.HunterProgression)
 local Data = {}
 function Data.Copy(value)
 	if type(value) ~= "table" then
@@ -18,6 +19,8 @@ function Data.New()
 		gold = 0,
 		xp = 0,
 		strength = 0,
+		goldCarry = 0,
+		strengthCarry = 0,
 		creatures = {},
 		discoveries = {},
 		variantDiscoveries = {},
@@ -30,7 +33,7 @@ function Data.New()
 end
 function Data.Validate(p)
 	assert(type(p) == "table" and p.schemaVersion == C.SchemaVersion, "Versão de perfil incompatível")
-	-- Additive migration: keep existing IDs, balances, creatures and discoveries.
+	-- A nova geração de save começa limpa; validação mantém os campos explícitos.
 	p.settings = p.settings or Data.Copy(C.Settings)
 	p.variantDiscoveries = p.variantDiscoveries or {}
 	assert(type(p.settings) == "table" and type(p.variantDiscoveries) == "table", "Invalid preferences")
@@ -43,9 +46,10 @@ function Data.Validate(p)
 		end
 		assert(type(p.settings[key]) == "boolean", "Invalid setting")
 	end
-	for _, key in ipairs({ "gold", "xp", "strength", "revision" }) do
+	for _, key in ipairs({ "gold", "xp", "strength", "revision", "goldCarry", "strengthCarry" }) do
 		assert(type(p[key]) == "number" and p[key] >= 0 and p[key] < math.huge, "Valor inválido: " .. key)
 	end
+	assert(p.goldCarry < 1 and p.strengthCarry < 1, "Fractional balance invalid")
 	for _, key in ipairs({ "creatures", "discoveries", "upgrades", "items", "owned", "shop" }) do
 		assert(type(p[key]) == "table", "Campo inválido: " .. key)
 	end
@@ -126,10 +130,13 @@ function Data.Capture(p, creature)
 	item.location, item.slot = "bag", nil
 	p.creatures[item.id] = item
 	local first = not p.discoveries[item.species]
-	p.discoveries[item.species] = true
 	p.variantDiscoveries = p.variantDiscoveries or {}
+	local firstVariant = not p.variantDiscoveries[C.VariantKey(item)]
+	p.discoveries[item.species] = true
 	p.variantDiscoveries[C.VariantKey(item)] = true
-	return true, first and "New discovery!" or "Creature captured!"
+	local earnedXP = Rank.CaptureReward(item, first, firstVariant)
+	p.xp += earnedXP
+	return true, first and "New discovery!" or "Creature captured!", earnedXP
 end
 function Data.Action(p, action, args, rotation)
 	local item = type(args.id) == "string" and p.creatures[args.id]
@@ -160,7 +167,7 @@ function Data.Action(p, action, args, rotation)
 		if item.favorite then
 			return false, "Unfavorite this creature before selling."
 		end
-		p.gold += C.Value(item, "Sale")
+		Rank.CreditGold(p, C.Value(item, "Sale"))
 		p.creatures[item.id] = nil
 	elseif action == "Unequip" then
 		if not item or item.location ~= "base" then
@@ -192,6 +199,9 @@ function Data.Action(p, action, args, rotation)
 		local offer, def = rotation.offers[args.id], C.Items[args.id]
 		if not offer or not def then
 			return false, "Item unavailable in this rotation."
+		end
+		if Rank.Level(p.xp) < (def.RequiredHunterRank or 1) then
+			return false, "Requires Hunter Rank " .. def.RequiredHunterRank .. "."
 		end
 		if def.Permanent and p.owned[args.id] then
 			return false, "You already own this equipment."
