@@ -2,6 +2,7 @@
 -- Movimento cinemático: os modelos de peças ancoradas não dependem de Humanoid/física.
 local Behavior = {}
 local Gameplay = require(game.ReplicatedStorage.HACShared.GameplayConfig)
+local Animator = require(script.Parent.LumitoAnimator)
 Behavior.__index = Behavior
 local ANGLES = { 0, 35, -35, 70, -70, 110, -110, 180 }
 local function flat(v) return Vector3.new(v.X, 0, v.Z) end
@@ -27,17 +28,7 @@ function Behavior.new(model, profile, service)
 	self.pause, self.walkTime = 0, 0
 	self.walkFactor = 1
 	self.stateTime = 0
-	self.feet = {}
-	for _, part in ipairs(model:GetChildren()) do
-		local side = part:IsA("BasePart") and (part:GetAttribute("FootSide") or (part.Name == "Pe" and (#self.feet == 0 and "L" or "R")))
-		if side then
-			table.insert(self.feet, {
-				part = part,
-				rest = model:GetPivot():ToObjectSpace(part.CFrame),
-				phaseOffset = side == "R" and math.pi or 0,
-			})
-		end
-	end
+	self.animator = Animator.new(model)
 	self.cast = RaycastParams.new()
 	self.cast.FilterType = Enum.RaycastFilterType.Exclude
 	self.cast.RespectCanCollide = true
@@ -247,7 +238,7 @@ function Behavior:Step(dt)
 			self:_setState("Capturing")
 		end
 		self.phase += dt * (self.model:GetAttribute("CapturePhase") == "resist" and 15 or 9)
-		self:_pose(false)
+		self:_pose(false, dt)
 		return -- A criatura resiste no lugar, sem consumir o timer de fuga.
 	elseif self.state == "Capturing" then
 		self:_setState("Tired") -- Escapou do laço: oferece janela lenta, sem sprint imediato.
@@ -287,10 +278,10 @@ function Behavior:Step(dt)
 		end
 	end
 	self.phase += dt * (self.state == "Panicking" and 18 or 7)
-	self:_pose(moving)
+	self:_pose(moving, dt)
 end
 
-function Behavior:_pose(moving)
+function Behavior:_pose(moving, dt)
 	local slow = (self.model:GetAttribute("SlowedUntil") or 0) > os.clock()
 	if self.wasSlowed ~= slow then
 		self.wasSlowed = slow
@@ -298,18 +289,8 @@ function Behavior:_pose(moving)
 		local text = label and label:FindFirstChildOfClass("TextLabel")
 		if text then text.Text = self.model.Name .. (slow and " • SLOWED" or self.state == "Panicking" and " !" or self.state == "Tired" and " …" or "") end
 	end
-	local struggling = self.state == "Capturing"
-	local bounce = moving and math.abs(math.sin(self.phase)) * (self.state == "Panicking" and 0.13 or 0.045)
-		or struggling and math.abs(math.sin(self.phase)) * 0.08 or 0
-	local roll = moving and math.sin(self.phase) * (self.state == "Panicking" and 0.07 or 0.025)
-		or struggling and math.sin(self.phase) * 0.07 or 0
-	local pose = CFrame.new(self.position + Vector3.new(0, bounce, 0)) * self.facing * CFrame.Angles(0, 0, roll)
-	self.model:PivotTo(pose)
-	for i, foot in ipairs(self.feet) do
-		local offset = foot.phaseOffset ~= nil and foot.phaseOffset or (i - 1) * math.pi
-		local step = (moving or struggling) and math.sin(self.phase + offset) or 0
-		foot.part.CFrame = pose * foot.rest * CFrame.new(0, math.max(0, step) * 0.18 * self.scale, step * 0.24 * self.scale)
-	end
+	self.animator:Step(dt, CFrame.new(self.position) * self.facing, self.state,
+		moving and self:_speed() or 0, self.lastThreat, self.model:GetAttribute("CapturePhase"))
 end
 
 return Behavior

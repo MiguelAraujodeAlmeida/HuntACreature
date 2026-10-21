@@ -1,0 +1,25 @@
+-- Presentation only: never changes navigation, capture bounds or individual size.
+return {
+	BlendRate = 9,
+	StrideLength = 1.8,
+	StepLift = 0.24,
+	StepReach = 0.28,
+	IdleGestureMin = 4,
+	IdleGestureMax = 8,
+	GestureDuration = 2.1,
+	BlinkMin = 2.8,
+	BlinkMax = 5.8,
+	BlinkDuration = 0.18,
+	AttentionDistance = 12,
+	AttentionInterval = 0.3,
+	RunTrailSpeed = 6,
+	PuffTexture = "rbxassetid://118477338697511",
+	Pivots = {
+		Head = Vector3.new(0, -0.55, 0),
+		EarL = Vector3.new(0.45, 0.98, -0.10),
+		EarR = Vector3.new(-0.97, 0.60, -0.35),
+		Tail = Vector3.new(0, -1.05, 0.50),
+		ArmL = Vector3.new(0.60, -0.70, -0.05),
+		ArmR = Vector3.new(-0.60, -0.70, -0.05),
+	},
+}

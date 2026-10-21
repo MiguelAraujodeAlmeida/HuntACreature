@@ -3,6 +3,8 @@ local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 local C = require(game.ReplicatedStorage.HACShared.GameplayConfig)
 local Factory = require(script.Parent.CreatureFactory)
+local Animator = require(script.Parent.LumitoAnimator)
+local Motion = require(game.ReplicatedStorage.HACShared.LumitoMotionConfig)
 local Roaming = {}
 Roaming.__index = Roaming
 function Roaming.new(world)
@@ -116,6 +118,8 @@ function Roaming:Sync(base, profile)
 				if agent.position then
 					model = Factory.Build(folder, agent.position, item, true)
 					agent.model = model
+					agent.animator = Animator.new(model)
+					agent.attentionClock = 0
 					for _, part in ipairs(model:GetDescendants()) do
 						if part:IsA("BasePart") then
 							part.CanCollide, part.CanTouch, part.CanQuery = false, false, false
@@ -164,13 +168,23 @@ function Roaming:Step(dt)
 				agent.pause = 0.5
 			end
 		end
-		agent.phase += dt * (moving and 9 or 2)
-		local bob = moving and math.abs(math.sin(agent.phase)) * 0.12 or (math.sin(agent.phase) + 1) * 0.025
-		local point = agent.position + Vector3.new(0, bob, 0)
-		model:PivotTo(
-			CFrame.lookAt(point, point + agent.direction)
-				* CFrame.Angles(0, 0, moving and math.sin(agent.phase) * 0.04 or 0)
-		)
+		agent.attentionClock -= dt
+		if agent.attentionClock <= 0 then
+			agent.attentionClock = Motion.AttentionInterval
+			agent.attention = nil
+			local best = Motion.AttentionDistance
+			for _, player in ipairs(Players:GetPlayers()) do
+				local character = player.Character
+				local root = character and character:FindFirstChild("HumanoidRootPart")
+				local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+				if root and humanoid and humanoid.Health > 0 then
+					local distance = (root.Position - agent.position).Magnitude
+					if distance < best then best, agent.attention = distance, root.Position end
+				end
+			end
+		end
+		agent.animator:Step(dt, CFrame.lookAt(agent.position, agent.position + agent.direction),
+			"AtBase", moving and C.BaseRoaming.Speed or 0, not moving and agent.attention or nil)
 	end
 end
 return Roaming
