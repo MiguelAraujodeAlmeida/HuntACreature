@@ -26,6 +26,7 @@ Style.Icons = {
 	Bag = "rbxassetid://84667354571821",
 	Lasso = "rbxassetid://117254148917574",
 	HunterRank = "rbxassetid://94003376835794",
+	Index = "rbxassetid://112115433096189",
 }
 Style.Skins = { Tile = "rbxassetid://93505871377958", Panel = "rbxassetid://130734564577623" }
 -- A importação do Roblox reduz o painel de 2172x724 para 1024x341.

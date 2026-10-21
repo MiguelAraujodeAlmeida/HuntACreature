@@ -28,7 +28,7 @@ Não criar novas telas copiando o antigo `UI:Card(título, parágrafo)`. Esse co
 - Uma ação principal por seleção. Confirmar venda e oferecer cancelamento; favorito bloqueia venda. Compra indisponível exibe o motivo real.
 - Estados obrigatórios: carregando, vazio, selecionado, indisponível, confirmação (quando destrutivo), atualização de dados.
 - Não adicionar produtos, timers artificiais, percentuais, recompensas de coleção ou itens futuros só para preencher espaços.
-- Hunter Rank mostra o rank atual, percentual até o próximo e benefícios do próximo marco. Não expor custo bruto em XP, lista completa dos ranks nem rotular o último rank atualmente configurado como máximo. Exibir silhuetas apenas para equipamento real com `RequiredHunterRank`; missões ficam marcadas como futuras até existir sistema próprio.
+- Hunter Rank mostra o rank atual, XP restante e percentual até o próximo, além dos benefícios do próximo marco. Não expor custo total em XP, lista completa dos ranks nem rotular o último rank atualmente configurado como máximo. Exibir silhuetas apenas para equipamento real com `RequiredHunterRank`; missões ficam marcadas como futuras até existir sistema próprio.
 
 ## Layout e interação
 
@@ -36,6 +36,7 @@ Não criar novas telas copiando o antigo `UI:Card(título, parágrafo)`. Esse co
 - A partir de 740 px, galeria à esquerda e detalhe independente à direita. Abaixo disso, o detalhe selecionado fica na rolagem principal, acima da galeria.
 - Grid recebe largura útil e largura mínima de cartão; não escalar a tela inteira até o texto ficar ilegível.
 - GlossyButton via Kit.Action concentra brilho, pressão, retorno e som. Área de input estável.
+- Botões de navegação principais usam o mesmo `GlossyButton` com ícone original e placa curta; controles auxiliares da topbar podem usar a variante circular compacta, preservando o mesmo feedback de foco/clique.
 - Selectable anima a borda existente e o enquadramento do retrato; evitar UIStrokes duplicados.
 - Settings usa chave grande ON/OFF com resposta animada. A animação indica intenção; snapshot do servidor confirma. Timeout volta ao estado conhecido.
 - Foco tem FocusKey estável por ação/indivíduo. Dados passivos de renda não devem destruir cartões.

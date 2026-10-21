@@ -49,16 +49,21 @@ function HUD.new(player)
 	self.BagCount = W.text(self.BagBadge, "Valor", "0/3", UDim2.fromScale(1, 1), UDim2.fromScale(0, 0), 18)
 	self.IndexSkin = Button.new(gui, {
 		name = "IndexBotao",
-		glyph = "book",
 		text = "Index",
-		color = S.UI.Purple,
-		size = UDim2.fromOffset(86, 44),
+		icon = S.Icons.Index,
+		color = S.UI.Cyan,
+		size = UDim2.fromOffset(86, 86),
 		position = UDim2.new(),
-		textSize = 20,
+		textSize = 19,
 	})
+	self.IndexSkin.Root:SetAttribute("FocusKey", "OpenIndex")
 	self.IndexSkin.Root.Activated:Connect(function()
 		if self.Collection then
-			self.Collection:Open("Index")
+			if self.Collection.root.Visible and self.Collection.tab == "Index" then
+				self:CloseSheet()
+			else
+				self.Collection:Open("Index")
+			end
 		end
 	end)
 	self.Rank = RankDisplay.new(gui, function()
@@ -70,21 +75,42 @@ function HUD.new(player)
 			end
 		end
 	end)
+	local topbarGui = Instance.new("ScreenGui")
+	topbarGui.Name = "HACSettingsTopbar"
+	topbarGui.ResetOnSpawn = false
+	topbarGui.AutoLocalize = false
+	topbarGui.IgnoreGuiInset = true
+	topbarGui.ScreenInsets = Enum.ScreenInsets.DeviceSafeInsets
+	topbarGui.DisplayOrder = 2
+	topbarGui.Parent = player:WaitForChild("PlayerGui")
+	self.TopbarGui = topbarGui
 	self.SettingsSkin = Button.new(
-		gui,
+		topbarGui,
 		{
 			name = "Settings",
-			text = "Settings",
+			text = "",
 			glyph = "gear",
-			color = S.UI.Cyan,
-			size = UDim2.fromOffset(104, 40),
-			position = UDim2.new(1, -116, 0, 10),
-			textSize = 14,
+			topbar = true,
+			size = UDim2.fromOffset(42, 42),
+			position = UDim2.new(),
 		}
 	)
+	self.SettingsSkin.Root:SetAttribute("FocusKey", "OpenSettings")
+	local function positionSettings()
+		local inset = GuiService.TopbarInset
+		local button = self.SettingsSkin.Root
+		button.Position = UDim2.fromOffset(inset.Min.X + 6,
+			inset.Min.Y + math.max(0, math.floor((inset.Height - 42) / 2)))
+	end
+	table.insert(self.connections, GuiService:GetPropertyChangedSignal("TopbarInset"):Connect(positionSettings))
+	positionSettings()
 	self.SettingsSkin.Root.Activated:Connect(function()
 		if self.Collection then
-			self.Collection:Open("Settings")
+			if self.Collection.root.Visible and self.Collection.tab == "Settings" then
+				self:CloseSheet()
+			else
+				self.Collection:Open("Settings")
+			end
 		end
 	end)
 	self.ThrowSkin = Button.new(gui, {
@@ -165,6 +191,7 @@ function HUD.new(player)
 	)
 	gui.Destroying:Connect(function()
 		self.dead = true
+		topbarGui:Destroy()
 		Audio.Destroy()
 		for _, c in ipairs(self.connections) do
 			c:Disconnect()
@@ -184,32 +211,28 @@ function HUD:Resize(view)
 		or margin + layout.resourceHeight + 14
 	self.BagButton.Position = layout.narrow and UDim2.new(1, -margin - layout.bag, 0, margin + 5)
 		or UDim2.fromOffset(margin, bagY)
-	local navWidth = math.max(100, layout.bag)
-	self.IndexSkin.Root.Size = UDim2.fromOffset(navWidth, 44)
+	local navSize = layout.bag
+	self.IndexSkin.Root.Size = UDim2.fromOffset(navSize, navSize)
+	self.IndexSkin.caption:FindFirstChildOfClass("UITextSizeConstraint").MaxTextSize =
+		navSize < 75 and 16 or 19
 	local rankSize = layout.bag
 	local rankPosition
 	if layout.narrow then
 		rankPosition = UDim2.new(1, -margin - rankSize, 0, margin + 11 + layout.bag)
 	elseif layout.desktop then
-		rankPosition = UDim2.fromOffset(margin, bagY - 50 - rankSize - 8)
+		rankPosition = UDim2.fromOffset(margin, bagY - 2 * (rankSize + 8))
 	else
 		rankPosition = UDim2.fromOffset(margin + layout.bag + 8, bagY)
 	end
 	self.Rank:Resize(view, rankPosition, rankSize)
 	if layout.narrow then
 		local y = margin + 17 + layout.bag * 2
-		self.IndexSkin.Root.Position = UDim2.new(1, -margin - navWidth, 0, y)
+		self.IndexSkin.Root.Position = UDim2.new(1, -margin - navSize, 0, y)
 	elseif layout.desktop then
-		self.IndexSkin.Root.Position = UDim2.fromOffset(margin, bagY - 50)
+		self.IndexSkin.Root.Position = UDim2.fromOffset(margin, bagY - navSize - 8)
 	else
 		self.IndexSkin.Root.Position = UDim2.fromOffset(margin + layout.bag * 2 + 16, bagY)
 	end
-	self.SettingsSkin.Root.Position = layout.narrow and UDim2.new(1, -margin - navWidth, 0, margin + 63 + layout.bag * 2)
-		or (
-			layout.desktop and UDim2.new(1, -margin - 116, 0, margin)
-			or UDim2.fromOffset(margin + layout.bag * 2 + navWidth + 22, bagY)
-		)
-	self.SettingsSkin.Root.Size = UDim2.fromOffset(layout.narrow and navWidth or 116, 40)
 	self.BagBadge.Size = UDim2.fromOffset(32, 24)
 	self.BagBadge.Position = UDim2.new(1, -29, 0, 0)
 	self.BagCount.TextSize = 14

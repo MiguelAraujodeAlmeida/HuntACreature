@@ -27,7 +27,8 @@ function Rank.Progress(xp)
 	local start = Rank.Thresholds[level]
 	local finish = Rank.Thresholds[level + 1]
 	return level, finish and level + 1 or nil,
-		finish and math.clamp((xp - start) / (finish - start), 0, 1) or 1
+		finish and math.clamp((xp - start) / (finish - start), 0, 1) or 1,
+		finish and math.max(0, finish - xp) or nil
 end
 
 function Rank.GearAt(level)

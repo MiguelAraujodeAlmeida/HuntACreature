@@ -23,7 +23,16 @@ function Button.new(parent, o)
 	visual.AnchorPoint = Vector2.new(0.5, 0.5)
 	self.scale = Instance.new("UIScale")
 	self.scale.Parent = visual
-	if o.icon then
+	if o.topbar then
+		local face = W.frame(visual, "TopbarFace", UDim2.fromScale(1, 1),
+			UDim2.fromScale(0, 0), Color3.fromRGB(25, 29, 34), 50)
+		W.stroke(face, Color3.fromRGB(72, 80, 92), 1)
+		W.gradient(face, Color3.fromRGB(42, 47, 54), Color3.fromRGB(19, 23, 29))
+		self.glyph = require(script.Parent.NavGlyph).new(face, o.glyph or "gear")
+		self.glyph.Position = UDim2.new(0.5, -13, 0.5, -13)
+		self.caption = W.text(face, "Legenda", "", UDim2.fromScale(1, 1), UDim2.new(), 14)
+		self.caption.Visible = false
+	elseif o.icon then
 		local face = W.icon(visual, "Arte", S.Skins.Tile, UDim2.fromScale(1, 1), UDim2.fromScale(0, 0))
 		face.ScaleType = Enum.ScaleType.Stretch
 		self.icon = W.icon(face, "Icone", o.icon, UDim2.fromScale(0.78, 0.76), UDim2.fromScale(0.11, 0.005))
@@ -112,7 +121,7 @@ function Button.new(parent, o)
 		if o.sound ~= false then
 			Audio.Play("Click")
 		end
-		Effects.Burst(visual, S.UI.Gold, 5)
+		Effects.Burst(visual, o.topbar and S.UI.Cyan or S.UI.Gold, o.topbar and 3 or 5)
 		self:Shine()
 	end)
 	connect(root:GetPropertyChangedSignal("Visible"), function()

@@ -6,6 +6,12 @@ local Kit = require(script.Parent.MenuKit)
 local ToolArt = require(script.Parent.ToolPortrait)
 local Page = {}
 
+local function formatXP(value)
+	local digits = string.format("%.0f", math.max(0, value))
+	local grouped = digits:reverse():gsub("(%d%d%d)", "%1,"):reverse()
+	return (grouped:gsub("^,", ""))
+end
+
 local function perk(parent, name, icon, value, caption, position, size)
 	local card = Kit.Surface(parent, name, size, position, Kit.Theme.Ink)
 	local art = W.icon(card, "Icon", icon, UDim2.fromOffset(38, 38), UDim2.fromOffset(5, 5))
@@ -41,15 +47,18 @@ function Page.Render(ui)
 		UDim2.new(1, -24, 0, 23), UDim2.fromOffset(12, compact and 103 or 112),
 		compact and 13 or 16, Kit.Theme.Muted, Enum.TextXAlignment.Left)
 	local progressText = Kit.Label(hero, "ProgressText", "", UDim2.new(1, -24, 0, 23),
-		UDim2.fromOffset(12, compact and 126 or 137), compact and 15 or 17,
+		UDim2.fromOffset(12, compact and 126 or 137), compact and 13 or 17,
 		Kit.Theme.White, Enum.TextXAlignment.Left)
 	local track, fill = W.bar(hero, "Progress", UDim2.new(1, -24, 0, 17),
 		UDim2.fromOffset(12, compact and 151 or 164), W.Style.UI.Purple)
 	track.ZIndex = hero.ZIndex + 2
+	local percent = Kit.Label(track, "Percent", "", UDim2.fromOffset(48, 17),
+		UDim2.new(1, -52, 0, 0), 12, Kit.Theme.White, Enum.TextXAlignment.Right)
 	local function refresh()
-		local currentLevel, following, alpha = Rank.Progress(ui.data.profile.xp)
-		progressText.Text = following and string.format("%d%% TO RANK %d", math.floor(alpha * 100), following)
+		local currentLevel, following, alpha, remaining = Rank.Progress(ui.data.profile.xp)
+		progressText.Text = following and ("XP LEFT: " .. formatXP(remaining))
 			or ("RANK " .. currentLevel .. " · JOURNEY CONTINUES")
+		percent.Text = following and string.format("%d%%", math.floor(alpha * 100)) or ""
 		fill.Size = UDim2.fromScale(alpha, 1)
 	end
 	table.insert(ui.valueRefreshers, refresh)

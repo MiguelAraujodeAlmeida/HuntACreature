@@ -7,6 +7,7 @@ Arquivos finais usados pelo jogo:
 | `resource-icons-v1.png` | moeda, estrela de XP, laço de força; três células horizontais | `rbxassetid://107528171876427` |
 | `satchel-icon-v1.png` | bolsa de explorador | `rbxassetid://129286908163718` |
 | `hunter-rank-emblem-v1.png` | escudo de licença com estrela roxa e laço dourado | `rbxassetid://94003376835794` |
+| `creature-index-book-v1.png` | bestiário azul com emblema de criatura e cantos dourados | `rbxassetid://112115433096189` |
 
 Criados com o gerador de imagens integrado do Codex, com fundo transparente. As imagens originais permanecem neste diretório. O Roblox reduz a primeira textura ao importar; `shared/VisualStyle.luau` guarda o tamanho da célula usado pelo HUD.
 
@@ -17,3 +18,5 @@ Criados com o gerador de imagens integrado do Codex, com fundo transparente. As 
 **Bolsa:** “A cheerful compact explorer's creature satchel, teal canvas body with warm leather flap, small golden rope loop clasp and tiny paw-shaped embossed mark. Three-quarter front view, premium toy-like 3D game icon, chunky silhouette legible at 52px, transparent background, no text.”
 
 **Hunter Rank:** “A polished toy-game badge icon: deep navy shield rimmed in warm gold, faceted amethyst star at its center, small curved golden lasso across the lower edge. Clean chunky silhouette readable at HUD size, playful 3D bevels and glossy highlights, transparent background, no text.”
+
+**Index:** “One original square icon for a Roblox creature index: a chunky glossy 3D toy bestiary book in bright cyan blue, gold corners, dark navy bold outline, a simple small creature face embossed on cover, pale page edges. Front three-quarter view, premium playful adventure game icon, legible at 60 pixels, soft highlights, generous transparent margin. No text, letters, UI button frame, scene, or shadow. Transparent background.”
