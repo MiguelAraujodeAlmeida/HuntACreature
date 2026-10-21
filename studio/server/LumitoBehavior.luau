@@ -29,8 +29,13 @@ function Behavior.new(model, profile, service)
 	self.stateTime = 0
 	self.feet = {}
 	for _, part in ipairs(model:GetChildren()) do
-		if part:IsA("BasePart") and part.Name == "Pe" then
-			table.insert(self.feet, { part = part, rest = model:GetPivot():ToObjectSpace(part.CFrame) })
+		local side = part:IsA("BasePart") and (part:GetAttribute("FootSide") or (part.Name == "Pe" and (#self.feet == 0 and "L" or "R")))
+		if side then
+			table.insert(self.feet, {
+				part = part,
+				rest = model:GetPivot():ToObjectSpace(part.CFrame),
+				phaseOffset = side == "R" and math.pi or 0,
+			})
 		end
 	end
 	self.cast = RaycastParams.new()
@@ -301,7 +306,8 @@ function Behavior:_pose(moving)
 	local pose = CFrame.new(self.position + Vector3.new(0, bounce, 0)) * self.facing * CFrame.Angles(0, 0, roll)
 	self.model:PivotTo(pose)
 	for i, foot in ipairs(self.feet) do
-		local step = (moving or struggling) and math.sin(self.phase + (i - 1) * math.pi) or 0
+		local offset = foot.phaseOffset ~= nil and foot.phaseOffset or (i - 1) * math.pi
+		local step = (moving or struggling) and math.sin(self.phase + offset) or 0
 		foot.part.CFrame = pose * foot.rest * CFrame.new(0, math.max(0, step) * 0.18 * self.scale, step * 0.24 * self.scale)
 	end
 end
