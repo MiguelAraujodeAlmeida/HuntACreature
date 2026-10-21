@@ -5,6 +5,7 @@ local ContextActionService = game:GetService("ContextActionService")
 local Config = require(game:GetService("ReplicatedStorage").HACShared.CaptureConfig)
 
 local Feedback = require(script.Parent.LassoFeedback)
+local ChargePresentation = require(script.Parent.LassoChargePresentation)
 local Aim = require(game.ReplicatedStorage.HACShared.LassoAim)
 local Audio = require(script.Parent.AudioFeedback)
 
@@ -30,6 +31,7 @@ function Controller.new(player, remote, hud)
 	self.holdInput = nil
 	self.lasso = nil
 	self.feedback = Feedback.new(player)
+	self.chargePresentation = ChargePresentation.new(player)
 	self.flying = false
 	self.readyAt = 0
 
@@ -42,6 +44,9 @@ function Controller.new(player, remote, hud)
 		self.feedback:Hide()
 		local function update()
 			local tool = character:FindFirstChildOfClass("Tool")
+			if self.charging and (not tool or tool.Name ~= self.chargeLassoName) then
+				self:_cancelCharge()
+			end
 			self.lasso = tool and Config.Lassos[tool.Name] or nil
 			self.equipped = self.lasso ~= nil
 			self.hud:SetEquipped(self.equipped)
@@ -126,7 +131,7 @@ function Controller.new(player, remote, hud)
 			or self.player:GetAttribute("Treinando")
 			or self.hud.Collection and self.hud.Collection.selected
 		then
-			self.feedback:Hide(self.flying)
+			self.feedback:Hide()
 			return
 		end
 		local power = self.charging and math.clamp((os.clock() - self.chargeStarted) / self.lasso.ChargeSeconds, 0, 1)
@@ -143,6 +148,7 @@ function Controller.new(player, remote, hud)
 		ContextActionService:UnbindAction("HACCaptureHold")
 		self.renderConnection:Disconnect()
 		self.feedback:Destroy()
+		self.chargePresentation:Destroy()
 	end)
 	UserInputService.WindowFocusReleased:Connect(function()
 		self:_cancelCharge()
@@ -197,6 +203,9 @@ function Controller:_startCharge(mode, input)
 	self.chargeMode = mode
 	self.chargeInput = input
 	self.chargeStarted = os.clock()
+	local tool = self.player.Character and self.player.Character:FindFirstChildOfClass("Tool")
+	self.chargeLassoName = tool and tool.Name or nil
+	if tool then self.chargePresentation:StartLocal(tool.Name, self.chargeStarted) end
 	self.remote:FireServer("ChargeStart")
 	self.hud:SetCharging(0)
 end
@@ -210,14 +219,17 @@ function Controller:_releaseCharge()
 	self.charging = false
 	self.chargeInput = nil
 	self.chargeMode = nil
+	self.chargeLassoName = nil
 	if aim then
 		self.flying = true
-		self.feedback:Hide(true)
+		self.feedback:Hide()
+		self.chargePresentation:StopLocal("throw", aim)
 		self.remote:FireServer("Throw", aim)
 		Audio.StopCharge()
 		Audio.Play("Throw", 0.9 + power * 0.25)
 		self.hud:ThrowLaunched()
 	else
+		self.chargePresentation:StopLocal("cancel")
 		self.remote:FireServer("ChargeCancel")
 	end
 end
@@ -229,6 +241,8 @@ function Controller:_cancelCharge()
 	self.charging = false
 	self.chargeInput = nil
 	self.chargeMode = nil
+	self.chargeLassoName = nil
+	self.chargePresentation:StopLocal("cancel")
 	self.remote:FireServer("ChargeCancel")
 	self.hud:ResetThrow()
 end
@@ -246,15 +260,18 @@ function Controller:HandleEvent(action, a, b, c)
 	if action == "ChargeReady" then
 		return
 	elseif action == "ChargeDenied" then
+		self.chargePresentation:StopLocal("cancel")
 		self.flying = false
 		self.charging = false
 		self.chargeInput = nil
 		self.chargeMode = nil
+		self.chargeLassoName = nil
 		self.hud:ResetThrow()
 		if a then
 			self.hud:Notice(a)
 		end
 	elseif action == "ThrowReady" then
+		self.chargePresentation:StopLocal("cancel")
 		self.flying = false
 		self.readyAt = os.clock() + (a or 0)
 		self.hud:ResetThrow()
@@ -267,6 +284,7 @@ function Controller:HandleEvent(action, a, b, c)
 			self.hud:Notice(b)
 		end
 	elseif action == "CaptureStart" then
+		self.chargePresentation:StopLocal("cancel")
 		if self.hud.Collection then
 			self.hud.Collection.selected = nil
 		end

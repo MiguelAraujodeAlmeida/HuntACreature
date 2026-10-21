@@ -247,12 +247,26 @@ function CaptureService:_startCharge(player)
 	end
 	-- Bolsa cheia bloqueia somente a captura. Arremessar continua permitido.
 	self.charges[player] = { started = os.clock(), lassoName = name }
+	local character = player.Character
+	if character then
+		character:SetAttribute("HACLassoChargeStartedAt", workspace:GetServerTimeNow())
+		character:SetAttribute("HACLassoCharging", name)
+	end
 	self.remote:FireClient(player, "ChargeReady")
+end
+
+function CaptureService:_clearCharge(player)
+	self.charges[player] = nil
+	local character = player.Character
+	if character then
+		character:SetAttribute("HACLassoCharging", nil)
+		character:SetAttribute("HACLassoChargeStartedAt", nil)
+	end
 end
 
 function CaptureService:_throw(player, ray)
 	local charge = self.charges[player]
-	self.charges[player] = nil
+	self:_clearCharge(player)
 	if not charge or self.projectiles[player] or self.sessions[player] then
 		return
 	end
@@ -306,7 +320,7 @@ function CaptureService:HandleRemote(player, action, value)
 	if action == "ChargeStart" then
 		self:_startCharge(player)
 	elseif action == "ChargeCancel" then
-		self.charges[player] = nil
+		self:_clearCharge(player)
 	elseif action == "Throw" then
 		self:_throw(player, value)
 	elseif action == "Hold" and typeof(value) == "boolean" then
@@ -458,12 +472,13 @@ end
 function CaptureService:_step(dt)
 	dt = math.min(dt, 0.08)
 	for player, charge in pairs(self.charges) do
+		local _, equippedName = equippedLasso(player)
 		if
 			not playerRoot(player)
-			or not equippedLasso(player)
+			or equippedName ~= charge.lassoName
 			or os.clock() - charge.started > Config.MaximumChargeSeconds
 		then
-			self.charges[player] = nil
+			self:_clearCharge(player)
 			self.remote:FireClient(player, "ChargeDenied")
 		end
 	end
@@ -476,7 +491,7 @@ function CaptureService:_step(dt)
 end
 
 function CaptureService:PlayerRemoving(player)
-	self.charges[player] = nil
+	self:_clearCharge(player)
 	self.cooldowns[player] = nil
 	local projectile = self.projectiles[player]
 	if projectile then

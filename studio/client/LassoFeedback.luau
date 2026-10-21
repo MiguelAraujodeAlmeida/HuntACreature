@@ -1,4 +1,4 @@
--- Feedback local de mira: contorno elegível, alcance previsto e giro durante carga.
+-- Feedback local de mira: contorno elegível e alcance previsto.
 local Aim = require(game.ReplicatedStorage.HACShared.LassoAim)
 local Visuals = require(game.ReplicatedStorage.HACShared.LassoVisuals)
 local Config = require(game.ReplicatedStorage.HACShared.CaptureConfig)
@@ -32,43 +32,7 @@ function Feedback.new(player)
 	self.Marker = marker
 	return self
 end
-function Feedback:StopSpin()
-	if self.loop then
-		Visuals.CleanupLine(self.line)
-		self.loop:Destroy()
-		self.loop = nil
-		self.line = nil
-	end
-end
-function Feedback:SetToolHidden(hidden)
-	if not hidden then
-		if self.hiddenParts then
-			for part, value in pairs(self.hiddenParts) do
-				if part.Parent then
-					part.LocalTransparencyModifier = value
-				end
-			end
-		end
-		self.hiddenParts = nil
-		return
-	end
-	local tool = self.player.Character and self.player.Character:FindFirstChildOfClass("Tool")
-	if not tool then
-		return
-	end
-	self.hiddenParts = self.hiddenParts or {}
-	for _, part in ipairs(tool:GetDescendants()) do
-		if part:IsA("BasePart") then
-			if self.hiddenParts[part] == nil then
-				self.hiddenParts[part] = part.LocalTransparencyModifier
-			end
-			part.LocalTransparencyModifier = 1
-		end
-	end
-end
-function Feedback:Hide(hideTool)
-	self:SetToolHidden(hideTool)
-	self:StopSpin()
+function Feedback:Hide()
 	self.Marker.Transparency = 1
 	self.Highlight.Enabled = false
 	self.Highlight.Adornee = nil
@@ -144,31 +108,9 @@ function Feedback:Update(ray, lasso, power, charging)
 	self.Marker.Color = palette[state] or Color3.fromRGB(255, 216, 73)
 	self.Marker.Position = resolved.endpoint
 	self.Marker.Transparency = charging and 0.15 or 1
-	if charging then
-		if not self.loop then
-			self.loop = Visuals.Loop(self.Folder)
-			self.line = Visuals.Line(character, self.loop.PrimaryPart)
-		end
-		local hand = character:FindFirstChild("RightHand")
-			or character:FindFirstChild("Right Arm")
-			or character.HumanoidRootPart
-		local center = hand.Position + Vector3.new(0, 1.1, 0)
-		self.loop:PivotTo(
-			CFrame.lookAt(center, center + resolved.direction) * CFrame.Angles(0, 0, os.clock() * (8 + power * 14))
-		)
-		if self.line then
-			self.line.beam.Width0 = 0.1 + power * 0.06
-			self.line.beam.Width1 = self.line.beam.Width0
-		end
-	else
-		self:StopSpin()
-	end
-	self:SetToolHidden(charging)
 	return range
 end
 function Feedback:Destroy()
-	self:SetToolHidden(false)
-	self:StopSpin()
 	self.Folder:Destroy()
 end
 return Feedback
