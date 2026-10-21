@@ -15,7 +15,7 @@ Jogo Roblox de longo prazo. Feedback recente do desenvolvedor prevalece sobre pr
 
 1. Consultar Estado Atual, Backlog, decisões e regras do domínio já lidos no conjunto vigente.
 2. Atualizar o checkout pelo Git e trabalhar a partir do commit atual de `main`. O Git é a referência operacional dos fontes versionados.
-3. Usar o Studio para aplicar e salvar alterações no lugar quando a tarefa exigir. Não executar comparações integrais ou rotineiras Studio ↔ disco; só investigar divergência concreta reportada pelo desenvolvedor ou falha de aplicação.
+3. Usar o MCP do Studio para aplicar alterações no lugar quando a tarefa exigir. **Não acionar o salvamento do lugar pelo acesso ao computador**; lembrar o desenvolvedor de salvá-lo e registrar se ele confirmou. Não executar comparações integrais ou rotineiras Studio ↔ disco; só investigar divergência concreta reportada pelo desenvolvedor ou falha de aplicação.
 4. Preservar reversibilidade. Código, lugar salvo, aplicação no Studio e publicação são estados distintos.
 
 ## Ao implementar
@@ -32,7 +32,7 @@ Jogo Roblox de longo prazo. Feedback recente do desenvolvedor prevalece sobre pr
 - Atualizar a nota dona das regras alteradas, Estado Atual e Backlog; remover contradições e duplicações, não acumular versões concorrentes.
 - Registrar a solicitação em `00_Inicio/Historico de Contexto.md`, com revisão, resultado, evidência, autoria/ambiente conhecidos e pendências. Decisão duradoura recebe ADR curta em Decisoes Vigentes.
 - Seguir `03_Engenharia/Fluxo de Desenvolvimento.md`: atualizar manifesto, executar `python tools/check_context.py --refresh` e depois sem flag na raiz do cofre, revisar diff, commitar e sincronizar com GitHub; confirmar SHA remoto ou informar sincronização pendente. Não usar force push nem descartar trabalho de outra máquina.
-- Se alterou jogo, salvar/verificar o lugar no Studio quando aplicável e registrar o commit enviado. Documentação/commit não substituem salvamento integral. Se alterou só documentação, não iniciar Studio por rotina.
+- Se alterou jogo, aplicar no Studio quando possível, registrar o commit enviado e lembrar o desenvolvedor de salvar o lugar. Sem confirmação humana, marcar o salvamento como pendente. Documentação/commit não substituem salvamento integral. Se alterou só documentação, não iniciar Studio por rotina.
 - Manter o cofre sempre atual, enxuto e suficiente para continuidade independente do chat/dispositivo. Essa manutenção é parte da entrega, não opcional.
 
 Fontes técnicas locais: `studio/README.md`, `studio/STYLE_GUIDE.md`, `studio/MENU_STANDARD.md`. O repositório do cofre não armazena o jogo completo.

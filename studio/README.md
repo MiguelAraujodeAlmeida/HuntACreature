@@ -6,7 +6,7 @@ Atualizado em 21/10/2026. Lugar **[Testing] Hunt a Creature**, placeId **1023104
 
 - Código versionado em https://github.com/MiguelAraujodeAlmeida/HuntACreature; Git é a referência operacional dos fontes. Script Sync/Rojo não está configurado.
 - Base viva, Settings, favoritos protegidos, inglês nativo, Tools/Lassos e Index visual por variantes implementados. Tamanho individual é multiplicador oculto contínuo de 1× a 5×; a curva e o teto ficam em GameplayConfig.
-- Caça polida: estados de mira, carga, voo/retorno, ritmo da disputa, reação do Lumito e recompensa curta com retrato e renda potencial na base. Treino, inventário, renda e placas preservados.
+- Caça polida: estados de mira, carga, voo/retorno, ritmo da disputa, reação do Lumito e recompensa curta com retrato e renda potencial na base. `LassoChargePresentation` faz o boleio cosmético do Training Lasso com braço/pulso, corda flexível e soltura breve; `LassoChargeStyle` guarda parâmetros por laço. Treino, inventário, renda e placas preservados.
 - Menus ativos usam MenuTheme/MenuKit, galerias, detalhes e arte de equipamentos. Na HUD, Index agora compartilha a placa quadrada glossy de Criaturas/Rank com ícone original; Settings usa controle compacto circular na área livre da topbar por `GuiService.TopbarInset`. A rodada de caça teve compilação estática em Edit; diversão, precisão, PC/celular e persistência real dependem do desenvolvedor.
 - Hunter Rank tem entrada própria no HUD, barra de progresso, celebração de subida e página que revela XP restante/percentual até o próximo rank e benefícios reais. XP vem principalmente de captura/descoberta, com bônus por Gold/tamanho e pesquisa menor por criatura equipada. Requisito `RequiredHunterRank` é opcional por item; nenhum item atual foi bloqueado.
 - Reset global por geração fixa `20261021_hunter_rank_01` em PersistenceConfig. Todos os perfis começam novos quando esta versão entrar em uso; gerações anteriores permanecem recuperáveis. Aplicação em Edit e publicação são estados separados.
@@ -32,7 +32,7 @@ UpgradePage é legado sem rota ativa. QuickSlot reserva espaço invisível para 
 1. Na primeira leitura, absorver somente `bootstrap` do manifesto do cofre `C:/Users/melg_/OneDrive/Documents/Hunt A Creature/Hunt A Creature`, conforme AGENTS.md. Antes de implementar, consultar apenas os domínios afetados pela tarefa.
 2. Atualizar o checkout pelo Git e trabalhar a partir de `main`. Não comparar o conjunto inteiro Studio/disco por rotina; investigar somente uma divergência concreta ou falha de aplicação.
 3. Separar configuração, regras autoritativas, input e apresentação; revisão/verificações leves, sem Play ou QA pesado autônomo.
-4. Aplicar em Edit quando a tarefa exigir, salvar/verificar o lugar, atualizar cofre e registrar commit enviado. Desenvolvedor testa a experiência.
+4. Aplicar em Edit quando a tarefa exigir, atualizar cofre e registrar commit enviado. **O desenvolvedor salva o lugar**; o assistente não aciona Save pelo acesso ao computador e registra o salvamento como pendente até confirmação humana. Desenvolvedor testa a experiência.
 
 Backup anterior em `../contexto/retomada-2026-10-18/`: export dos 37 fontes, cópia dos arquivos locais antigos e notas do cofre. Clone anterior dos objetos em `ServerStorage.HACBeforeMenus20261018`. Fontes/clone interno não substituem lugar salvo; a exportação recuperável .rbxl continua pendente.
 
