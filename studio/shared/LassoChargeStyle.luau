@@ -11,6 +11,10 @@ local default = {
 	WaveAmount = 0.055,
 	SegmentCount = 24,
 	RemoteViewDistance = 130,
+	ShoulderLiftDegrees = 115,
+	ShoulderOutDegrees = 25,
+	ElbowBendDegrees = 65,
+	WristCircleDegrees = 12,
 	RopeColor = Color3.fromRGB(255, 199, 62),
 	BrightColor = Color3.fromRGB(255, 237, 135),
 }

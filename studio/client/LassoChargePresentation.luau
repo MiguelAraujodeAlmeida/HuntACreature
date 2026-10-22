@@ -25,15 +25,19 @@ local function jointsOf(character)
 	local joints = {}
 	for _, item in ipairs(character:GetDescendants()) do
 		if (item:IsA("Motor6D") or item:IsA("AnimationConstraint")) then
-			if item.Name == "RightShoulder" or item.Name == "Right Shoulder" then
+			local child
+			if item:IsA("Motor6D") then child = item.Part1
+			else child = item.Attachment1 and item.Attachment1.Parent end
+			local childName = child and child.Name
+			if item.Name == "RightShoulder" or item.Name == "Right Shoulder" or childName == "RightUpperArm" or childName == "Right Arm" then
 				joints.shoulder = item
-			elseif item.Name == "RightElbow" then
+			elseif item.Name == "RightElbow" or childName == "RightLowerArm" then
 				joints.elbow = item
-			elseif item.Name == "RightWrist" then
+			elseif item.Name == "RightWrist" or childName == "RightHand" then
 				joints.wrist = item
-			elseif item.Name == "LeftShoulder" or item.Name == "Left Shoulder" then
+			elseif item.Name == "LeftShoulder" or item.Name == "Left Shoulder" or childName == "LeftUpperArm" or childName == "Left Arm" then
 				joints.leftShoulder = item
-			elseif item.Name == "Waist" then
+			elseif item.Name == "Waist" or childName == "UpperTorso" then
 				joints.waist = item
 			end
 		end
@@ -61,6 +65,26 @@ local function restoreTool(hidden)
 			part.LocalTransparencyModifier = original
 		end
 	end
+end
+
+-- Remove our previous pose before Animator evaluates the next frame. This also
+-- prevents drift on joints that have no active animation track.
+local function restorePose(effect)
+	for joint, transform in pairs(effect.baseTransforms or {}) do
+		if joint.Parent then pcall(function() joint.Transform = transform end) end
+	end
+	effect.baseTransforms = {}
+end
+
+local function inJointSpace(joint, rotation)
+	local basis
+	if joint:IsA("Motor6D") then
+		basis = joint.C0.Rotation
+	else
+		local attachment = joint.Attachment0
+		basis = attachment and attachment.CFrame.Rotation or CFrame.identity
+	end
+	return basis:Inverse() * rotation * basis
 end
 
 local function makeEffect(parent, character, lassoName, started, localOwner)
@@ -147,13 +171,9 @@ local function makeEffect(parent, character, lassoName, started, localOwner)
 end
 
 local function destroyEffect(effect)
+	restorePose(effect)
 	if effect.line then Visuals.CleanupLine(effect.line) end
 	restoreTool(effect.hidden)
-	for _, joint in pairs(effect.joints) do
-		if joint.Parent then
-			pcall(function() joint.Transform = CFrame.identity end)
-		end
-	end
 	effect.ring:Destroy()
 end
 
@@ -200,6 +220,9 @@ function Presentation.new(localPlayer)
 		self.characterConnections[player] = nil
 	end))
 	table.insert(self.connections, RunService.RenderStepped:Connect(function(dt) self:_render(dt) end))
+	table.insert(self.connections, RunService.PreAnimation:Connect(function()
+		for _, effect in pairs(self.effects) do restorePose(effect) end
+	end))
 	table.insert(self.connections, RunService.PreSimulation:Connect(function() self:_pose() end))
 	return self
 end
@@ -343,24 +366,37 @@ function Presentation:_pose()
 					weight *= 1 - smooth(t)
 				end
 			end
-			local swing = math.sin(effect.phase) * weight
+			local style = effect.style
+			local swing = math.sin(effect.phase)
 			local aimYaw = 0
 			if effect.throwDirection then
 				local root = effect.character:FindFirstChild("HumanoidRootPart")
 				if root then aimYaw = math.clamp(root.CFrame:VectorToObjectSpace(effect.throwDirection).X, -0.7, 0.7) end
 			end
 			local poses = {
-				shoulder = CFrame.Angles(math.rad(-52 - release * 32) * weight + swing * 0.1,
-					aimYaw * release * 0.3, math.rad(18) * weight + math.cos(effect.phase) * 0.12 * weight),
-				elbow = CFrame.Angles(math.rad(-48 + release * 42) * weight + swing * 0.14, 0, 0),
-				wrist = CFrame.Angles(swing * 0.35, 0, math.cos(effect.phase) * 0.32 * weight),
-				leftShoulder = CFrame.Angles(math.rad(-14) * weight, 0, math.rad(-10) * weight),
-				waist = CFrame.Angles(math.rad(-3 - release * 6) * weight,
-					math.sin(effect.phase) * 0.04 * weight + aimYaw * release * 0.2, 0),
+				-- Positive X lifts the downward-pointing arm forward, toward -Z.
+				shoulder = CFrame.Angles(math.rad(style.ShoulderLiftDegrees + (90 - style.ShoulderLiftDegrees) * release)
+					+ swing * 0.035 * (1 - release), -aimYaw * release,
+					math.rad(style.ShoulderOutDegrees) * (1 - release) + math.cos(effect.phase) * 0.035 * (1 - release)),
+				elbow = CFrame.Angles(math.rad(style.ElbowBendDegrees) * (1 - release), 0, 0),
+				wrist = CFrame.Angles(swing * math.rad(style.WristCircleDegrees) * (1 - release),
+					0, math.cos(effect.phase) * math.rad(style.WristCircleDegrees) * (1 - release)),
+				leftShoulder = CFrame.Angles(math.rad(14), 0, math.rad(-10)),
+				waist = CFrame.Angles(math.rad(3 - release * 9), swing * 0.025 + aimYaw * release * 0.2, 0),
 			}
 			for name, joint in pairs(effect.joints) do
 				if joint.Parent then
-					pcall(function() joint.Transform = joint.Transform * poses[name] end)
+					pcall(function()
+						local base = joint.Transform
+						effect.baseTransforms = effect.baseTransforms or {}
+						effect.baseTransforms[joint] = base
+						local pose = inJointSpace(joint, poses[name])
+						if name == "shoulder" or name == "elbow" or name == "wrist" then
+							joint.Transform = base:Lerp(CFrame.new(base.Position) * pose, weight)
+						else
+							joint.Transform = base * CFrame.identity:Lerp(pose, weight)
+						end
+					end)
 				end
 			end
 		end
