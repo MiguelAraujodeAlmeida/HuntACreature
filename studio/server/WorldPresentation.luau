@@ -6,6 +6,7 @@ local TrainingDummies = require(script.Parent.TrainingDummies)
 local World = {}
 World.__index = World
 function World.new(world)
+	Stations.Prepare(world)
 	local self = setmetatable(
 		{ world = world, bases = world.Hub.Bases, dummies = {}, exercise = {}, upgradePrompts = {} },
 		World
@@ -43,7 +44,6 @@ function World.new(world)
 				stripe.Transparency = 1
 			end
 			self.dummies[base] = TrainingDummies.Build(base, 1, 1)
-			station.Treinar.ActionText, station.Treinar.ObjectText = "Train / leave", "Training dummy"
 		end
 	end
 	local shop = Factory.Part(
@@ -54,10 +54,9 @@ function World.new(world)
 		Color3.fromRGB(56, 161, 185)
 	)
 	shop.CanCollide = true
-	local prompt = Instance.new("ProximityPrompt")
-	prompt.Name, prompt.ActionText, prompt.ObjectText = "AbrirLoja", "Shop", "Hunting Shop"
-	prompt.MaxActivationDistance, prompt.HoldDuration, prompt.Parent = 12, 0, shop
-	prompt.RequiresLineOfSight, prompt.ClickablePrompt = false, true
+	local oldPrompt = shop:FindFirstChild("AbrirLoja")
+	if oldPrompt then oldPrompt:Destroy() end
+	Stations.Zone(world.Hub, "ShopZone", shop.Position + Vector3.new(0, -1.55, 3.9), 3, Color3.fromRGB(94, 236, 255))
 	local sign = Instance.new("BillboardGui")
 	sign.Size, sign.StudsOffset, sign.AlwaysOnTop, sign.Parent =
 		UDim2.fromOffset(200, 40), Vector3.new(0, 3, 0), true, shop
@@ -65,7 +64,7 @@ function World.new(world)
 	label.Size, label.BackgroundTransparency, label.Text, label.TextSize = UDim2.fromScale(1, 1), 1, "HUNTING SHOP", 23
 	label.Font, label.TextColor3, label.TextStrokeTransparency, label.Parent =
 		Enum.Font.FredokaOne, Color3.new(1, 1, 1), 0, sign
-	self.shop, self.prompt = shop, prompt
+	self.shop = shop
 	self.seller = Stations.Ensure(world)
 	return self
 end
@@ -82,13 +81,6 @@ function World:RenderBase(base, profile)
 				if state.base == base then state.target = self.dummies[base].Alvo end
 			end
 		end
-		base.Esteira.Treinar.ObjectText = "Dummy "
-			.. ((profile.upgrades.Treino or 0) + 1)
-			.. " • +"
-			.. C.TrainingGain(profile)
-			.. " strength / "
-			.. C.TrainingSeconds
-			.. " s"
 	end
 end
 function World:StopTraining(player, speed)

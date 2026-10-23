@@ -51,11 +51,14 @@ local function near(player, part, distance)
 	local root = aliveRoot(player)
 	return root and part and (root.Position - part.Position).Magnitude <= distance
 end
-local function setLabel(base, message)
-	local label = base.Totem:FindFirstChild("Label")
-	local text = label and label:FindFirstChild("Text")
-	if text then
-		text.Text = message
+local function setLabel(base, owner)
+	local marker = base and base:FindFirstChild("OwnerMarker")
+	local gui = marker and marker:FindFirstChild("OwnerBillboard")
+	if not gui then return end
+	gui.Enabled = owner ~= nil
+	if owner then
+		gui.OwnerName.Text = owner.DisplayName
+		gui.Portrait.Image = "rbxthumb://type=AvatarHeadShot&id=" .. owner.UserId .. "&w=150&h=150"
 	end
 end
 local function stopTraining(player)
@@ -200,11 +203,6 @@ local function toggleTraining(player, base)
 		player:SetAttribute("Treinando", true)
 	end
 end
-for _, base in ipairs(presentation.bases:GetChildren()) do
-	base.Esteira.Treinar.Triggered:Connect(function(player)
-		toggleTraining(player, base)
-	end)
-end
 local function openCounter(player, anchor, distance, page)
 	if not near(player, anchor, distance) then
 		return
@@ -216,11 +214,39 @@ local function openCounter(player, anchor, distance, page)
 	publish(player)
 	remote:FireClient(player, "OpenCollection", page)
 end
-presentation.prompt.Triggered:Connect(function(player)
-	openCounter(player, presentation.shop, C.Shop.Distance, "Loja")
-end)
-presentation.seller.Vender.Triggered:Connect(function(player)
-	openCounter(player, presentation.seller, C.Sell.Distance, "Venda")
+local zonePresence, zoneClock = {}, 0
+local function inside(root, zone, radius)
+	if not root or not zone then return false end
+	local delta = root.Position - zone.Position
+	return math.abs(delta.Y) < 7 and Vector2.new(delta.X, delta.Z).Magnitude <= radius
+end
+RunService.Heartbeat:Connect(function(dt)
+	zoneClock += dt
+	if zoneClock < 0.15 then return end
+	zoneClock = 0
+	for _, player in ipairs(Players:GetPlayers()) do
+		local root = aliveRoot(player)
+		local base = baseOf(player)
+		local trainZone = base and base:FindFirstChild("TrainZone")
+		local shopZone = world.Hub:FindFirstChild("ShopZone")
+		local sellZone = world.Hub:FindFirstChild("SellZone")
+		local zones = {
+			training = trainZone and trainZone:FindFirstChild("Center"),
+			shop = shopZone and shopZone:FindFirstChild("Center"),
+			sell = sellZone and sellZone:FindFirstChild("Center"),
+		}
+		local previous = zonePresence[player] or {}
+		for kind, zone in pairs(zones) do
+			local active = inside(root, zone, kind == "training" and 2.7 or 3)
+			if active and not previous[kind] then
+				if kind == "training" then toggleTraining(player, base)
+				elseif kind == "shop" then openCounter(player, presentation.shop, C.Shop.Distance, "Loja")
+				else openCounter(player, presentation.seller, C.Sell.Distance, "Venda") end
+			end
+			previous[kind] = active
+		end
+		zonePresence[player] = previous
+	end
 end)
 for index = 1, #spawnPoints do
 	spawnWild(index)
@@ -231,7 +257,7 @@ local function assignBase(player)
 		if not owners[i] then
 			owners[i] = player
 			player:SetAttribute("BaseIndex", i)
-			setLabel(baseOf(player), "BASE • " .. string.upper(player.DisplayName))
+			setLabel(baseOf(player), player)
 			return true
 		end
 	end
@@ -297,11 +323,12 @@ local function playerRemoving(player)
 	capture:PlayerRemoving(player)
 	huntingTools:RemovePlayer(player)
 	requests[player] = nil
+	zonePresence[player] = nil
 	passiveElapsed[player] = nil
 	local base = baseOf(player)
 	if base then
 		base.CriaturasInstaladas:ClearAllChildren()
-		setLabel(base, "FREE BASE")
+		setLabel(base, nil)
 		owners[player:GetAttribute("BaseIndex")] = nil
 	end
 	Profiles:Save(player, true)

@@ -46,15 +46,11 @@ function Boards:_activate(panel, id)
 	if not self:_canUse(panel) or os.clock() < (self.nextClick or 0) then
 		return
 	end
-	if id ~= "Treinar" and not C.UpgradePreview(self.profile, id).cost then
+	if not C.UpgradePreview(self.profile, id).cost then
 		return
 	end
 	self.nextClick = os.clock() + 0.3
-	if id == "Treinar" then
-		self.ui.remote:FireServer("ToggleTraining")
-	else
-		self.ui:Send("Upgrade", id)
-	end
+	self.ui:Send("Upgrade", id)
 end
 
 function Boards:_mount(base, anchor, signature)
@@ -77,21 +73,7 @@ function Boards:_mount(base, anchor, signature)
 		table.insert(panel.faces, view)
 		local root = W.frame(gui, "Painel", UDim2.fromScale(1, 1), UDim2.new(), W.Style.UI.Ink, 12)
 		W.stroke(root, W.Style.UI.Cyan, 3)
-		local training = anchor.Name == "Treino"
-		local rows = W.frame(root, "Melhorias", UDim2.new(1, 0, 1, training and -55 or 0), UDim2.new())
-		if training then
-			view.train = Button.new(root, {
-				name = "Treinar",
-				text = "TRAIN",
-				color = W.Style.UI.Green,
-				size = UDim2.new(1, -20, 0, 44),
-				position = UDim2.new(0, 10, 1, -49),
-				textSize = 23,
-			})
-			view.train.Root.Activated:Connect(function()
-				self:_activate(panel, "Treinar")
-			end)
-		end
+		local rows = W.frame(root, "Melhorias", UDim2.fromScale(1, 1), UDim2.new())
 		for i, id in ipairs(keys) do
 			local row = W.frame(rows, id, UDim2.new(1, -18, 1 / #keys, -12), UDim2.new(0, 9, (i - 1) / #keys, 6))
 			local title = W.text(row, "Titulo", C.Upgrades[id].Name, UDim2.new(1, 0, 0, 26), UDim2.new(), 22)

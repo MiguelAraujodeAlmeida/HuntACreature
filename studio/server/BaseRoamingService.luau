@@ -30,7 +30,7 @@ function Roaming:Free(agent, point)
 	if math.abs(localPoint.X) > floor.Size.X / 2 - margin or math.abs(localPoint.Z) > floor.Size.Z / 2 - margin then
 		return false
 	end
-	for _, name in ipairs({ "Totem", "Esteira" }) do
+	for _, name in ipairs({ "Esteira" }) do
 		local obstacle = agent.base:FindFirstChild(name)
 		if obstacle then
 			local offset = obstacle.CFrame:PointToObjectSpace(point)
