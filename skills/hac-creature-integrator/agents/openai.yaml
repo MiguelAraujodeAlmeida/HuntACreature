@@ -1,0 +1,4 @@
+interface:
+  display_name: "Hunt A Creature Integration"
+  short_description: "Integre criaturas com personalidade e animações próprias"
+  default_prompt: "Use $hac-creature-integrator para integrar este modelo ao Hunt A Creature."
