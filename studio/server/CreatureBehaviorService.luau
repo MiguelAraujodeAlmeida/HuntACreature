@@ -2,7 +2,7 @@
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Profiles = require(script.Parent.CreatureProfiles)
-local Behaviors = { Lumito = require(script.Parent.LumitoBehavior) }
+local Behaviors = { Lumito = require(script.Parent.LumitoBehavior), Chicken = require(script.Parent.LumitoBehavior) }
 local Service = {}
 Service.__index = Service
 

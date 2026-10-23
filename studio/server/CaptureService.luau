@@ -465,7 +465,7 @@ function CaptureService:_stepSession(player, session, dt)
 		})
 	end
 	if session.progress >= 1 then
-		self:_finish(player, true, "Lumito captured!")
+		self:_finish(player, true, session.creature.Name .. " captured!")
 	end
 end
 

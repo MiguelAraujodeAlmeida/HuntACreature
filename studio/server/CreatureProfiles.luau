@@ -26,4 +26,17 @@ return {
 		EdgeMargin = 0.6,
 		MaxStepHeight = 0.35,
 	},
+	Chicken = {
+		Behavior = "Chicken", Animator = "ChickenAnimator",
+		WalkSpeed = 4.2, PanicSpeed = 15, TiredSpeed = 2,
+		PanicSeconds = 3.8, RecoverySeconds = 5,
+		ViewDistance = 20, ViewAngle = 170, ThinkInterval = 0.20,
+		WanderRadius = 15, PauseMin = 0.5, PauseMax = 1.8,
+		LongPauseChance = 0.22, LongPauseMin = 2, LongPauseMax = 3.5,
+		WalkBurstMin = 0.7, WalkBurstMax = 2.5,
+		ResumeSameGoalChance = 0.2, WalkSpeedMinFactor = 0.75,
+		WalkSpeedMaxFactor = 1.2, BodyRadius = 1.05,
+		RootHeight = 1.35, BodyHeight = 2, EdgeMargin = 0.5,
+		MaxStepHeight = 0.35,
+	},
 }

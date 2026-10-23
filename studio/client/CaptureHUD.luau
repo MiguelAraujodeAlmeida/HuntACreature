@@ -38,7 +38,7 @@ function Capture.new(parent)
 	self.Name = W.text(
 		self.Root,
 		"Criatura",
-		"Lumito",
+		"CREATURE",
 		UDim2.fromOffset(300, 32),
 		UDim2.fromOffset(85, 12),
 		28,

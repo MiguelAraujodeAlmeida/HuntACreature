@@ -15,10 +15,28 @@ C.Species = {
 		Description = "A playful wanderer. Flees from hunters until it tires.",
 	},
 }
+-- Temporary economy until species balance is designed. Keep the inherited values
+-- in one place so a future Chicken rebalance does not affect other systems.
+C.Species.Chicken = setmetatable({
+	Name = "Chicken",
+	Rarity = "Comum",
+	Behavior = "Chicken",
+	BalanceSource = "Lumito",
+	Template = "HACChickenTemplate",
+	RootHeight = 1.35,
+	BodyRadius = 1.05,
+	LabelHeight = 1.8,
+	BodySize = Vector3.new(1.65, 2, 1.45),
+	Description = "A curious chicken with more courage than good judgment.",
+}, { __index = C.Species.Lumito })
+C.SpawnReservations = { Ponto4 = "Chicken" } -- one existing test-island point
 C.Mutations = { Dourado = { Name = "Gold", Chance = 0.18, Value = 3, Difficulty = 1.2 } }
-C.Size = { Minimum = 1, Maximum = 5, Curve = 5, Precision = 100 }
+C.Size = { Minimum = 1, Maximum = 5, BaseChance = 0.7, Curve = 12, Precision = 100 }
 function C.RollSize(random)
-	-- Continuous scale; large specimens are uncommon without a separate rarity tier.
+	-- Most creatures have the base scale; beyond it, every larger interval is rarer.
+	if random:NextNumber() < C.Size.BaseChance then
+		return C.Size.Minimum
+	end
 	local size = C.Size.Minimum + (C.Size.Maximum - C.Size.Minimum) * random:NextNumber() ^ C.Size.Curve
 	return math.clamp(math.floor(size * C.Size.Precision + 0.5) / C.Size.Precision, C.Size.Minimum, C.Size.Maximum)
 end

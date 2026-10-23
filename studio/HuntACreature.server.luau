@@ -119,14 +119,16 @@ spawnWild = function(index)
 	if not point or not world.Parent or closing then
 		return
 	end
-	local item = Factory.Roll(random)
-	local model = Factory.Build(wild, point.Position + Vector3.new(0, 1.68 * item.size, 0), item, false)
+	local reservedSpecies = C.SpawnReservations[point.Name] or "Lumito"
+	local item = Factory.Roll(random, reservedSpecies)
+	local rootHeight = C.Species[item.species].RootHeight or 1.68
+	local model = Factory.Build(wild, point.Position + Vector3.new(0, rootHeight * item.size, 0), item, false)
 	wildData[model] = item
 	model:SetAttribute("SpawnIndex", index)
 	model.Destroying:Once(function()
 		wildData[model] = nil
 	end)
-	creatures:Add(model, C.Species[item.species].Behavior)
+	creatures:Add(model, item.species)
 end
 capture = require(Modules.CaptureService).new({
 	remote = remote,

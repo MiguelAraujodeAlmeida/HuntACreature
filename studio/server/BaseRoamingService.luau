@@ -3,7 +3,6 @@ local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 local C = require(game.ReplicatedStorage.HACShared.GameplayConfig)
 local Factory = require(script.Parent.CreatureFactory)
-local Animator = require(script.Parent.LumitoAnimator)
 local Motion = require(game.ReplicatedStorage.HACShared.LumitoMotionConfig)
 local Roaming = {}
 Roaming.__index = Roaming
@@ -101,8 +100,8 @@ function Roaming:Sync(base, profile)
 				local floor = base:FindFirstChild("Tapete") or base.Plataforma
 				local agent = {
 					base = base,
-					radius = 1.7 * item.size * 0.72,
-					height = floor.Position.Y + floor.Size.Y / 2 + 1.625 * item.size * 0.72,
+					radius = (C.Species[item.species].BodyRadius or 1.7) * item.size * 0.72,
+					height = floor.Position.Y + floor.Size.Y / 2 + (C.Species[item.species].RootHeight or 1.625) * item.size * 0.72,
 					pause = self.random:NextNumber(0, 1.5),
 					phase = self.random:NextNumber(0, 6),
 					direction = Vector3.new(0, 0, -1),
@@ -118,7 +117,8 @@ function Roaming:Sync(base, profile)
 				if agent.position then
 					model = Factory.Build(folder, agent.position, item, true)
 					agent.model = model
-					agent.animator = Animator.new(model)
+					local animatorName = item.species == "Chicken" and "ChickenAnimator" or "LumitoAnimator"
+					agent.animator = require(script.Parent[animatorName]).new(model)
 					agent.attentionClock = 0
 					for _, part in ipairs(model:GetDescendants()) do
 						if part:IsA("BasePart") then

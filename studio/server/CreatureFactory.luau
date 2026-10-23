@@ -21,6 +21,20 @@ local PALETTES = {
 		Glint = Color3.fromRGB(255, 255, 255),
 	},
 }
+local CHICKEN_PALETTES = {
+	Normal = {
+		Main = Color3.fromRGB(247, 231, 204), Secondary = Color3.fromRGB(255, 248, 229),
+		Accent = Color3.fromRGB(235, 52, 67), Extra_1 = Color3.fromRGB(255, 181, 28),
+		Extra_2 = Color3.fromRGB(137, 79, 36), Ink = Color3.fromRGB(21, 27, 37),
+		Glint = Color3.new(1, 1, 1),
+	},
+	Golden = {
+		Main = Colors.Gold, Secondary = Color3.fromRGB(255, 244, 190),
+		Accent = Color3.fromRGB(232, 90, 61), Extra_1 = Color3.fromRGB(255, 196, 43),
+		Extra_2 = Color3.fromRGB(143, 91, 45), Ink = Color3.fromRGB(21, 27, 37),
+		Glint = Color3.new(1, 1, 1),
+	},
+}
 
 local FALLBACK_PARTS = {
 	{ name = "Pe", role = "Main", side = "L", sz = Vector3.new(0.7928, 0.3542, 1.0747), pos = Vector3.new(0.5260, -1.3889, -0.1212) },
@@ -74,9 +88,12 @@ local function part(parent, name, size, cframe, color, material, shape)
 	return p
 end
 
-local function makeCreature(parent, position, golden, scale)
-	local palette = golden and PALETTES.Golden or PALETTES.Normal
-	local template = ReplicatedStorage:FindFirstChild("HACLumitoTemplate")
+local function makeCreature(parent, position, golden, scale, species)
+	local paletteSet = species == "Chicken" and CHICKEN_PALETTES or PALETTES
+	local palette = golden and paletteSet.Golden or paletteSet.Normal
+	local templateName = C.Species[species].Template or "HACLumitoTemplate"
+	local template = ReplicatedStorage:FindFirstChild(templateName)
+	assert(template or species == "Lumito", "Missing creature template: " .. templateName)
 	local model
 	if template then
 		model = template:Clone()
@@ -102,12 +119,13 @@ local function makeCreature(parent, position, golden, scale)
 					child.CanTouch = false
 					child.CanQuery = false
 					child.CastShadow = false
-					child.Size = Vector3.new(3.3, 2.8, 2.6) * scale
+					child.Size = (C.Species[species].BodySize or Vector3.new(3.3, 2.8, 2.6)) * scale
 					child.CFrame = CFrame.new(position)
 				else
 					local rel = baseOrigin:ToObjectSpace(child.CFrame)
 					child.Size = child.Size * scale
 					child.CFrame = CFrame.new(position + rel.Position * scale) * rel.Rotation
+					child.CanQuery = not installed -- precise cursor targeting for wild creatures
 				end
 			end
 		end
@@ -143,19 +161,20 @@ local function makeCreature(parent, position, golden, scale)
 			end
 		end
 	end
-	model.Name = golden and "Golden Lumito" or "Lumito"
+	model.Name = C.Species[species].Name
 	model:SetAttribute("Golden", golden)
 	model:SetAttribute("CreatureScale", scale)
 	model.Parent = parent
 	return model
 end
 
-local function addWildLabel(model, scale)
+local function addWildLabel(model, scale, species)
 	local gui = Instance.new("BillboardGui")
 	gui.Name = "Identificacao"
 	gui.Adornee = model.PrimaryPart
 	gui.Size = UDim2.fromOffset(230, 46)
-	gui.StudsOffsetWorldSpace = Vector3.new(0, 2.25 * scale + 1.5, 0)
+	local labelHeight = C.Species[species].LabelHeight
+	gui.StudsOffsetWorldSpace = Vector3.new(0, labelHeight and labelHeight * scale or 2.25 * scale + 1.5, 0)
 	gui.AlwaysOnTop = true
 	gui.MaxDistance = 65
 	gui.Parent = model.PrimaryPart
@@ -171,11 +190,13 @@ local function addWildLabel(model, scale)
 	text.Parent = gui
 end
 
-function Factory.Roll(random)
+function Factory.Roll(random, species)
+	species = species or "Lumito"
+	assert(C.Species[species], "Unknown species: " .. tostring(species))
 	return {
 		id = HttpService:GenerateGUID(false),
-		species = "Lumito",
-		rarity = C.Species.Lumito.Rarity,
+		species = species,
+		rarity = C.Species[species].Rarity,
 		size = C.RollSize(random),
 		mutations = random:NextNumber() < C.Mutations.Dourado.Chance and { "Dourado" } or {},
 		location = "bag",
@@ -184,7 +205,7 @@ end
 
 function Factory.Build(parent, position, item, installed)
 	local golden = table.find(item.mutations, "Dourado") ~= nil
-	local model = makeCreature(parent, position, golden, item.size * (installed and 0.72 or 1))
+	local model = makeCreature(parent, position, golden, item.size * (installed and 0.72 or 1), item.species)
 	model.Name = C.Name(item)
 	model:SetAttribute("CreatureId", item.id)
 	model:SetAttribute("Species", item.species)
@@ -193,7 +214,7 @@ function Factory.Build(parent, position, item, installed)
 	model:SetAttribute("SizeFactor", item.size)
 	model:SetAttribute("Difficulty", (golden and C.Mutations.Dourado.Difficulty or 1) * (0.9 + item.size * 0.1))
 	if not installed then
-		addWildLabel(model, item.size)
+		addWildLabel(model, item.size, item.species)
 	end
 	return model
 end

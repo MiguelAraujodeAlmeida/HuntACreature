@@ -2,7 +2,6 @@
 -- Movimento cinemático: os modelos de peças ancoradas não dependem de Humanoid/física.
 local Behavior = {}
 local Gameplay = require(game.ReplicatedStorage.HACShared.GameplayConfig)
-local Animator = require(script.Parent.LumitoAnimator)
 Behavior.__index = Behavior
 local ANGLES = { 0, 35, -35, 70, -70, 110, -110, 180 }
 local function flat(v) return Vector3.new(v.X, 0, v.Z) end
@@ -18,7 +17,7 @@ function Behavior.new(model, profile, service)
 	self.scale = model:GetAttribute("CreatureScale") or 1
 	self.radius = profile.BodyRadius * self.scale
 	self.height = profile.RootHeight * self.scale
-	self.bodySize = Vector3.new(self.radius * 2, 2.8 * self.scale, self.radius * 2)
+	self.bodySize = Vector3.new(self.radius * 2, (profile.BodyHeight or 2.8) * self.scale, self.radius * 2)
 	self.position = model.PrimaryPart.Position
 	self.home = self.position
 	self.facing = CFrame.Angles(0, self.random:NextNumber(-math.pi, math.pi), 0)
@@ -28,7 +27,7 @@ function Behavior.new(model, profile, service)
 	self.pause, self.walkTime = 0, 0
 	self.walkFactor = 1
 	self.stateTime = 0
-	self.animator = Animator.new(model)
+	self.animator = require(script.Parent[profile.Animator or "LumitoAnimator"]).new(model)
 	self.cast = RaycastParams.new()
 	self.cast.FilterType = Enum.RaycastFilterType.Exclude
 	self.cast.RespectCanCollide = true
