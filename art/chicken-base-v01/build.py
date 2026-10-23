@@ -44,7 +44,7 @@ for side,x,angle in [('L',-.616,-15),('R',.616,15)]:
     obj=k.frustum('Foot_'+side,.53,.60,.33,.35,.19,location=(0,-.04,.045),material=gold,bevel=.035,parent=foot)
     obj['FootSide']=side
     box('Ankle_'+side,(.22,.22,.15),(0,.05,.19),gold,.025,foot)
-    k.stud('FootStud_'+side,(0,.09,.24),radius=.07,height=.035,material=gold,parent=foot)
+    k.stud('FootStud_'+side,(0,.05,.34),radius=.07,height=.035,material=gold,parent=foot)
 tail=k.empty('Tail_Pivot',(0,.43,.69),parent=root)
 for i,(x,angle,length) in enumerate([(-.09,-27,.84),(0,-43,1.08),(.09,-63,.84)]):
     k.frustum('Tail_Feather_'+str(i),.24,.25,.34,.28,length,location=(x,0,0),rotation=(angle,0,0),material=white,bevel=.065,parent=tail)
@@ -53,4 +53,3 @@ export_fbx_collection(collection, OUT/'Chicken_Base_v01.fbx')
 # Write only this scene and its dependencies, leaving the preexisting file intact.
 bpy.data.libraries.write(str(OUT/'Chicken_Base_v01.blend'), {scene}, fake_user=True)
 result={'scene':scene.name,'objects':len(collection.objects),'output':str(OUT)}
-
