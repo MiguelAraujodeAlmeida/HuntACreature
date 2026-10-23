@@ -52,6 +52,25 @@ function Page.Render(ui)
 		UDim2.fromScale(0.5, 0),
 		W.Style.UI.Cyan
 	)
+	if not selling then
+		local upgrade = C.UpgradePreview(p, "Bolsa")
+		local caption = upgrade.cost and ("Upgrade bag  " .. upgrade.current .. " → " .. upgrade.next
+			.. "  ·  " .. upgrade.cost .. " gold") or "Bag capacity  ·  MAX"
+		local action = Kit.Action(ui.scroll, "UpgradeBag", caption, function()
+			if not upgrade.cost then return end
+			local gold = ui.data.profile.gold
+			if gold < upgrade.cost then
+				ui.hud:Notice("Need " .. (upgrade.cost - gold) .. " gold")
+				return
+			end
+			ui:Send("Upgrade", "Bolsa")
+		end, UDim2.new(1, -2, 0, 48), UDim2.new(), W.Style.UI.Cyan)
+		action.Root.LayoutOrder = 2
+		action.Root.Interactable = upgrade.cost ~= nil
+		table.insert(ui.valueRefreshers, function()
+			action.caption.TextTransparency = upgrade.cost and ui.data.profile.gold < upgrade.cost and 0.3 or 0
+		end)
+	end
 	table.sort(items, function(a, b)
 		if (a.favorite == true) ~= (b.favorite == true) then
 			return a.favorite == true

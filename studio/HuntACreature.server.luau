@@ -385,7 +385,7 @@ remote.OnServerEvent:Connect(function(player, action, args)
 			notice(player, "Move closer to the hunting shop.")
 			return
 		end
-		if args.action == "Upgrade" then
+		if args.action == "Upgrade" and args.id ~= "Bolsa" then
 			local board = Stations.FindBoard(baseOf(player), args.id)
 			if not board or not near(player, board, C.Boards.Distance) then
 				notice(player, "Move closer to your upgrade board.")

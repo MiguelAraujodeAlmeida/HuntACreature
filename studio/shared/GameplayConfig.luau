@@ -50,6 +50,14 @@ C.UpgradeGroups = {
 	},
 	Velocidade = { Name = "Movement speed" },
 }
+-- Future gold stages are design targets. Release more upgrade levels only with
+-- creatures whose income supports the corresponding prices.
+C.GoldStages = {
+	{ Name = "Start", IncomePerSecond = { 1, 6 }, TargetWaitSeconds = { 30, 240 } },
+	{ Name = "Growth", IncomePerSecond = { 10, 100 }, TargetWaitSeconds = { 30, 240 } },
+	{ Name = "Advanced", IncomePerSecond = { 1000, 20000 }, TargetWaitSeconds = { 30, 240 } },
+	{ Name = "Rare", IncomePerSecond = { 1000000, 80000000 }, TargetWaitSeconds = { 30, 240 } },
+}
 C.BaseLayout = { Columns = 3, ColumnSpacing = 4, RowSpacing = 3.5 }
 C.Index = { PageSize = 18 }
 C.Settings = { Sound = true, BaseCreatures = true }
@@ -79,15 +87,15 @@ C.Upgrades = {
 		Group = "Base",
 		Description = "Equip more creatures to grow your income.",
 		Values = { 3, 4, 5, 6 },
-		Costs = { 40, 100, 220 },
+		Costs = { 40, 150, 600 },
 		Unit = "slots",
 	},
 	Bolsa = {
 		Name = "Bag",
 		Group = "Bolsa",
 		Description = "Carry more creatures on your hunts.",
-		Values = { 3, 4, 5, 6 },
-		Costs = { 25, 70, 160 },
+		Values = { 3, 5, 9, 16 },
+		Costs = { 25, 180, 1400 },
 		Unit = "slots",
 	},
 	Treino = {
@@ -95,7 +103,7 @@ C.Upgrades = {
 		Group = "Treino",
 		Description = "Gain more strength each training cycle.",
 		Values = { 1, 2, 3, 4 },
-		Costs = { 30, 90, 180 },
+		Costs = { 30, 120, 480 },
 		Unit = "strength / cycle",
 	},
 	Multiplicador = {
@@ -103,7 +111,7 @@ C.Upgrades = {
 		Group = "Treino",
 		Description = "Multiply strength gained during training.",
 		Values = { 1, 1.25, 1.5, 2 },
-		Costs = { 50, 140, 300 },
+		Costs = { 50, 200, 800 },
 		Unit = "× training gain",
 	},
 	Velocidade = {

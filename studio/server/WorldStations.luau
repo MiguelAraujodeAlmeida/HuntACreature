@@ -28,7 +28,9 @@ function Stations.Ensure(world)
 		local platform = base.Plataforma
 		local direction = Vector3.new(0, 0, platform.Position.Z < 0 and 1 or -1)
 		local front = platform.Position + direction * (platform.Size.Z / 2 + 0.6) + Vector3.new(0, 3.8, 0)
-		board(folder, "Base", front, direction, "Base,Bolsa,Velocidade", Vector3.new(7, 5.6, 0.35))
+		board(folder, "Base", front, direction, "Base", Vector3.new(5.6, 5.6, 0.35))
+		board(folder, "Velocidade", front + platform.CFrame.RightVector * 6.2, direction,
+			"Velocidade", Vector3.new(5.6, 5.6, 0.35))
 		local train = base.Esteira.Position + Vector3.new(-4, 3.2, 0)
 		board(folder, "Treino", train, direction, "Treino,Multiplicador", Vector3.new(5.6, 5.6, 0.35))
 		-- Os acessos antigos deixariam duas formas concorrentes de fazer a mesma ação.
