@@ -215,10 +215,10 @@ local function openCounter(player, anchor, distance, page)
 	remote:FireClient(player, "OpenCollection", page)
 end
 local zonePresence, zoneClock = {}, 0
-local function inside(root, zone, radius)
+local function inside(root, zone)
 	if not root or not zone then return false end
 	local delta = root.Position - zone.Position
-	return math.abs(delta.Y) < 7 and Vector2.new(delta.X, delta.Z).Magnitude <= radius
+	return math.abs(delta.Y) < 7 and Vector2.new(delta.X, delta.Z).Magnitude <= (zone:GetAttribute("Radius") or 3)
 end
 RunService.Heartbeat:Connect(function(dt)
 	zoneClock += dt
@@ -237,7 +237,7 @@ RunService.Heartbeat:Connect(function(dt)
 		}
 		local previous = zonePresence[player] or {}
 		for kind, zone in pairs(zones) do
-			local active = inside(root, zone, kind == "training" and 2.7 or 3)
+			local active = inside(root, zone)
 			if active and not previous[kind] then
 				if kind == "training" then toggleTraining(player, base)
 				elseif kind == "shop" then openCounter(player, presentation.shop, C.Shop.Distance, "Loja")

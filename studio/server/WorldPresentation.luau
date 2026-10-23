@@ -56,7 +56,7 @@ function World.new(world)
 	shop.CanCollide = true
 	local oldPrompt = shop:FindFirstChild("AbrirLoja")
 	if oldPrompt then oldPrompt:Destroy() end
-	Stations.Zone(world.Hub, "ShopZone", shop.Position + Vector3.new(0, -1.55, 3.9), 3, Color3.fromRGB(94, 236, 255))
+	Stations.Zone(world.Hub, "ShopZone", shop.Position + Vector3.new(0, -1.55, 4.7), 4.5, Color3.fromRGB(94, 236, 255))
 	local sign = Instance.new("BillboardGui")
 	sign.Size, sign.StudsOffset, sign.AlwaysOnTop, sign.Parent =
 		UDim2.fromOffset(200, 40), Vector3.new(0, 3, 0), true, shop

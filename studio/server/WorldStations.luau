@@ -9,6 +9,7 @@ local function interactionZone(parent, name, position, radius, color)
 	center.Shape, center.Material, center.Transparency = Enum.PartType.Cylinder, Enum.Material.Neon, 0.72
 	center.CFrame = CFrame.new(position) * CFrame.Angles(0, 0, math.pi / 2)
 	center.CanQuery = false
+	center:SetAttribute("Radius", radius)
 	for i = 1, 16 do
 		local a = i * math.pi * 2 / 16
 		local b = (i + 1) * math.pi * 2 / 16
@@ -18,14 +19,8 @@ local function interactionZone(parent, name, position, radius, color)
 			CFrame.lookAt((p0 + p1) / 2, p1), color)
 		segment.Material, segment.CanQuery = Enum.Material.Neon, false
 	end
-	local label = center:FindFirstChild("ZoneLabel") or Instance.new("BillboardGui")
-	label.Name, label.Adornee, label.Size = "ZoneLabel", center, UDim2.fromOffset(140, 40)
-	label.StudsOffsetWorldSpace, label.MaxDistance, label.Parent = Vector3.new(0, 2.4, 0), 50, center
-	local text = label:FindFirstChild("Title") or Instance.new("TextLabel")
-	text.Name, text.Size, text.BackgroundTransparency = "Title", UDim2.fromScale(1, 1), 1
-	text.Text = ({ TrainZone = "TRAIN", ShopZone = "SHOP", SellZone = "SELL" })[name] or name
-	text.Font, text.TextScaled, text.TextColor3 = Enum.Font.FredokaOne, true, color
-	text.TextStrokeTransparency, text.Parent = 0, label
+	local oldLabel = center:FindFirstChild("ZoneLabel")
+	if oldLabel then oldLabel:Destroy() end
 	return center
 end
 Stations.Zone = interactionZone
@@ -56,8 +51,12 @@ function Stations.Prepare(world)
 		local direction = Vector3.new(0, 0, platform.Position.Z < 0 and 1 or -1)
 		local station = base:FindFirstChild("Esteira")
 		if station then
-			local destination = platform.Position - direction * (platform.Size.Z / 2 + 1.5)
+			local destination = platform.Position - direction * (platform.Size.Z / 2 + 10)
 			station.Position = Vector3.new(platform.Position.X + 4.2, 5.05, destination.Z)
+			local annex = part(base, "TrainingAnnex", Vector3.new(10, 1, 25),
+				CFrame.new(station.Position.X, 3.5, (platform.Position.Z + station.Position.Z) / 2 - direction.Z * 4),
+				Color3.fromRGB(117, 222, 94))
+			annex.TopSurface = Enum.SurfaceType.Studs
 			local belt = base:FindFirstChild("FaixaEsteira")
 			if belt then belt.Position = station.Position + Vector3.new(0, 0.29, 0) end
 			local old = station:FindFirstChild("Treinar")
@@ -66,7 +65,7 @@ function Stations.Prepare(world)
 		local totem = base:FindFirstChild("Totem")
 		if totem then totem:Destroy() end
 		local marker = part(base, "OwnerMarker", Vector3.new(0.2, 0.2, 0.2),
-			CFrame.new(platform.Position + Vector3.new(0, 4.5, 0)), Color3.new(1, 1, 1))
+			CFrame.new(platform.Position + Vector3.new(0, 10.5, 0)), Color3.new(1, 1, 1))
 		marker.Transparency, marker.CanQuery = 1, false
 		local gui = marker:FindFirstChild("OwnerBillboard") or Instance.new("BillboardGui")
 		gui.Name, gui.Adornee, gui.Size = "OwnerBillboard", marker, UDim2.fromOffset(160, 118)
@@ -94,7 +93,7 @@ function Stations.Ensure(world)
 			"Velocidade", Vector3.new(5.6, 5.6, 0.35))
 		local train = base.Esteira.Position + Vector3.new(-4, 3.2, 0)
 		board(folder, "Treino", train, direction, "Treino,Multiplicador", Vector3.new(5.6, 5.6, 0.35))
-		interactionZone(base, "TrainZone", base.Esteira.Position + Vector3.new(0, 0.36, 2.2), 2.7, Color3.fromRGB(70, 232, 255))
+		interactionZone(base, "TrainZone", base.Esteira.Position + Vector3.new(0, 0.36, 1.5), 4.5, Color3.fromRGB(70, 232, 255))
 		-- Os acessos antigos deixariam duas formas concorrentes de fazer a mesma ação.
 		for _, v in ipairs(base:GetDescendants()) do
 			if
@@ -116,7 +115,7 @@ function Stations.Ensure(world)
 	)
 	local oldPrompt = seller:FindFirstChild("Vender")
 	if oldPrompt then oldPrompt:Destroy() end
-	interactionZone(world.Hub, "SellZone", seller.Position + Vector3.new(0, -1.55, 3.9), 3, Color3.fromRGB(78, 255, 156))
+	interactionZone(world.Hub, "SellZone", seller.Position + Vector3.new(0, -1.55, 4.7), 4.5, Color3.fromRGB(78, 255, 156))
 	if not seller:FindFirstChild("Letreiro") then
 		local gui = Instance.new("BillboardGui")
 		gui.Name, gui.Size, gui.StudsOffset, gui.AlwaysOnTop, gui.Parent =

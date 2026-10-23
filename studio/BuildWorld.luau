@@ -111,7 +111,7 @@ for i, x in ipairs({-31, -10, 11, 32}) do
 	local platform = part(base, "Plataforma", Vector3.new(18, 0.8, 17), Vector3.new(x, 4.4, z), Color3.fromRGB(45, 95, 115), Enum.Material.SmoothPlastic)
 	local accent = part(base, "Tapete", Vector3.new(15, 0.16, 14), Vector3.new(x, 4.89, z), Color3.fromRGB(79, 210, 241), Enum.Material.SmoothPlastic)
 	accent.CanCollide = false
-	local outer = z < 0 and z - 10 or z + 10
+	local outer = z < 0 and z - 18.5 or z + 18.5
 	local training = part(base, "Esteira", Vector3.new(5, 0.5, 6), Vector3.new(x + 4.2, 5.05, outer), Color3.fromRGB(29, 39, 70), Enum.Material.SmoothPlastic)
 	local belt = part(base, "FaixaEsteira", Vector3.new(3.8, 0.08, 4.8), Vector3.new(x + 4.2, 5.34, outer), Color3.fromRGB(35, 154, 156), Enum.Material.SmoothPlastic)
 	belt.CanCollide = false
