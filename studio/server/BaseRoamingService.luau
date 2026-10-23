@@ -103,6 +103,8 @@ function Roaming:Sync(base, profile)
 					radius = (C.Species[item.species].BodyRadius or 1.7) * item.size * 0.72,
 					height = floor.Position.Y + floor.Size.Y / 2 + (C.Species[item.species].RootHeight or 1.625) * item.size * 0.72,
 					pause = self.random:NextNumber(0, 1.5),
+					roamSpeed = C.Species[item.species].BaseRoamSpeed or C.BaseRoaming.Speed,
+					currentSpeed = 0,
 					phase = self.random:NextNumber(0, 6),
 					direction = Vector3.new(0, 0, -1),
 				}
@@ -152,14 +154,18 @@ function Roaming:Step(dt)
 					agent.target = nil
 					agent.pause = self.random:NextNumber(C.BaseRoaming.PauseMin, C.BaseRoaming.PauseMax)
 				else
-					local nextPoint = agent.position + delta.Unit * math.min(delta.Magnitude, C.BaseRoaming.Speed * dt)
+					local desired = math.min(agent.roamSpeed, math.sqrt(24 * math.max(0, delta.Magnitude - 0.12)))
+					agent.currentSpeed = math.min(desired, agent.currentSpeed + 8 * dt)
+					local nextPoint = agent.position + delta.Unit * math.min(delta.Magnitude, agent.currentSpeed * dt)
 					if self:Free(agent, nextPoint) then
+						local travelled = (nextPoint - agent.position).Magnitude
 						agent.position = nextPoint
-						agent.direction = agent.direction:Lerp(delta.Unit, math.min(1, dt * 7))
+						agent.direction = agent.direction:Lerp(delta.Unit, math.min(1, dt * 5))
 						if agent.direction.Magnitude < 0.1 then
 							agent.direction = delta.Unit
 						end
-						moving = true
+						moving = travelled > 0.001
+						agent.actualSpeed = travelled / math.max(dt, 0.001)
 					else
 						agent.target, agent.pause = nil, self.random:NextNumber(0.3, 0.9)
 					end
@@ -167,6 +173,10 @@ function Roaming:Step(dt)
 			else
 				agent.pause = 0.5
 			end
+		end
+		if not moving then
+			agent.currentSpeed = 0
+			agent.actualSpeed = 0
 		end
 		agent.attentionClock -= dt
 		if agent.attentionClock <= 0 then
@@ -184,7 +194,7 @@ function Roaming:Step(dt)
 			end
 		end
 		agent.animator:Step(dt, CFrame.lookAt(agent.position, agent.position + agent.direction),
-			"AtBase", moving and C.BaseRoaming.Speed or 0, not moving and agent.attention or nil)
+			"AtBase", agent.actualSpeed, not moving and agent.attention or nil)
 	end
 end
 return Roaming

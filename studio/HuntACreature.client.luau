@@ -27,8 +27,13 @@ remote.OnClientEvent:Connect(function(action, a, b, c)
 		end
 	elseif action == "OpenCollection" then
 		collection:Open(a, b)
-	elseif action == "CloseZoneCollection" then
+	elseif action == "OpenZoneCollection" then
+		collection:Open(a)
 		if collection.root.Visible and collection.tab == a then
+			collection.zonePage = a
+		end
+	elseif action == "CloseZoneCollection" then
+		if collection.root.Visible and collection.tab == a and collection.zonePage == a then
 			hud:CloseSheet()
 		end
 	elseif action == "ActionFeedback" then

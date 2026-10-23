@@ -1,6 +1,7 @@
 -- Rigid-piece performance for the v01 template and its named fallback.
 -- Rest transforms are captured once; every pose is absolute, never accumulated.
 local C = require(game.ReplicatedStorage.HACShared.LumitoMotionConfig)
+local FootPuff = require(script.Parent.CreatureFootPuff)
 local Animator = {}
 Animator.__index = Animator
 local function hinge(point, rotation)
@@ -35,29 +36,7 @@ function Animator.new(model)
 				size = part.Size, transparency = part.Transparency, group = group(part) })
 		end
 	end
-	local attachment = Instance.new("Attachment")
-	attachment.Name = "LumitoFootDust"
-	attachment.Position = Vector3.new(0, -1.59 * self.scale, 0)
-	attachment.Parent = model.PrimaryPart
-	local dust = Instance.new("ParticleEmitter")
-	dust.Name = "StepPuff"
-	dust.Texture = C.PuffTexture
-	dust.Rate = 0
-	dust.Lifetime = NumberRange.new(0.28, 0.34)
-	dust.Speed = NumberRange.new(0.25, 0.55)
-	dust.SpreadAngle = Vector2.new(18, 12)
-	dust.Rotation = NumberRange.new(-8, 8)
-	dust.RotSpeed = NumberRange.new(-12, 12)
-	dust.Color = ColorSequence.new(Color3.new(1, 1, 1))
-	dust.Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.12), NumberSequenceKeypoint.new(0.78, 0.18), NumberSequenceKeypoint.new(1, 1) })
-	local size = math.min(self.scale, 2)
-	dust.Size = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.38 * size), NumberSequenceKeypoint.new(1, 0.74 * size) })
-	dust.LightEmission = 0.15
-	dust.FlipbookLayout = Enum.ParticleFlipbookLayout.Grid2x2
-	dust.FlipbookMode = Enum.ParticleFlipbookMode.OneShot
-	dust.FlipbookFramerate = NumberRange.new(12)
-	dust.Parent = attachment
-	self.dust = dust -- lifetime owned by model; no extra connection or free-standing effect.
+	self.dust = FootPuff.new(model.PrimaryPart, "LumitoFootDust", Vector3.new(0, -1.59, 0), self.scale)
 	local trailLeft = Instance.new("Attachment")
 	trailLeft.Name = "LumitoRunTrailLeft"
 	trailLeft.Position = Vector3.new(-0.42, -1.25, 0.40) * self.scale

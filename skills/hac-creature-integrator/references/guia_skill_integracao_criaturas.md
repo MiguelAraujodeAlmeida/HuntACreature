@@ -45,7 +45,7 @@ Quadrúpedes não reutilizam uma passada bípede. Contato de pés deve ser plaus
 
 Flutuar significa pairar sobre terreno navegável com altura ajustável e oscilação visual moderada. Não implica voo livre, travessia de obstáculos ou captura aérea nova. Perguntar quando a descrição exigir essas mecânicas.
 
-Misturar transições e calcular poses a partir do repouso, sem acúmulo de transformação. Não reiniciar abruptamente ciclos a cada mudança de velocidade. Usar efeitos curtos ligados a eventos reais; poeira somente com contato, sem poeira de passada em criaturas flutuantes. Respeitar som e visibilidade configurados. Limpar efeitos/conexões ao remover a criatura e evitar trabalho visual desnecessário em criaturas ocultas/distantes.
+Misturar transições e calcular poses a partir do repouso, sem acúmulo de transformação. Não reiniciar abruptamente ciclos a cada mudança de velocidade. Para criaturas terrestres que correm, usar o puff de contato compartilhado do Lumito nos passos reais: textura/flipbook e emissão curta, ajustando apenas intensidade e posição anatômica. Não emitir fumaça parada, no ar ou em criaturas flutuantes. A frequência da passada deve acompanhar a distância percorrida e a escala, não apenas a velocidade desejada pela IA. Respeitar som e visibilidade configurados. Limpar efeitos/conexões ao remover a criatura e evitar trabalho visual desnecessário em criaturas ocultas/distantes.
 
 Corrigir problemas visuais observáveis antes da entrega. A existência de movimento não comprova personalidade, diversão ou polimento; registrar limitações e exigir playtest humano para aprovar a experiência.
 

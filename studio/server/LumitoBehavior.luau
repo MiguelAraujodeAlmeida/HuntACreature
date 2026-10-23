@@ -23,6 +23,7 @@ function Behavior.new(model, profile, service)
 	self.facing = CFrame.Angles(0, self.random:NextNumber(-math.pi, math.pi), 0)
 	self.direction = self.facing.LookVector
 	self.moveDirection = Vector3.zero
+	self.currentSpeed = 0
 	self.thinkIn, self.phase = self.random:NextNumber(0, profile.ThinkInterval), 0
 	self.pause, self.walkTime = 0, 0
 	self.walkFactor = 1
@@ -236,6 +237,7 @@ function Behavior:Step(dt)
 		if self.state ~= "Capturing" then
 			self:_setState("Capturing")
 		end
+		self.currentSpeed = 0
 		self.phase += dt * (self.model:GetAttribute("CapturePhase") == "resist" and 15 or 9)
 		self:_pose(false, dt)
 		return -- A criatura resiste no lugar, sem consumir o timer de fuga.
@@ -263,24 +265,39 @@ function Behavior:Step(dt)
 		self.thinkIn = self.profile.ThinkInterval
 	end
 	local moving = self.moveDirection.Magnitude > 0.01
+	local speed = self:_speed()
+	if self.profile.Acceleration then
+		local desired = moving and speed or 0
+		if moving and self.state == "Wandering" and self.goal then
+			local remaining = flat(self.goal - self.position).Magnitude
+			desired = math.min(desired, math.sqrt(2 * self.profile.Deceleration * math.max(0, remaining - 1.5)))
+		end
+		local rate = desired > self.currentSpeed and self.profile.Acceleration or self.profile.Deceleration
+		self.currentSpeed += math.clamp(desired - self.currentSpeed, -rate * dt, rate * dt)
+		speed = self.currentSpeed
+	end
 	if moving then
-		local destination = self:_canStep(self.moveDirection, self:_speed() * dt)
+		local destination = self:_canStep(self.moveDirection, speed * dt)
 		if destination then
+			local oldPosition = self.position
 			self.position = destination
 			self.direction = self.moveDirection
 			local facing = CFrame.lookAt(Vector3.zero, self.direction)
-			self.facing = self.facing:Lerp(facing, 1 - math.exp(-dt * 12))
+			self.facing = self.facing:Lerp(facing, 1 - math.exp(-dt * (self.profile.TurnRate or 12)))
+			speed = flat(destination - oldPosition).Magnitude / math.max(dt, 0.001)
 		else
 			moving = false
+			speed = 0
+			self.currentSpeed = 0
 			self.moveDirection = Vector3.zero
 			self.thinkIn = 0
 		end
 	end
 	self.phase += dt * (self.state == "Panicking" and 18 or 7)
-	self:_pose(moving, dt)
+	self:_pose(moving, dt, speed)
 end
 
-function Behavior:_pose(moving, dt)
+function Behavior:_pose(moving, dt, speed)
 	local slow = (self.model:GetAttribute("SlowedUntil") or 0) > os.clock()
 	if self.wasSlowed ~= slow then
 		self.wasSlowed = slow
@@ -289,7 +306,7 @@ function Behavior:_pose(moving, dt)
 		if text then text.Text = self.model.Name .. (slow and " • SLOWED" or self.state == "Panicking" and " !" or self.state == "Tired" and " …" or "") end
 	end
 	self.animator:Step(dt, CFrame.new(self.position) * self.facing, self.state,
-		moving and self:_speed() or 0, self.lastThreat, self.model:GetAttribute("CapturePhase"))
+		moving and (speed or self:_speed()) or 0, self.lastThreat, self.model:GetAttribute("CapturePhase"))
 end
 
 return Behavior

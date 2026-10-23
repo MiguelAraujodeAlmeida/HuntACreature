@@ -28,7 +28,8 @@ return {
 	},
 	Chicken = {
 		Behavior = "Chicken", Animator = "ChickenAnimator",
-		WalkSpeed = 4.2, PanicSpeed = 15, TiredSpeed = 2,
+		WalkSpeed = 2.8, PanicSpeed = 9, TiredSpeed = 1.6,
+		Acceleration = 11, Deceleration = 15, TurnRate = 5,
 		PanicSeconds = 3.8, RecoverySeconds = 5,
 		ViewDistance = 20, ViewAngle = 170, ThinkInterval = 0.20,
 		WanderRadius = 15, PauseMin = 0.5, PauseMax = 1.8,

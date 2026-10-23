@@ -214,7 +214,7 @@ local function openCounter(player, anchor, distance, page)
 		return
 	end
 	publish(player)
-	remote:FireClient(player, "OpenCollection", page)
+	remote:FireClient(player, "OpenZoneCollection", page)
 end
 local zonePresence, zoneClock = {}, 0
 local function inside(root, zone)

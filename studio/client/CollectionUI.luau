@@ -175,6 +175,7 @@ function UI:Open(tab, group)
 	end
 	self.controller:_cancelCharge()
 	self.hud:CloseSheet()
+	self.zonePage = nil
 	self.hud.sheetKind = "collection"
 	self.tab = tab or "Criaturas"
 	self.renderedTab = nil
@@ -206,6 +207,7 @@ function UI:Open(tab, group)
 end
 function UI:Close()
 	self.root.Visible, self.shade.Visible = false, false
+	self.zonePage = nil
 	if self.hud.sheetKind == "collection" then
 		self.hud.sheetKind = nil
 	end

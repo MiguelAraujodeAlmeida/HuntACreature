@@ -27,6 +27,7 @@ C.Species.Chicken = setmetatable({
 	BodyRadius = 1.05,
 	LabelHeight = 1.8,
 	BodySize = Vector3.new(1.65, 2, 1.45),
+	BaseRoamSpeed = 1.65,
 	Description = "A curious chicken with more courage than good judgment.",
 }, { __index = C.Species.Lumito })
 C.SpawnReservations = { Ponto4 = "Chicken" } -- one existing test-island point
