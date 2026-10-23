@@ -1,0 +1,4 @@
+interface:
+  display_name: "Hunt A Creature 3D"
+  short_description: "Crie criaturas 3D facetadas a partir de conceitos"
+  default_prompt: "Use $hac-creature-modeler para criar uma criatura 3D a partir deste conceito."
