@@ -28,15 +28,18 @@ end
 
 function Animator.new(model)
 	local self = setmetatable({ model = model, parts = {}, random = Random.new(), time = 0,
-		phase = 0, moving = 0, panic = 0, tired = 0, captive = 0, reaction = 10,
+		phase = 0, moving = 0, panic = 0, tired = 0, captive = 0, reaction = 10, gaze = 0,
+		wingRoll = { L = 0, R = 0 },
 		gesture = 0, gestureStart = -10, attentionCooldown = 0 }, Animator)
 	self.scale = model:GetAttribute("CreatureScale") or 1
 	self.seed = self.random:NextNumber(0, 100)
 	self.nextGesture = self.random:NextNumber(1.8, 4)
+	self.nextBlink = self.random:NextNumber(2.4, 5.3)
 	local origin = model:GetPivot()
 	for _, part in ipairs(model:GetDescendants()) do
 		if part:IsA("BasePart") and part.Name ~= "Root" and part.Name ~= "Corpo" then
-			table.insert(self.parts, {part = part, rest = origin:ToObjectSpace(part.CFrame), group = group(part.Name)})
+			table.insert(self.parts, {part = part, rest = origin:ToObjectSpace(part.CFrame), group = group(part.Name),
+				size = part.Size, transparency = part.Transparency})
 		end
 	end
 	self.dustL = FootPuff.new(model.PrimaryPart, "ChickenFootPuffL", Vector3.new(-0.38, -1.31, -0.1), self.scale)
@@ -60,7 +63,7 @@ function Animator:Step(dt, rootPose, state, speed, attention, capturePhase)
 	self.captive += ((captive and 1 or 0) - self.captive) * blend
 	-- Travel drives footfall; a sprint cannot spin the feet independently of the path.
 	self.phase += dt * math.min(18, speed / (1.65 * self.scale) * math.pi * 2)
-	if self.time >= self.nextGesture and self.moving < 0.18 and not captive then
+	if self.time >= self.nextGesture and self.moving < 0.18 and not panic and not tired and not captive then
 		self.gesture = self.random:NextInteger(1, 3) -- peck, puzzled flap, or clumsy hop
 		self.gestureStart = self.time
 		self.nextGesture = self.time + self.random:NextNumber(3.6, 7)
@@ -78,6 +81,12 @@ function Animator:Step(dt, rootPose, state, speed, attention, capturePhase)
 	local baffled = self.gesture == 2 and g or 0
 	local stumble = self.gesture == 3 and g or 0
 	local t = self.time + self.seed
+	local look = 0
+	if state == "AtBase" and attention and self.moving < 0.25 then
+		local delta = rootPose:VectorToObjectSpace(attention - rootPose.Position)
+		look = math.clamp(math.atan2(-delta.X, -delta.Z), -0.45, 0.45)
+	end
+	self.gaze += (look - self.gaze) * (1 - math.exp(-dt * 4))
 	local stride = math.sin(self.phase)
 	if speed > 0.7 and self.moving > 0.55 and self.lastStride and (stride >= 0) ~= (self.lastStride >= 0) then
 		local puff = stride >= 0 and self.dustR or self.dustL
@@ -94,8 +103,9 @@ function Animator:Step(dt, rootPose, state, speed, attention, capturePhase)
 		* hinge(PIVOT.Body * s, CFrame.Angles(-0.07 * self.moving + 0.1 * self.tired + 0.11 * tug,
 			0, stride * 0.035 * self.moving + 0.06 * tug + stumble * 0.12 * math.sin(u * math.pi * 2)))
 	local head = body * hinge(PIVOT.Head * s, CFrame.Angles(
-			-0.72 * peck + 0.14 * self.panic + 0.19 * self.tired + 0.10 * tug - 0.12 * startle,
-			0.26 * baffled * math.sin(u * math.pi * 2) + 0.05 * math.sin(t * 1.4),
+			-0.72 * peck + 0.14 * self.panic + 0.19 * self.tired + 0.10 * tug - 0.12 * startle
+				- 0.035 * stride * self.moving,
+			self.gaze + 0.26 * baffled * math.sin(u * math.pi * 2) + 0.05 * math.sin(t * 1.4),
 			0.28 * baffled - 0.09 * tug))
 	local transforms = {Body = body, Head = head}
 	for _, side in ipairs({"L", "R"}) do
@@ -103,21 +113,32 @@ function Animator:Step(dt, rootPose, state, speed, attention, capturePhase)
 		local step = math.sin(self.phase + (side == "R" and math.pi or 0)) * self.moving
 		transforms["Foot" .. side] = CFrame.new(0, (math.max(0, step) * 0.14 + hop + startle * 0.12) * s,
 			-step * 0.13 * s)
+		local wingTarget = 0.08 * math.sin(t * 1.8 + sign) + 0.5 * baffled * math.sin(u * 13)
+			+ stumble * 0.42 * math.sin(u * 13) + startle * 0.25
+			+ self.panic * (0.26 + 0.1 * math.sin(t * 11)) + 0.32 * tug
+		self.wingRoll[side] += (wingTarget - self.wingRoll[side]) * (1 - math.exp(-dt * 9))
 		transforms["Wing" .. side] = body * hinge(PIVOT["Wing" .. side] * s,
-			CFrame.Angles(-0.08 * step, 0,
-				sign * (0.1 * math.sin(t * 2) + 0.48 * baffled * math.sin(u * 14)
-					+ stumble * 0.46 * math.sin(u * 15) + startle * 0.22
-					+ self.panic * (0.26 + 0.12 * math.sin(t * 14)) + 0.32 * tug)))
+			CFrame.Angles(-0.16 * step + 0.15 * baffled, 0, sign * self.wingRoll[side]))
 	end
 	transforms.Tail = body * hinge(PIVOT.Tail * s,
 		CFrame.Angles(0.1 * self.tired - 0.08 * self.panic,
-			0.08 * math.sin(t * 3 - 0.4) + 0.14 * baffled + 0.1 * tug, 0))
+			0.11 * math.sin(t * (2.4 + self.moving * 1.8) - 0.4) + 0.16 * baffled
+				+ 0.12 * stumble + 0.1 * tug, 0))
+	local blinkTime = self.time - self.nextBlink
+	local blink = blinkTime >= 0 and blinkTime < 0.14
+	if blinkTime >= 0.14 then self.nextBlink = self.time + self.random:NextNumber(2.4, 5.3) end
 	self.model.PrimaryPart.CFrame = rootPose
 	local collider = self.model:FindFirstChild("Corpo")
 	if collider then collider.CFrame = rootPose end
 	for _, entry in ipairs(self.parts) do
 		if entry.part.Parent then
 			entry.part.CFrame = rootPose * (transforms[entry.group] or CFrame.new()) * entry.rest
+			if entry.part.Name == "Eye_L" or entry.part.Name == "Eye_R" then
+				entry.part.Size = Vector3.new(entry.size.X,
+					entry.size.Y * (blink and 0.15 or (1 + self.panic * 0.1 - self.tired * 0.15)), entry.size.Z)
+			elseif entry.part.Name == "Glint_L" or entry.part.Name == "Glint_R" then
+				entry.part.Transparency = blink and 1 or entry.transparency
+			end
 		end
 	end
 end

@@ -2,6 +2,7 @@
 return {
 	BlendRate = 9,
 	StrideLength = 1.8,
+	WalkReferenceSpeed = 3.5,
 	StepLift = 0.24,
 	StepReach = 0.28,
 	IdleGestureMin = 4,
