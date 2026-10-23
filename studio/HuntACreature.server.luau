@@ -242,6 +242,9 @@ RunService.Heartbeat:Connect(function(dt)
 				if kind == "training" then toggleTraining(player, base)
 				elseif kind == "shop" then openCounter(player, presentation.shop, C.Shop.Distance, "Loja")
 				else openCounter(player, presentation.seller, C.Sell.Distance, "Venda") end
+			elseif not active and previous[kind] then
+				if kind == "shop" then remote:FireClient(player, "CloseZoneCollection", "Loja")
+				elseif kind == "sell" then remote:FireClient(player, "CloseZoneCollection", "Venda") end
 			end
 			previous[kind] = active
 		end

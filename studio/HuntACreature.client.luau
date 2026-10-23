@@ -27,6 +27,10 @@ remote.OnClientEvent:Connect(function(action, a, b, c)
 		end
 	elseif action == "OpenCollection" then
 		collection:Open(a, b)
+	elseif action == "CloseZoneCollection" then
+		if collection.root.Visible and collection.tab == a then
+			hud:CloseSheet()
+		end
 	elseif action == "ActionFeedback" then
 		require(modules.AudioFeedback).Play(a == "Use" and "Hit" or "Progress")
 	elseif action == "HunterRankUp" then
