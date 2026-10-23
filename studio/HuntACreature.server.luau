@@ -63,6 +63,7 @@ local function stopTraining(player)
 	local p = Profiles:Get(player)
 	presentation:StopTraining(player, p and C.Stat(p, "Velocidade"))
 	player:SetAttribute("Treinando", false)
+	player:SetAttribute("TrainingStartedAt", nil)
 end
 local function busy(player)
 	return training[player] or capture.sessions[player] or capture.projectiles[player] or capture.charges[player]
@@ -195,6 +196,7 @@ local function toggleTraining(player, base)
 	end
 	if presentation:StartTraining(player, base, effects) then
 		training[player] = os.clock()
+		player:SetAttribute("TrainingStartedAt", workspace:GetServerTimeNow())
 		player:SetAttribute("Treinando", true)
 	end
 end
@@ -412,27 +414,26 @@ remote.OnServerEvent:Connect(function(player, action, args)
 	publish(player)
 end)
 
-local incomeClock, animationClock = 0, 0
+local incomeClock = 0
 local rotationId = C.Rotation(os.time()).id
 RunService.Heartbeat:Connect(function(dt)
 	incomeClock += dt
-	animationClock += dt
-	if animationClock >= 0.1 then
-		animationClock = 0
-		presentation:AnimateTraining()
-	end
 	for player, started in pairs(training) do
 		if not aliveRoot(player) or not Profiles:Get(player) then
 			stopTraining(player)
 		elseif os.clock() - started >= C.TrainingSeconds then
 			training[player] = os.clock()
+			local credited = 0
 			Profiles:Change(player, function(p)
 				local amount = C.TrainingGain(p) * Rank.TrainingMultiplier(p.xp) + p.strengthCarry
 				local whole = math.floor(amount)
+				credited = whole
 				p.strength += whole
 				p.strengthCarry = amount - whole
 				return true
 			end, true)
+			player:SetAttribute("TrainingGain", credited)
+			player:SetAttribute("TrainingPulse", workspace:GetServerTimeNow())
 			publish(player)
 		end
 	end

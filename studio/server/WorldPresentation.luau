@@ -2,6 +2,7 @@ local C = require(game.ReplicatedStorage.HACShared.GameplayConfig)
 local Factory = require(script.Parent.CreatureFactory)
 local Visuals = require(game.ReplicatedStorage.HACShared.LassoVisuals)
 local Stations = require(script.Parent.WorldStations)
+local TrainingDummies = require(script.Parent.TrainingDummies)
 local World = {}
 World.__index = World
 function World.new(world)
@@ -41,29 +42,7 @@ function World.new(world)
 			if stripe then
 				stripe.Transparency = 1
 			end
-			local dummy = Instance.new("Model")
-			dummy.Name, dummy.Parent = "Manequim", base
-			local center = station.Position + Vector3.new(0, 2, -1.5)
-			local body =
-				Factory.Part(dummy, "Alvo", Vector3.new(1.4, 2.2, 1), CFrame.new(center), Color3.fromRGB(234, 183, 111))
-			Factory.Part(
-				dummy,
-				"Cabeca",
-				Vector3.one,
-				CFrame.new(center + Vector3.new(0, 1.6, 0)),
-				Color3.fromRGB(255, 220, 160),
-				nil,
-				Enum.PartType.Ball
-			)
-			Factory.Part(
-				dummy,
-				"Bracos",
-				Vector3.new(3, 0.5, 0.6),
-				CFrame.new(center + Vector3.new(0, 0.5, 0)),
-				body.Color
-			)
-			dummy.PrimaryPart = body
-			self.dummies[base] = dummy
+			self.dummies[base] = TrainingDummies.Build(base, 1, 1)
 			station.Treinar.ActionText, station.Treinar.ObjectText = "Train / leave", "Training dummy"
 		end
 	end
@@ -94,10 +73,15 @@ function World:RenderBase(base, profile)
 	self.roaming:Sync(base, profile)
 	local dummy = self.dummies[base]
 	if dummy then
-		dummy.Alvo.Color = Color3.fromRGB(234, 183, 111):Lerp(
-			Color3.fromRGB(255, 219, 62),
-			(profile.upgrades.Treino or 0) / math.max(1, #C.Upgrades.Treino.Values - 1)
-		)
+		local level = (profile.upgrades.Treino or 0) + 1
+		local efficiency = (profile.upgrades.Multiplicador or 0) + 1
+		if dummy:GetAttribute("TrainingLevel") ~= level or base.Esteira:GetAttribute("EfficiencyLevel") ~= efficiency then
+			self.dummies[base] = TrainingDummies.Build(base, level, efficiency)
+			base.Esteira:SetAttribute("EfficiencyLevel", efficiency)
+			for _, state in pairs(self.exercise) do
+				if state.base == base then state.target = self.dummies[base].Alvo end
+			end
+		end
 		base.Esteira.Treinar.ObjectText = "Dummy "
 			.. ((profile.upgrades.Treino or 0) + 1)
 			.. " • +"
@@ -113,8 +97,6 @@ function World:StopTraining(player, speed)
 		return
 	end
 	self.exercise[player] = nil
-	Visuals.CleanupLine(state.line)
-	state.loop:Destroy()
 	if state.root.Parent then
 		state.root.Anchored = state.anchored
 	end
@@ -132,6 +114,7 @@ function World:StartTraining(player, base, effects)
 		return false
 	end
 	local state = {
+		base = base,
 		root = root,
 		humanoid = humanoid,
 		anchored = root.Anchored,
@@ -142,20 +125,7 @@ function World:StartTraining(player, base, effects)
 	}
 	root.CFrame = CFrame.lookAt(base.Esteira.Position + Vector3.new(0, 3.2, 1.7), dummy.Alvo.Position)
 	root.Anchored, humanoid.WalkSpeed, humanoid.AutoRotate = true, 0, false
-	state.loop = Visuals.Loop(effects)
-	state.line = Visuals.Line(character, state.loop.PrimaryPart)
 	self.exercise[player] = state
 	return true
-end
-function World:AnimateTraining()
-	for _, state in pairs(self.exercise) do
-		if state.root.Parent and state.target.Parent then
-			local phase = (os.clock() - state.started) % C.TrainingSeconds / C.TrainingSeconds
-			local from = state.root.Position + Vector3.new(1, 0.4, 0)
-			local t = phase < 0.65 and phase / 0.65 or (1 - phase) / 0.35
-			local pos = from:Lerp(state.target.Position, t)
-			state.loop:PivotTo(CFrame.lookAt(pos, pos + state.root.CFrame.LookVector))
-		end
-	end
 end
 return World

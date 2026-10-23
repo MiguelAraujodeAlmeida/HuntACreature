@@ -14,6 +14,7 @@ if oldGui then
 end
 local hud = HUD.new(player)
 local controller = CaptureController.new(player, remote, hud)
+local trainingPresentation = require(modules.TrainingPresentation).new(player)
 local collection = require(modules.CollectionUI).new(player, remote, hud, controller)
 hud.Collection = collection
 local boards
