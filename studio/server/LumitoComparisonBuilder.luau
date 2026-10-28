@@ -1,6 +1,7 @@
 -- Rebuildable, non-gameplay comparison display for [Testing] Hunt a Creature.
 -- The source template is cloned; no species, spawn, profile or save is created.
 local Builder = {}
+local RigBuilder = require(script.Parent.LumitoRigBuilder)
 local ROOT_NAME = "LumitoRigComparison"
 local ARENA_CENTER = Vector3.new(181, 2, 0)
 local LANE_Z = {Original = -10, Rig = 10}
@@ -51,99 +52,6 @@ local function label(parent, text, size, offset, color)
 	return value
 end
 
-local function getGroup(item)
-	local n = item.Name
-	local foot = item:GetAttribute("FootSide")
-	if foot == "L" or foot == "R" then return "Foot" .. foot end
-	if n:match("^Ear_L") then return "EarL" end
-	if n:match("^Ear_R") then return "EarR" end
-	if n:match("^Tail") then return "Tail" end
-	if n == "Arm_L" then return "ArmL" end
-	if n == "Arm_R" then return "ArmR" end
-	if n == "Torso" or n == "Belly" then return "Body" end
-	if n == "Head" or n == "Snout" or n == "Mouth" or n == "Fang"
-		or n:match("^Eye") or n:match("^Crest_") or n:match("^Stud_Crest_") then return "Head" end
-	return nil
-end
-
-local function motor(parent, child, pivot, name)
-	local joint = Instance.new("Motor6D")
-	joint.Name = name
-	joint.Part0, joint.Part1 = parent, child
-	joint.C0 = parent.CFrame:ToObjectSpace(pivot)
-	joint.C1 = child.CFrame:ToObjectSpace(pivot)
-	joint.Parent = parent
-	return joint
-end
-
-local function rig(model, scale)
-	local root = assert(model:FindFirstChild("Root"), "Lumito comparison: Root missing")
-	local cores = {}
-	for _, item in ipairs(model:GetChildren()) do
-		if item:IsA("BasePart") then
-			local group = getGroup(item)
-			if item.Name == "Torso" then cores.Body = item
-			elseif item.Name == "Head" then cores.Head = item
-			elseif item.Name == "Arm_L" then cores.ArmL = item
-			elseif item.Name == "Arm_R" then cores.ArmR = item
-			elseif item.Name == "Tail" then cores.Tail = item
-			elseif item.Name == "Pe" and group == "FootL" then cores.FootL = item; item.Name = "Foot_L"
-			elseif item.Name == "Pe" and group == "FootR" then cores.FootR = item; item.Name = "Foot_R"
-			elseif item.Name == "Ear_L_Base" then cores.EarL = item
-			elseif item.Name == "Ear_R_Base" then cores.EarR = item end
-		end
-	end
-	for _, name in ipairs({"Body", "Head", "ArmL", "ArmR", "Tail", "FootL", "FootR", "EarL", "EarR"}) do
-		assert(cores[name], "Lumito comparison: missing core " .. name)
-	end
-
-	local pivot = Instance.new("Part")
-	pivot.Name = "HeadPivot"
-	pivot.Size = Vector3.one * (0.12 * scale)
-	pivot.CFrame = root.CFrame * CFrame.new(0, -0.55 * scale, 0)
-	pivot.Transparency = 1
-	pivot.CanCollide, pivot.CanTouch, pivot.CanQuery = false, false, false
-	pivot.Anchored, pivot.Massless = true, true
-	pivot.Parent = model
-
-	local C = function(x, y, z) return root.CFrame * CFrame.new(x * scale, y * scale, z * scale) end
-	motor(root, cores.Body, C(0, -0.96, 0), "BodyJoint")
-	motor(cores.Body, pivot, C(0, -0.55, 0), "HeadLookJoint")
-	motor(pivot, cores.Head, C(0, -0.55, 0), "HeadJoint")
-	motor(cores.Body, cores.ArmL, C(0.60, -0.70, -0.05), "ArmLJoint")
-	motor(cores.Body, cores.ArmR, C(-0.60, -0.70, -0.05), "ArmRJoint")
-	motor(cores.Body, cores.Tail, C(0, -1.05, 0.50), "TailJoint")
-	motor(root, cores.FootL, cores.FootL.CFrame, "FootLJoint")
-	motor(root, cores.FootR, cores.FootR.CFrame, "FootRJoint")
-	motor(cores.Head, cores.EarL, C(0.45, 0.98, -0.10), "EarLJoint")
-	motor(cores.Head, cores.EarR, C(-0.97, 0.60, -0.35), "EarRJoint")
-
-	for _, item in ipairs(model:GetChildren()) do
-		if item:IsA("BasePart") and item ~= root and item.Name ~= "Corpo" and item ~= pivot then
-			local group = getGroup(item)
-			local core = group and cores[group]
-			if core and core ~= item then
-				local weld = Instance.new("WeldConstraint")
-				weld.Name = "VisualAttachment"
-				weld.Part0, weld.Part1 = core, item
-				weld.Parent = core
-			end
-		end
-	end
-	for _, item in ipairs(model:GetChildren()) do
-		if item:IsA("BasePart") and item ~= root and item.Name ~= "Corpo" then
-			item.Anchored = false
-			item.Massless = true
-		end
-	end
-	local controller = Instance.new("AnimationController")
-	controller.Name = "AnimationController"
-	controller.Parent = model
-	local animator = Instance.new("Animator")
-	animator.Parent = controller
-	return model
-end
-
 local function makeActor(folder, kind, scale, golden)
 	local template = assert(game.ReplicatedStorage:FindFirstChild("HACLumitoTemplate"), "Lumito template missing")
 	local model = template:Clone()
@@ -163,7 +71,7 @@ local function makeActor(folder, kind, scale, golden)
 			item.Anchored, item.CanCollide, item.CanTouch, item.CanQuery = true, false, false, false
 		end
 	end
-	if kind == "Rig" then rig(model, scale) end
+	if kind == "Rig" then RigBuilder.Build(model) end
 	model.Parent = folder
 	return model
 end

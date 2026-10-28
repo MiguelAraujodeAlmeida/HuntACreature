@@ -1,7 +1,7 @@
 -- Parâmetros iniciais para playtest. Raridade/variante não implica uma IA diferente.
 return {
 	Lumito = {
-		Behavior = "Lumito",
+		Behavior = "Lumito", Animator = "LumitoRigDriver",
 		WalkSpeed = 3.5,
 		PanicSpeed = 14,
 		TiredSpeed = 1.8,
@@ -22,7 +22,7 @@ return {
 		WalkSpeedMinFactor = 0.8,
 		WalkSpeedMaxFactor = 1.1,
 		BodyRadius = 1.85,
-		RootHeight = 1.68,
+		RootHeight = 1.68, RigFootClearance = 0.06,
 		EdgeMargin = 0.6,
 		MaxStepHeight = 0.35,
 	},

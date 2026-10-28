@@ -1,6 +1,7 @@
 -- Client-local playback for the rig half of the Studio-only A/B display.
 local RunService = game:GetService("RunService")
 if not RunService:IsStudio() or game.PlaceId ~= 102310424634629 then return end
+if workspace:GetAttribute("HACShowLumitoComparison") ~= true then return end
 
 local Clips = require(game.ReplicatedStorage.HACShared.LumitoRigClips)
 local arena = workspace:WaitForChild("HuntACreature"):WaitForChild("LumitoRigComparison", 30)

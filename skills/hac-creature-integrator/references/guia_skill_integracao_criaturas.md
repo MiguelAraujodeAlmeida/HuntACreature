@@ -22,9 +22,10 @@ Reservar um ponto do conjunto existente na ilha de teste para a nova espécie, m
 
 - Preservar arte, proporções e materiais aprovados. Comparar importação com as vistas da fonte; não trocar por aproximação de peças sem decisão do desenvolvedor.
 - Converter e verificar eixos Blender/Roblox, tamanho em studs, frente, apoio no chão e pivôs. Metadados FBX não são garantia de atributos Roblox: mapear e conferir `ColorRole`, grupos e `FootSide`.
-- Escolher peças articuladas ou rig conforme a malha. Preparar cópia articulável quando possível sem mudar aparência; perguntar se houver necessidade de redesenho relevante. Preservar o original.
+- Preferir um rig anatômico com clipes autorais quando a malha permitir: `Motor6D` para peças rígidas, `Bone` para malha skinned. Preparar cópia articulável sem mudar a aparência; perguntar se isso exigir redesenho relevante. Preservar o original como retorno seguro até a aprovação visual da nova atuação.
 - Separar raiz autoritativa, volume de captura e geometria cosmética. Dimensionar captura pelo corpo; ornamentos orbitais não aumentam automaticamente o alvo. Animações não deslocam a raiz de gameplay.
 - Mapear explicitamente cabeça, tronco, membros, cauda, olhos, asas e ornamentos aplicáveis. Peças desconhecidas permanecem estáticas e são reportadas, nunca atribuídas automaticamente à cabeça.
+- Conferir cada detalhe contra a articulação correta em várias poses: ornamentos da cabeça seguem a cabeça, detalhes de pés seguem o pé respectivo; não basta que a peça esteja conectada. Medir solas contra o piso em repouso e durante os clipes, inclusive nos tamanhos extremos.
 - Respeitar papéis de cor por espécie na variante Gold e escala contínua vigente; evitar recolorir tudo como Main. Não alterar regras globais de mutação.
 
 ## 4. Atuação e qualidade
@@ -47,6 +48,8 @@ Flutuar significa pairar sobre terreno navegável com altura ajustável e oscila
 
 Misturar transições e calcular poses a partir do repouso, sem acúmulo de transformação. Não reiniciar abruptamente ciclos a cada mudança de velocidade. Para criaturas terrestres que correm, usar o puff de contato compartilhado do Lumito nos passos reais: textura/flipbook e emissão curta, ajustando apenas intensidade e posição anatômica. Não emitir fumaça parada, no ar ou em criaturas flutuantes. A frequência da passada deve acompanhar a distância percorrida e a escala, não apenas a velocidade desejada pela IA. Respeitar som e visibilidade configurados. Limpar efeitos/conexões ao remover a criatura e evitar trabalho visual desnecessário em criaturas ocultas/distantes.
 
+Versionar construtor do rig, fontes de cada clipe e parâmetros de transição. Um `AnimationController`/`Animator` com IDs publicados é apropriado quando os assets estão disponíveis ao lugar. Se ainda não houver publicação, o reprodutor em runtime deve ler as fontes versionadas e aplicar poses às juntas; hashes de `RegisterKeyframeSequence` servem apenas à prévia no Studio. Não entregar uma espécie que só anima durante o teste local. O servidor continua dono de `Root`, navegação, colisão e estado; clientes apresentam poses, olhar e piscada. Clipes são próprios da espécie e não reutilizam mecanicamente o ciclo do Lumito.
+
 Corrigir problemas visuais observáveis antes da entrega. A existência de movimento não comprova personalidade, diversão ou polimento; registrar limitações e exigir playtest humano para aprovar a experiência.
 
 ## 5. Integração na estrutura atual
@@ -56,7 +59,7 @@ Mapa de investigação, conferido em 23/10/2026; inspecionar os arquivos relevan
 - `studio/shared/GameplayConfig.luau`: catálogo `Species`, valores, raridade, tamanho e Gold. O Index já percorre o catálogo.
 - `studio/server/CreatureFactory.luau`: ainda seleciona Lumito no sorteio e usa template/paletas/colisão específicos. Generalizar os pontos necessários para seleção por espécie.
 - `studio/server/CreatureProfiles.luau` e `CreatureBehaviorService.luau`: perfis e registro de comportamentos. Conferir passagem de ID de espécie versus ID de comportamento; não presumir que são iguais.
-- `studio/server/LumitoBehavior.luau` chama `LumitoAnimator` diretamente; `LumitoAnimator` tem agrupamento específico. Introduzir seleção apropriada sem quebrar o Lumito. Localizar também o caminho de movimentação/animação das criaturas na base.
+- `studio/server/LumitoBehavior.luau` seleciona o animador pelo `CreatureProfiles`; `LumitoRigBuilder`, `LumitoRigDriver`, `LumitoRigClips` e `LumitoRigPerformance` são o exemplo vigente de separação entre rig, estado e pose. São referência de estrutura, não de anatomia, gestos ou clipes para outra espécie. Localizar também a seleção de animador na base.
 - `studio/server/CatalogPresentation.luau` publica `HACCreaturePreviews`; `studio/client/CreaturePortrait.luau` consome retratos por espécie/variante. Regerar previews corretos, sem clones de Lumito disfarçados.
 
 Separar template, perfil de comportamento, configuração de animação e perfil econômico. Reutilizar componentes compatíveis; não copiar o animador inteiro para cada criatura nem expandir monólitos. Não impor uma migração geral de arquitetura para adicionar uma espécie.
@@ -67,7 +70,7 @@ Servidor mantém autoridade sobre recursos, captura, inventário e deslocamento 
 
 ## 6. Verificação e entrega
 
-No Studio Edit: validar template, escala, grupos, pivôs, atributos, captura, registros, reserva de spawn, retratos e compilação. Inspecionar poses representativas em frente/perfil/3/4, usando cópias de revisão quando necessário. Não iniciar Play, emulação ou QA extenso automaticamente. Inspeção estática não comprova transições em execução.
+No Studio Edit: validar template, escala, grupos, pivôs, atribuição de cada ornamento, solas, `Root`/hitbox, atributos, captura, registros, reserva de spawn, retratos e compilação. Inspecionar poses representativas em frente/perfil/3/4, usando cópias de revisão quando necessário. Não iniciar Play, emulação ou QA extenso automaticamente. Inspeção estática não comprova transições em execução.
 
 Checklist humano por integração:
 

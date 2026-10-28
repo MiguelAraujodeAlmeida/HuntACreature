@@ -1,6 +1,6 @@
 # Hunt A Creature — fontes do protótipo
 
-Atualizado em 21/10/2026. Lugar **[Testing] Hunt a Creature**, placeId **102310424634629**. [Padrão de menus](MENU_STANDARD.md). O cofre Obsidian registra o estado vigente e o checklist humano.
+Atualizado em 28/10/2026. Lugar **[Testing] Hunt a Creature**, placeId **102310424634629**. [Padrão de menus](MENU_STANDARD.md). O cofre Obsidian registra o estado vigente e o checklist humano.
 
 ## Estado
 
@@ -10,6 +10,7 @@ Atualizado em 21/10/2026. Lugar **[Testing] Hunt a Creature**, placeId **1023104
 - Menus ativos usam MenuTheme/MenuKit, galerias, detalhes e arte de equipamentos. Na HUD, Index agora compartilha a placa quadrada glossy de Criaturas/Rank com ícone original; Settings usa controle compacto circular na área livre da topbar por `GuiService.TopbarInset`. A rodada de caça teve compilação estática em Edit; diversão, precisão, PC/celular e persistência real dependem do desenvolvedor.
 - Hunter Rank tem entrada própria no HUD, barra de progresso, celebração de subida e página que revela XP restante/percentual até o próximo rank e benefícios reais. XP vem principalmente de captura/descoberta, com bônus por Gold/tamanho e pesquisa menor por criatura equipada. Requisito `RequiredHunterRank` é opcional por item; nenhum item atual foi bloqueado.
 - Reset global por geração fixa `20261021_hunter_rank_01` em PersistenceConfig. Todos os perfis começam novos quando esta versão entrar em uso; gerações anteriores permanecem recuperáveis. Aplicação em Edit e publicação são estados separados.
+- O Lumito jogável usa `LumitoRigBuilder`/`LumitoRigDriver` e poses locais de `LumitoRigPerformance`, a partir dos oito clipes versionados em `LumitoRigClips`. `Root`, colisão e estados continuam no servidor; `LumitoAnimator` permanece disponível para retorno mudando o perfil. O comparativo temporário fica desativado por padrão (`Workspace.HACShowLumitoComparison = false`). Clipes ainda não têm IDs publicados: a execução normal usa as fontes versionadas, sem depender de hashes temporários do Studio. Playtest e Save humano pendentes.
 
 ## Organização
 

@@ -7,6 +7,7 @@ local remote = ReplicatedStorage:WaitForChild("HuntACreatureRemote")
 local modules = script.Parent:WaitForChild("HACClient")
 local HUD = require(modules.HUD)
 local CaptureController = require(modules.CaptureController)
+require(modules.LumitoRigPerformance).Start()
 
 local oldGui = player:WaitForChild("PlayerGui"):FindFirstChild("HuntACreatureGui")
 if oldGui then

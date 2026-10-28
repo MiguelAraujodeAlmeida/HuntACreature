@@ -4,6 +4,7 @@ local Players = game:GetService("Players")
 local C = require(game.ReplicatedStorage.HACShared.GameplayConfig)
 local Factory = require(script.Parent.CreatureFactory)
 local Motion = require(game.ReplicatedStorage.HACShared.LumitoMotionConfig)
+local CreatureProfiles = require(script.Parent.CreatureProfiles)
 local Roaming = {}
 Roaming.__index = Roaming
 function Roaming.new(world)
@@ -101,7 +102,8 @@ function Roaming:Sync(base, profile)
 				local agent = {
 					base = base,
 					radius = (C.Species[item.species].BodyRadius or 1.7) * item.size * 0.72,
-					height = floor.Position.Y + floor.Size.Y / 2 + (C.Species[item.species].RootHeight or 1.625) * item.size * 0.72,
+					height = floor.Position.Y + floor.Size.Y / 2 + ((C.Species[item.species].RootHeight or 1.625)
+						+ (CreatureProfiles[item.species].RigFootClearance or 0)) * item.size * 0.72,
 					pause = self.random:NextNumber(0, 1.5),
 					roamSpeed = C.Species[item.species].BaseRoamSpeed or C.BaseRoaming.Speed,
 					currentSpeed = 0,
@@ -119,7 +121,7 @@ function Roaming:Sync(base, profile)
 				if agent.position then
 					model = Factory.Build(folder, agent.position, item, true)
 					agent.model = model
-					local animatorName = item.species == "Chicken" and "ChickenAnimator" or "LumitoAnimator"
+					local animatorName = CreatureProfiles[item.species].Animator or "LumitoAnimator"
 					agent.animator = require(script.Parent[animatorName]).new(model)
 					agent.attentionClock = 0
 					for _, part in ipairs(model:GetDescendants()) do

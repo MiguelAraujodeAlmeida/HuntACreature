@@ -1,6 +1,7 @@
 -- Studio-only A/B display. It never registers creatures with hunt, capture or saves.
 local RunService = game:GetService("RunService")
 if not RunService:IsStudio() or game.PlaceId ~= 102310424634629 then return end
+if workspace:GetAttribute("HACShowLumitoComparison") ~= true then return end
 
 local Builder = require(game.ServerScriptService.HACServer.LumitoComparisonBuilder)
 local Legacy = require(game.ServerScriptService.HACServer.LumitoAnimator)
