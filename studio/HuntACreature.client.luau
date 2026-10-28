@@ -8,6 +8,7 @@ local modules = script.Parent:WaitForChild("HACClient")
 local HUD = require(modules.HUD)
 local CaptureController = require(modules.CaptureController)
 require(modules.LumitoRigPerformance).Start()
+require(modules.ChickenRigPerformance).Start()
 
 local oldGui = player:WaitForChild("PlayerGui"):FindFirstChild("HuntACreatureGui")
 if oldGui then

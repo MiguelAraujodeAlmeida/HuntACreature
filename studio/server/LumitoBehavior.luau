@@ -16,7 +16,7 @@ function Behavior.new(model, profile, service)
 	self.random = Random.new()
 	self.scale = model:GetAttribute("CreatureScale") or 1
 	self.radius = profile.BodyRadius * self.scale
-	self.height = profile.RootHeight * self.scale
+	self.height = (profile.RootHeight + (profile.WildRigFootClearance or 0)) * self.scale
 	self.bodySize = Vector3.new(self.radius * 2, (profile.BodyHeight or 2.8) * self.scale, self.radius * 2)
 	self.position = model.PrimaryPart.Position
 	self.home = self.position

@@ -27,7 +27,7 @@ return {
 		MaxStepHeight = 0.35,
 	},
 	Chicken = {
-		Behavior = "Chicken", Animator = "ChickenAnimator",
+		Behavior = "Chicken", Animator = "ChickenRigDriver",
 		WalkSpeed = 2.8, PanicSpeed = 9, TiredSpeed = 1.6,
 		Acceleration = 11, Deceleration = 15, TurnRate = 5,
 		PanicSeconds = 3.8, RecoverySeconds = 5,
@@ -37,7 +37,8 @@ return {
 		WalkBurstMin = 0.7, WalkBurstMax = 2.5,
 		ResumeSameGoalChance = 0.2, WalkSpeedMinFactor = 0.75,
 		WalkSpeedMaxFactor = 1.2, BodyRadius = 1.05,
-		RootHeight = 1.35, BodyHeight = 2, EdgeMargin = 0.5,
+		RootHeight = 1.35, RigFootClearance = 0.04, WildRigFootClearance = 0.04,
+		BodyHeight = 2, EdgeMargin = 0.5,
 		MaxStepHeight = 0.35,
 	},
 }
