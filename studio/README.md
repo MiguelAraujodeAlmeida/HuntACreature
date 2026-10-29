@@ -4,7 +4,7 @@ Atualizado em 28/10/2026. Lugar **[Testing] Hunt a Creature**, placeId **1023104
 
 ## Estado
 
-- A passagem visual reconstruível `BuildBaseIslandPreview.luau` cria `Workspace.HAC_IlhaBase.PreviewV02` em Studio Edit: mar, seis cercados, seis pontos de treino, duas lojas e barco. Não conecta gameplay, não substitui `Workspace.HuntACreature` e não altera o SpawnLocation existente. Reexecutá-la substitui somente `PreviewV02`; o desenvolvedor avalia antes de migrar sistemas.
+- Escopo atual da Ilha Base: cenário e lotes reservados. Mar, cercados, treinos, lojas e barco da PreviewV02 foram rejeitados; remoção no Studio aguarda Edit. O construtor dessa prévia foi retirado do código.
 
 - Código versionado em https://github.com/MiguelAraujodeAlmeida/HuntACreature; Git é a referência operacional dos fontes. Script Sync/Rojo não está configurado.
 - Base viva, Settings, favoritos protegidos, inglês nativo, Tools/Lassos e Index visual por variantes implementados. Tamanho individual é multiplicador oculto contínuo de 1× a 5×; a curva e o teto ficam em GameplayConfig.
