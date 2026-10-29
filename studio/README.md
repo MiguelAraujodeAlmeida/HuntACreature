@@ -4,6 +4,8 @@ Atualizado em 28/10/2026. Lugar **[Testing] Hunt a Creature**, placeId **1023104
 
 ## Estado
 
+- A passagem visual reconstruível `BuildBaseIslandPreview.luau` cria `Workspace.HAC_IlhaBase.PreviewV02` em Studio Edit: mar, seis cercados, seis pontos de treino, duas lojas e barco. Não conecta gameplay, não substitui `Workspace.HuntACreature` e não altera o SpawnLocation existente. Reexecutá-la substitui somente `PreviewV02`; o desenvolvedor avalia antes de migrar sistemas.
+
 - Código versionado em https://github.com/MiguelAraujodeAlmeida/HuntACreature; Git é a referência operacional dos fontes. Script Sync/Rojo não está configurado.
 - Base viva, Settings, favoritos protegidos, inglês nativo, Tools/Lassos e Index visual por variantes implementados. Tamanho individual é multiplicador oculto contínuo de 1× a 5×; a curva e o teto ficam em GameplayConfig.
 - Caça polida: estados de mira, carga, voo/retorno, ritmo da disputa, reação do Lumito e recompensa curta com retrato e renda potencial na base. `LassoChargePresentation` faz o boleio cosmético do Training Lasso com braço/pulso, corda flexível e soltura breve; `LassoChargeStyle` guarda parâmetros por laço. Treino, inventário, renda e placas preservados.
