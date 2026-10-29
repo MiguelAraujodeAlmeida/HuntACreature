@@ -4,7 +4,7 @@ Atualizado em 28/10/2026. Lugar **[Testing] Hunt a Creature**, placeId **1023104
 
 ## Estado
 
-- Escopo atual da Ilha Base: cenário e lotes reservados. Mar, cercados, treinos, lojas e barco da PreviewV02 foram rejeitados; remoção no Studio aguarda Edit. O construtor dessa prévia foi retirado do código.
+- Escopo atual da Ilha Base: cenário e lotes reservados. Mar, cercados, treinos, lojas e barco da PreviewV02 foram rejeitados; grupo removido do Studio Edit. O construtor dessa prévia foi retirado do código.
 
 - Código versionado em https://github.com/MiguelAraujodeAlmeida/HuntACreature; Git é a referência operacional dos fontes. Script Sync/Rojo não está configurado.
 - Base viva, Settings, favoritos protegidos, inglês nativo, Tools/Lassos e Index visual por variantes implementados. Tamanho individual é multiplicador oculto contínuo de 1× a 5×; a curva e o teto ficam em GameplayConfig.
@@ -63,3 +63,5 @@ CaptureConfig concentra o ritmo de 3,6 s e o ganho-base de 0,18/s. CaptureServic
 ## Contexto portável
 
 Repositório canônico: https://github.com/MiguelAraujodeAlmeida/HuntaCreature-Obsidian. O manifesto define a leitura vigente; Histórico de Contexto registra solicitações entre IAs/dispositivos. Atualizar e sincronizar o cofre em toda entrega conforme AGENTS.md. O clone de contexto não substitui este código nem o lugar salvo.
+
+Revisão visual Art03: RefineBaseIsland.luau aplica materiais por função, simplifica vegetação, cria sólidos chanfrados e reduz o reflexo ambiental global para 0.15. Backup em ServerStorage.HACIslandBeforeArtV03 guarda a ilha anterior e o valor especular. Aplicado em Edit; 602 peças, zero Textures e BillboardGui na ilha, 15 lotes preservados. Materiais nativos são um teste; texturas autorais ainda não foram produzidas. Save e revisão humana pendentes.
