@@ -4,7 +4,7 @@ Atualizado em 28/10/2026. Lugar **[Testing] Hunt a Creature**, placeId **1023104
 
 ## Estado
 
-- Escopo atual da Ilha Base: cenário e lotes reservados. Mar, cercados, treinos, lojas e barco da PreviewV02 foram rejeitados; remoção no Studio aguarda Edit. O construtor dessa prévia foi retirado do código.
+- Escopo atual da Ilha Base: cenário e lotes reservados. A PreviewV02 e a revisão Art03 foram rejeitadas e removidas do Studio Edit; seus construtores foram retirados do código. O desenvolvedor salva o lugar manualmente.
 
 - Código versionado em https://github.com/MiguelAraujodeAlmeida/HuntACreature; Git é a referência operacional dos fontes. Script Sync/Rojo não está configurado.
 - Base viva, Settings, favoritos protegidos, inglês nativo, Tools/Lassos e Index visual por variantes implementados. Tamanho individual é multiplicador oculto contínuo de 1× a 5×; a curva e o teto ficam em GameplayConfig.
